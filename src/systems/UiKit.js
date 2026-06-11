@@ -126,6 +126,8 @@ const MAP_DISPLAY_NAMES = {
   ashfen_town: 'Ashfen Town',
   north_road: 'Ashfen Lowlands — North Road',
   hollow_cave: 'Hollow Cave',
+  keldrath_gate: 'Keldrath Gate',
+  keldrath_town: 'Keldrath Coast — Harborside',
 };
 
 function prettyMapName(id) {

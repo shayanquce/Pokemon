@@ -179,6 +179,17 @@ function ensureWorldTextures(scene) {
 
   noiseTile(scene, 'tile_path', '#7a6a4e', ['#6a5c42', '#8a7a5c', '#5f5440'], 44);
 
+  // Coastal sand — pale, with faint shell flecks.
+  noiseTile(scene, 'tile_sand', '#c9b487', ['#bca678', '#d6c298', '#b09a6e'], 133, {
+    count: 60,
+    post: (ctx, rnd) => {
+      ctx.fillStyle = '#e8dcc0';
+      for (let i = 0; i < 5; i++) {
+        ctx.fillRect(2 + Math.floor(rnd() * 28), 2 + Math.floor(rnd() * 28), 2, 1);
+      }
+    },
+  });
+
   noiseTile(scene, 'tile_water', '#1c3a5e', ['#234a78'], 55, {
     count: 30,
     post: (ctx, rnd) => {
@@ -816,6 +827,95 @@ Object.assign(STARTER_PIXELMAPS, {
       '..cccccccw......',
       '..cc..cc........',
       '..d....d........',
+    ],
+  },
+});
+
+// Keldrath Coast wilds.
+Object.assign(STARTER_PIXELMAPS, {
+  brinepup: {
+    palette: { b: '#5a88a8', d: '#41687f', w: '#cde4ee', k: '#142832', s: '#8fb8cc', p: '#e8a8b8' },
+    rows: [
+      '..bb......bb....',
+      '.bsbb....bbsb...',
+      '.bbbbbbbbbbbb...',
+      '.bbkbbbbbbkbb...',
+      '..bbbwwwwbbb....',
+      '..bbwwppwwbb....',
+      '.bbbbwwwwbbbb...',
+      '.bbbbbbbbbbbbs..',
+      '..bsbbbbbbsb.s..',
+      '..bbb.bb.bbb.s..',
+      '...dd.dd.dd.s...',
+      '..ddd.dd.ddd....',
+    ],
+  },
+  gullwisp: {
+    palette: { w: '#dce8f0', d: '#a8bcc8', g: '#8fa8b8', k: '#1c2430', y: '#e8c84a', s: '#b8d4e4' },
+    rows: [
+      'ww............ww',
+      'wwww..........ww',
+      '.wwwww..ss..www.',
+      '..wwwwwssswwww..',
+      '...wwwswwwsww...',
+      '....wwkwwkww....',
+      '....swwyywws....',
+      '...swwwwwwwws...',
+      '....gwwwwwwg....',
+      '.....gwwwwg.....',
+      '......gwwg......',
+      '.......gg.......',
+    ],
+  },
+  saltshell: {
+    palette: { s: '#9aa8a0', d: '#6e8078', l: '#c4d0c8', k: '#16201c', o: '#d4845a', m: '#5da58f' },
+    rows: [
+      '....ssssssss....',
+      '..sslssssssss...',
+      '.sssslsssssssss.',
+      '.ssmsssssssmss..',
+      'ssssssssssssssss',
+      'sskssssssssksss.',
+      'ssssssooosssssss',
+      '.sssssooossssss.',
+      '..ddddddddddd...',
+      '..o..o....o..o..',
+      '.oo..o....o..oo.',
+      '................',
+    ],
+  },
+  driftbloom: {
+    palette: { p: '#e8b8d0', P: '#f4dce8', v: '#5da55f', d: '#3a6c3c', y: '#e8c84a', k: '#1c2418' },
+    rows: [
+      '......pPPp......',
+      '....pPPppPPp....',
+      '...pPp.yy.pPp...',
+      '...Pp.yyyy.pP...',
+      '...pPp.yy.pPp...',
+      '....pPPppPPp....',
+      '......pPPp......',
+      '.......vv.......',
+      '....v..vv..v....',
+      '.....vvvvvv.....',
+      '...kv.vvvv.vk...',
+      '......v..v......',
+    ],
+  },
+  sparkfin: {
+    palette: { t: '#3f8fae', d: '#2c6a86', y: '#e8c84a', Y: '#f4e49a', k: '#13313f', w: '#aef0e8' },
+    rows: [
+      '......yy........',
+      '..t..yYy........',
+      '.ttt.yy.tt......',
+      '.tttttttttt.....',
+      'ttktttttttttt...',
+      'ttttttwwttttyy..',
+      'tttwtttttttYYy..',
+      '.ttttttttttyy...',
+      '..tttttttttt....',
+      '...tt..yy.......',
+      '..t...yYy.......',
+      '.......yy.......',
     ],
   },
 });

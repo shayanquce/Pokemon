@@ -164,7 +164,7 @@ const MAPS = {
       'TGFGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 6
       'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 7
       'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 8  <- Lyra camps at (16,8)
-      'PPPPPPPPPPPPPPPPPPPPPPPPPPPPPT', // 9  <- west exit at (0,9); east blocked (Keldrath later)
+      'PPPPPPPPPPPPPPPPPPPPPPPPPPPPPP', // 9  <- west exit at (0,9); east exit to Keldrath gate at (29,9)
       'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 10
       'TGGggggggGGGGTGGGGGggggggGGGGT', // 11
       'TGGggggggGGGGGGFGGGGggggggGGGT', // 12
@@ -176,6 +176,7 @@ const MAPS = {
     exits: [
       { x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' },
       { x: 22, y: 0, to: 'hollow_cave', toX: 22, toY: 15, facing: 'up' },
+      { x: 29, y: 9, to: 'keldrath_gate', toX: 1, toY: 9, facing: 'right' },
     ],
     doors: [],
     npcs: [
@@ -287,6 +288,134 @@ const MAPS = {
         { speciesId: 'mirewisp', weight: 20, min: 7, max: 9 },
       ],
     },
+  },
+  keldrath_gate: {
+    id: 'keldrath_gate',
+    name: 'Keldrath Gate',
+    //       012345678901234567890123456789
+    rows: [
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
+      'TGGGGGGTGGGGGGGGGGGBssssssWWWT', // 1
+      'TGggggGGGGGGFGGGGGGBssssssWWWT', // 2  <- west grass: coast wilds
+      'TGggggGGGGGGGGGGGGGBsssssWWWWT', // 3
+      'TGggggGGGGGGGGGGGGGBssssWWWWWT', // 4
+      'TGGGGGGGGGGTGGGGGGGBssssssWWWT', // 5
+      'TGGGGGGGGGGGGGGGGGGBsssssssWWT', // 6
+      'TGGFGGGGGGGGGGGGGGGBssssssssWT', // 7
+      'TGGGGGGGGGGGGGGGGGGBsssssssssT', // 8  <- warden steps aside to (18,8)
+      'PPPPPPPPPPPPPPPPPPPPPPPPPPPPPP', // 9  <- gate gap at (19,9); exits (0,9) and (29,9)
+      'TGGGGGGGGGGGGGGGGGGBsssssssssT', // 10
+      'TGGGGGGGTGGGGGGGGGGBssssssssWT', // 11
+      'TGGggggGGGGGGGGGGGGBsssssssWWT', // 12
+      'TGGggggGGGGGGGGGGGGBssssssWWWT', // 13
+      'TGGggggGGGGGGGGGGGGBsssssWWWWT', // 14
+      'TGGGGGFGGGGGGGGGGGGBssssWWWWWT', // 15
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 16
+    ],
+    exits: [
+      { x: 0, y: 9, to: 'north_road', toX: 28, toY: 9, facing: 'left' },
+      { x: 29, y: 9, to: 'keldrath_town', toX: 1, toY: 9, facing: 'right' },
+    ],
+    doors: [],
+    npcs: [
+      {
+        id: 'pass_warden_hale',
+        name: 'Pass-Warden Hale',
+        x: 19, y: 9, facing: 'left',
+        palette: { h: '#4a5a6e', f: '#caa07a', e: '#20203a', c: '#5e564c', g: '#d4af37', b: '#241d18' },
+        gate: {
+          requiresFlag: 'badge_lowlands',
+          grantsFlag: 'coast_pass_granted',
+          asideX: 18, asideY: 8,
+          deniedDialogue: [
+            'Hold there, traveler. The coast road is closed to the unproven — Hollowed Chain trouble past the dunes.',
+            'Warden Thane holds the Lowlands Sigil in his cave on the North Road. Bring me his stone and I will stand aside.',
+          ],
+          grantedDialogue: [
+            'That weight on your belt — the Lowlands Sigil? So the Oath finally broke against someone.',
+            'The coast is yours to walk, {player}. Mind the surf-grass, and mind who asks your business in Keldrath. Not everyone selling rope is a sailor.',
+          ],
+        },
+        repeatDialogue: ['The gate stands open for the Sigil-bearer. Keldrath is east along the shore.'],
+      },
+    ],
+    encounters: {
+      rate: 0.14,
+      table: [
+        { speciesId: 'brinepup', weight: 26, min: 8, max: 11 },
+        { speciesId: 'gullwisp', weight: 22, min: 8, max: 12 },
+        { speciesId: 'driftbloom', weight: 22, min: 8, max: 11 },
+        { speciesId: 'sparkfin', weight: 16, min: 9, max: 12 },
+        { speciesId: 'saltshell', weight: 14, min: 9, max: 12 },
+      ],
+    },
+  },
+
+  keldrath_town: {
+    id: 'keldrath_town',
+    name: 'Keldrath Coast — Harborside',
+    //       012345678901234567890123456789
+    rows: [
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
+      'TGGGGGRRRRGGGGGGGRRRRGGGsssWWT', // 1
+      'TGGGGGRRRRGGGGGGGRRRRGGssssWWT', // 2
+      'TGGGGGBBDBGGGGGGGBDBBGGsssWWWT', // 3  <- doors at (8,3) and (18,3)
+      'TGGGGGGGPGGGGGGGGGPGGGGssssWWT', // 4
+      'TFGGGGGGPGGGGGGGGGPGGGGsssWWWT', // 5
+      'TGGGGGGGPGGGGGGGGGPGGGGssssWWT', // 6
+      'TGGGGGGGPPPPPPPPPPPGGGGsssWWWT', // 7
+      'TGGGGGGGPGGGGGGGGGGGGGGssssWWT', // 8
+      'PPPPPPPPPGGGGSGGGGGGGGGsssWWWT', // 9  <- west exit (0,9); shrine at (13,9)
+      'TGGGGGGGPGGGGGGGGGGGGGGssssWWT', // 10
+      'TGGGGGGGPGGGGGGGGGGGGPPPPPWWWT', // 11 <- pier path onto the sand
+      'TGGGGGGGPGGGGGGGGGGGGGGssssWWT', // 12
+      'TGGFGGGGPGGGGGGGGGGGGGGsssWWWT', // 13
+      'TGGGGGGGGGGGGGGGTGGGGGGssssWWT', // 14
+      'TGGGGGGGGGGGGGGGGGGGGGGsssWWWT', // 15
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 16
+    ],
+    exits: [{ x: 0, y: 9, to: 'keldrath_gate', toX: 28, toY: 9, facing: 'left' }],
+    doors: [
+      { x: 8, y: 3, text: 'The harbormaster\'s office. A slate reads: "No berths. No exceptions. Stop asking, Pim."' },
+      { x: 18, y: 3, text: 'A chandlery smelling of tar and oranges. The shutters are drawn against the wind.' },
+    ],
+    npcs: [
+      {
+        id: 'dockmaster_orla',
+        name: 'Dockmaster Orla',
+        x: 12, y: 7, facing: 'down',
+        palette: { h: '#3a3430', f: '#b88a64', e: '#20203a', c: '#6e3a2e', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          'New face. Sigil on the belt. You will want the noticeboard, the shrine, and to stay out of the chandlery after dark — in that order.',
+          'Strangers came through last week asking after an "echo". Paid in old coin, smiled too much. The harbor did not like them, and the harbor is never wrong.',
+        ],
+        repeatDialogue: ['Keep your echo quiet and your knots tight, Sigil-bearer.'],
+        setFlags: { heard_chain_rumor: true },
+      },
+      {
+        id: 'sailor_pim',
+        name: 'Pim',
+        x: 21, y: 11, facing: 'left',
+        palette: { h: '#e8c84a', f: '#d8a878', e: '#20203a', c: '#3f7fd0', g: '#8a93a0', b: '#241d18' },
+        dialogue: [
+          'A red-haired trainer blew through yesterday — beat two deckhands and the cook, then asked which road runs north along the cliffs.',
+          'Said her name like a challenge. Lyra? Lyra. If you know her, my advice is: train.',
+        ],
+        repeatDialogue: ['The cliff road north is past the dunes. The cook still will not talk about it.'],
+      },
+      {
+        id: 'shell_nina',
+        name: 'Nina',
+        x: 24, y: 9, facing: 'down',
+        palette: { h: '#a03a4a', f: '#e8c39a', e: '#20203a', c: '#c97ba0', g: '#8a93a0', b: '#241d18' },
+        dialogue: [
+          'Shh — there is a Saltshell on the third piling and it has my hairpin IN ITS ARMOR.',
+          'Papa says if I weaken it with a Luminary first, an orb might hold it. Papa also says my hairpin is "gone to the sea now". The sea can give it BACK.',
+        ],
+        repeatDialogue: ['The Saltshell is still down there. I can hear it being smug.'],
+      },
+    ],
+    encounters: null,
   },
 };
 

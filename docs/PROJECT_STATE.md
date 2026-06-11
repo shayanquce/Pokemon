@@ -1,13 +1,40 @@
-# Project State — v0.6 "A Living World" checkpoint (2026-06-11)
+# Project State — v0.7 "The Coast Road" checkpoint (2026-06-11)
 
-> Paused after the graphics/feel overhaul (between build-order steps 7 and 8).
-> All automated tests pass: 6 save-smoke, 120 engine checks, 59 live CDP
+> Paused after build-order step 8: Echo Vault UI + the Keldrath Coast opener.
+> All automated tests pass: 6 save-smoke, 162 engine checks, 74 live CDP
 > playtest checks, plus visual verification via screenshot/texture dumps.
 
 ## What runs today
 
+### v0.7 content (step 8)
+
+- **Echo Vault UI** (`src/systems/VaultPanel.js`): Save Shrines now open a
+  3-option menu (Rest & Record / Echo Vault / Leave — `WorldScene.openShrine`).
+  The vault is a two-column overlay: party (≤6) left, vault (≤300, 9-per-page,
+  Up/Down past the edge flips pages) right. Left/Right switch columns, Z
+  transfers, X closes (auto-saves `vault`). Rules: party keeps ≥1 Luminary AND
+  ≥1 conscious one; vault caps at 300
+- **Keldrath Gate** (`keldrath_gate`): east of the North Road (row 9 east end
+  opened). New walkable tile `s` sand (`tile_sand`). Gate wall splits grass
+  west from shore east; **Pass-Warden Hale** stands in the gap at (19,9)
+- **Gate NPC mechanic** (data-driven, reusable): `gate: { requiresFlag,
+  grantsFlag, asideX/Y, deniedDialogue, grantedDialogue }` on an NPC def.
+  Without `badge_lowlands` he refuses; with it he grants
+  `coast_pass_granted` and **steps aside** (tween via `WorldScene.stepAside`;
+  collision follows `npc.x/y`, which now shadows `def.x/y` — `npcAt` uses
+  npc.x/y, and granted gate NPCs spawn at their aside spot on re-entry)
+- **Keldrath Coast — Harborside** (`keldrath_town`): first coast town. NPCs:
+  Dockmaster Orla (sets `heard_chain_rumor` — Hollowed Chain hook), sailor
+  Pim (Lyra went north along the cliffs), kid Nina (Saltshell flavor). Two
+  flavor doors. No encounters in town
+- **5 new species (23 total, dex 22–26)**: Brinepup (Tide/Beast), Gullwisp
+  (Wind/Spirit), Saltshell (Tide/Stone), Driftbloom (Verdant/Wind), Sparkfin
+  (Volt/Tide) — all with pixel maps, in the gate-map encounter table (Lv 8–12)
+
+### v0.6 presentation overhaul
+
 Everything from v0.5 (4 maps, 18 species, trainers, rival, Warden's Oath,
-badge, shop, dex), plus the v0.6 presentation overhaul:
+badge, shop, dex), plus:
 
 - **Hi-res character sprites**: player + every NPC rebuilt as 16x24 pixel
   maps (was 8x14) with auto-derived shading from the same 6-key palettes the
@@ -41,13 +68,13 @@ badge, shop, dex), plus the v0.6 presentation overhaul:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 120 checks — adds Warden party/Oath/badge checks,
-                       # cave map integrity, 'C' in the solid-landing set
+npm run engine-test    # 162 checks — maps/species/exits are auto-derived, so
+                       # new content is covered by adding data alone
 npm run playtest-game  # terminal 1: game with CDP port 9223
-npm run playtest       # terminal 2: 59 live checks — v0.4 set plus cave warp,
-                       # collision, deterministic Oath unit check (fires once,
-                       # never twice), full Warden fight via dialogue with
-                       # flag/badge/reward assertions (uses + deletes slot_3)
+npm run playtest       # terminal 2: 74 live checks — v0.5 set plus Echo Vault
+                       # (deposit/withdraw/last-companion rule), Keldrath gate
+                       # (block, grant, step-aside), coast town flags, coast
+                       # wild battle + flee (uses + deletes slot_3)
 node scripts/screenshot-cdp.mjs   # PNG of the running game
 node scripts/cdp-eval.mjs "expr"  # eval JS in the running game, print JSON
 node scripts/cdp-press.mjs ArrowDown 700  # hold a REAL key (drives isDown —
@@ -73,8 +100,9 @@ Playtest scripting gotchas (don't regress):
 
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
-  ├─ data/starters.js   LUMINARY_SPECIES (18), MOVES, makeLuminary
-  ├─ data/maps.js       4 maps {rows, exits, doors, npcs, encounters}
+  ├─ data/starters.js   LUMINARY_SPECIES (23), MOVES, makeLuminary
+  ├─ data/maps.js       6 maps {rows, exits, doors, npcs, encounters}
+  │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…})
   ├─ data/items.js      ITEMS
   ├─ data/trainers.js   TRAINERS (lyra1, acolyte_vren, acolyte_sila,
   │                     warden_thane w/ wardenOath+setFlags) + buildTrainer
@@ -84,6 +112,7 @@ Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
   │                     frames), STARTER_PIXELMAPS
   ├─ systems/BattleEngine.js  pure battle math
   ├─ systems/PartyPanel.js    PartyPanel + ItemsPanel overlays
+  ├─ systems/VaultPanel.js    Echo Vault two-column overlay (shrine menu)
   ├─ systems/ShopPanel.js     ShopPanel + DexPanel overlays
   ├─ systems/DialogueBox.js   typewriter dialogue widget (pop-in)
   ├─ scenes/WorldScene.js     maps, walk cycle, ambient, NPC idle/hop,
@@ -97,35 +126,34 @@ Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
 
 v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
 `ceremony_complete`, `rival1_won`, `acolyte_vren_won`, `acolyte_sila_won`,
-`warden1_won`, `badge_lowlands`.
+`warden1_won`, `badge_lowlands`, `coast_pass_granted`, `heard_chain_rumor`.
 
-## Implemented Luminary (18 of 180+)
+## Implemented Luminary (23 of 180+)
 
 Starter lines ×3 (2 stages), grove lines ×3 (2 stages), road wilds ×5,
-Gloombat (cave). Dex numbers 1–21 with gaps reserved for third stages.
+Gloombat (cave), coast wilds ×5. Dex numbers 1–26 with gaps reserved for
+third stages.
 
 ## Not built yet (do not assume exists)
 
-- Echo Vault UI (capture with full party silently vaults)
 - Status conditions; Echo Surge (Bond 10); bond from shrine rests
-- Evolutions for road wilds + Gloombat; third-stage starter evolutions
-- Keldrath Coast (Sigil unlocks it narratively; map doesn't exist)
+- Evolutions for road/cave/coast wilds; third-stage starter evolutions
+- Keldrath cliff road north (Pim mentions it; map doesn't exist)
 - Building interiors, audio, packaging, full 18×18 type chart
 - Healer NPC (blackout/shrine are the only full heals)
+- Coast shop/noticeboard (Orla mentions a noticeboard; doesn't exist)
 
 ## Next session — plan (in priority order)
 
-1. **Echo Vault UI** at Save Shrines: deposit/withdraw between party (≤6)
-   and vault (≤300); reuse the PartyPanel pattern
-2. **Keldrath Coast region opener** (build order step 11 pulled early as
-   chapter momentum): `keldrath_gate` map east of the North Road,
-   pass-warden NPC checks `badge_lowlands`, first coast town + 4–6 new
-   Tide/Wind species toward 30
-3. **Status conditions** in battle (burn/sleep + spec's Shattered/Echoed/
+1. **Status conditions** in battle (burn/sleep + spec's Shattered/Echoed/
    Hollowed), then Echo Surge at Bond 10
-4. Chapter 1 story beats: Elder Maren post-badge dialogue, Hollowed Chain
-   scout encounter
-5. Healer NPC in Ashfen Town (free rest at Bram's neighbor?)
+2. **Chapter 1 story beats**: Elder Maren post-badge dialogue, first
+   Hollowed Chain scout encounter on the coast (follows `heard_chain_rumor`)
+3. **Evolutions** for road/cave/coast wilds (Voltail, Bristleboar, Gloombat,
+   Brinepup… — design stats + pixel maps)
+4. **Keldrath cliff road** north (`keldrath_cliffs`): next route toward the
+   second Warden, Lyra rematch on the way
+5. Healer NPC in Ashfen Town or Keldrath (free rest)
 
 ## Dependencies
 

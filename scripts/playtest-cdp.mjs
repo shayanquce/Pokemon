@@ -304,6 +304,64 @@ check('warden1_won flag set', await eval_(`Save.state.storyFlags.warden1_won ===
 check('badge_lowlands flag set', await eval_(`Save.state.storyFlags.badge_lowlands === true`));
 check('warden reward paid', (await eval_(`Save.state.shards`)) >= shardsPreWarden + 600, `${shardsPreWarden} -> ${await eval_(`Save.state.shards`)}`);
 
+// 8c-3. Echo Vault: deposit / last-companion rule / withdraw.
+await eval_(`(Save.state.party = [makeLuminary(Save.state.starterId ?? 'embrik', 25), makeLuminary('ashvole', 5)], Save.state.vault = [], true)`);
+await eval_(`(window.game.scene.getScene('WorldScene').openVault(), true)`);
+await sleep(300);
+check('vault panel opens and locks UI', await eval_(`Boolean(window.game.scene.getScene('WorldScene').vaultPanel) && window.game.scene.getScene('WorldScene').uiLock`));
+await eval_(`(() => { const v = window.game.scene.getScene('WorldScene').vaultPanel; v.col = 0; v.index = 1; v.transfer(); return true; })()`);
+await sleep(200);
+check('deposit moved mon to vault', (await eval_(`Save.state.party.length`)) === 1 && (await eval_(`Save.state.vault.length`)) === 1);
+await eval_(`(() => { const v = window.game.scene.getScene('WorldScene').vaultPanel; v.col = 0; v.index = 0; v.transfer(); return true; })()`);
+await sleep(200);
+check('last companion cannot be vaulted', (await eval_(`Save.state.party.length`)) === 1);
+await eval_(`(() => { const v = window.game.scene.getScene('WorldScene').vaultPanel; v.setCol(1); v.index = 0; v.transfer(); return true; })()`);
+await sleep(200);
+check('withdraw returned mon to party', (await eval_(`Save.state.party.length`)) === 2 && (await eval_(`Save.state.vault.length`)) === 0);
+await eval_(`(window.game.scene.getScene('WorldScene').input.keyboard.emit('keydown-X'), true)`);
+await sleep(500);
+check('vault closes, UI unlocked', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
+// 8c-4. Keldrath Gate: the pass-warden blocks, then steps aside for the Sigil.
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 29, y: 9, to: 'keldrath_gate', toX: 1, toY: 9, facing: 'right' }), true)`);
+check('keldrath gate loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'keldrath_gate' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('pass-warden blocks the road', await eval_(`window.game.scene.getScene('WorldScene').isSolid(19, 9)`));
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'right'; w.talkTo(w.npcs.find(n => n.def.id === 'pass_warden_hale')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(300); }
+await sleep(600);
+check('coast pass granted', await eval_(`Save.state.storyFlags.coast_pass_granted === true`));
+check('pass-warden stepped aside', !(await eval_(`window.game.scene.getScene('WorldScene').isSolid(19, 9)`)) && (await eval_(`window.game.scene.getScene('WorldScene').isSolid(18, 8)`)));
+
+// 8c-5. Keldrath town: NPCs, rumor flag, and a coast wild we can flee.
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 29, y: 9, to: 'keldrath_town', toX: 1, toY: 9, facing: 'right' }), true)`);
+check('keldrath town loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'keldrath_town' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('keldrath town discovered', await eval_(`Save.state.discoveredLocations.includes('keldrath_town')`));
+check('3 coast NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 3);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'dockmaster_orla')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(300); }
+await sleep(400);
+check('Hollowed Chain rumor heard', await eval_(`Save.state.storyFlags.heard_chain_rumor === true`));
+
+await eval_(`(window.game.scene.getScene('WorldScene').scene.start('BattleScene', { wild: makeLuminary('brinepup', 9) }), true)`);
+await sleep(1000);
+check('coast wild battle starts', await eval_(`window.game.scene.isActive('BattleScene')`));
+await pressZ(); await sleep(300); await pressZ(); await sleep(500); // intro
+for (let i = 0; i < 6; i++) {
+  const inBattle = await eval_(`window.game.scene.isActive('BattleScene')`);
+  if (!inBattle) break;
+  await eval_(`(() => { const b = window.game.scene.getScene('BattleScene'); if (b?.menu && b.menu.items.length < 5) b.menu.cancel(); return true; })()`);
+  await sleep(250);
+  await eval_(`(() => { const b = window.game.scene.getScene('BattleScene'); if (b?.menu && b.menu.items.length === 5) { b.menu.index = 4; b.menu.refresh(); b.menu.select(); } return true; })()`);
+  await sleep(500);
+  for (let j = 0; j < 6; j++) { await pressZ(); await sleep(250); }
+}
+await sleep(800);
+check('escaped coast battle', await eval_(`window.game.scene.isActive('WorldScene')`));
+
 // 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);
 check('back in town after rival win', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'ashfen_town' && window.game.scene.getScene('WorldScene').npcs)`));

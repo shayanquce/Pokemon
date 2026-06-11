@@ -292,6 +292,48 @@ const LUMINARY_SPECIES = {
     learnset: [{ id: 'zephyr_slice', level: 1 }, { id: 'scrabble', level: 1 }, { id: 'gust_flick', level: 5 }],
   },
 
+  // --- Keldrath Coast wilds (gate + shore, Lv 8–12) ---
+  brinepup: {
+    id: 'brinepup', dexNo: 22, name: 'Brinepup', types: ['Tide', 'Beast'],
+    baseStats: { hp: 54, atk: 56, def: 44, spa: 38, spd: 42, spe: 52 },
+    tagline: 'A salt-crusted pup that herds the tide.',
+    lore: 'Brinepup run the wave-line at dawn, barking the sea back into place. Keldrath fisherfolk swear the tide comes in twenty minutes late on mornings the pups oversleep.',
+    captureRate: 170, baseExp: 74,
+    learnset: [{ id: 'drip_lash', level: 1 }, { id: 'gnaw', level: 1 }, { id: 'brine_jet', level: 12 }],
+  },
+  gullwisp: {
+    id: 'gullwisp', dexNo: 23, name: 'Gullwisp', types: ['Wind', 'Spirit'],
+    baseStats: { hp: 44, atk: 36, def: 38, spa: 56, spd: 50, spe: 64 },
+    tagline: 'The gull that never came ashore.',
+    lore: 'Gullwisp ride the storm-edge where drowned sailors last saw land. They scream at ships that sail toward bad water — Keldrath harbor pays them in fish guts and gratitude.',
+    captureRate: 150, baseExp: 76,
+    learnset: [{ id: 'gust_flick', level: 1 }, { id: 'wisp_flare', level: 4 }, { id: 'zephyr_slice', level: 11 }],
+  },
+  saltshell: {
+    id: 'saltshell', dexNo: 24, name: 'Saltshell', types: ['Tide', 'Stone'],
+    baseStats: { hp: 60, atk: 50, def: 72, spa: 30, spd: 52, spe: 24 },
+    tagline: 'A fist-sized fortress with opinions about waves.',
+    lore: 'Saltshell armor themselves in whatever the sea regrets losing — coins, cleats, one famous tax ledger. Prying one off a dock piling takes two sailors and costs three friendships.',
+    captureRate: 160, baseExp: 78,
+    learnset: [{ id: 'pebble_toss', level: 1 }, { id: 'stone_guard', level: 1 }, { id: 'drip_lash', level: 8 }],
+  },
+  driftbloom: {
+    id: 'driftbloom', dexNo: 25, name: 'Driftbloom', types: ['Verdant', 'Wind'],
+    baseStats: { hp: 46, atk: 34, def: 40, spa: 58, spd: 54, spe: 58 },
+    tagline: 'A flower that mistook the wind for soil.',
+    lore: 'Driftbloom seeds root in the air itself, trailing petals like a slow comet. Where one finally settles, the coast grows a garden by spring — so children chase them with flowerpots.',
+    captureRate: 150, baseExp: 75,
+    learnset: [{ id: 'leaf_dart', level: 1 }, { id: 'gust_flick', level: 1 }, { id: 'glimmer_dust', level: 9 }],
+  },
+  sparkfin: {
+    id: 'sparkfin', dexNo: 26, name: 'Sparkfin', types: ['Volt', 'Tide'],
+    baseStats: { hp: 48, atk: 44, def: 38, spa: 60, spd: 44, spe: 68 },
+    tagline: 'A storm in a puddle, and proud of it.',
+    lore: 'Sparkfin school under thunderheads to drink the charge off the water. A netted Sparkfin will short every lantern on the boat, which is why Keldrath nets are wax-dipped and prayers are short.',
+    captureRate: 150, baseExp: 77,
+    learnset: [{ id: 'spark_nip', level: 1 }, { id: 'drip_lash', level: 5 }, { id: 'brine_jet', level: 13 }],
+  },
+
   // --- Hollow Cave wild ---
   gloombat: {
     id: 'gloombat', dexNo: 21, name: 'Gloombat', types: ['Shadow', 'Wind'],

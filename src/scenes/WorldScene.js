@@ -101,7 +101,7 @@ class WorldScene extends Phaser.Scene {
     const groundFor = {
       G: 'tile_grass', g: 'tile_grass_tall', F: 'tile_flowers', P: 'tile_path',
       W: 'tile_water', T: 'tile_tree', S: 'tile_grass', R: 'tile_roof', B: 'tile_wall', D: 'tile_door',
-      C: 'tile_cave_wall', c: 'tile_cave_floor', e: 'tile_cave_gravel',
+      C: 'tile_cave_wall', c: 'tile_cave_floor', e: 'tile_cave_gravel', s: 'tile_sand',
     };
 
     this.shrineTile = null;
@@ -132,6 +132,8 @@ class WorldScene extends Phaser.Scene {
       ashfen_town: { tint: [0x6aa052, 0xd4af37], frequency: 1000, drift: 18 },
       north_road: { tint: [0xe8e4e0, 0xefe2a0], frequency: 900, drift: 16 },
       hollow_cave: { tint: [0x9fd8ff, 0x6a5a8a], frequency: 800, drift: 7 },
+      keldrath_gate: { tint: [0xdce8f0, 0xcde4ee], frequency: 850, drift: 22 },
+      keldrath_town: { tint: [0xdce8f0, 0xefe2a0], frequency: 800, drift: 22 },
     };
     const p = presets[this.map.id];
     if (!p) return;
@@ -172,15 +174,31 @@ class WorldScene extends Phaser.Scene {
     const visible = (this.map.npcs ?? []).filter((def) => !(def.hiddenIfFlag && Save.state.storyFlags[def.hiddenIfFlag]));
     this.npcs = visible.map((def) => {
       ensureNpcTextures(this, def.id, def.palette);
-      const px = def.x * TILE + TILE / 2;
-      const shadow = this.add.ellipse(px, def.y * TILE + TILE - 3, 20, 7, 0x000000, 0.3).setDepth(def.y - 0.1);
+      // Gate wardens who already granted passage spawn at their aside spot.
+      const granted = def.gate && Save.state.storyFlags[def.gate.grantsFlag];
+      const tx = granted ? def.gate.asideX : def.x;
+      const ty = granted ? def.gate.asideY : def.y;
+      const px = tx * TILE + TILE / 2;
+      const shadow = this.add.ellipse(px, ty * TILE + TILE - 3, 20, 7, 0x000000, 0.3).setDepth(ty - 0.1);
       const sprite = this.add
-        .image(px, def.y * TILE + TILE - 2, `npc_${def.id}_${DIR_OF(def.facing)}_0`)
+        .image(px, ty * TILE + TILE - 2, `npc_${def.id}_${DIR_OF(def.facing)}_0`)
         .setOrigin(0.5, 1)
-        .setDepth(def.y)
+        .setDepth(ty)
         .setFlipX(def.facing === 'left');
-      return { def, sprite, shadow, facing: def.facing };
+      return { def, sprite, shadow, facing: def.facing, x: tx, y: ty };
     });
+  }
+
+  /** A gate NPC steps out of the road; collision follows npc.x/npc.y. */
+  stepAside(npc, tx, ty) {
+    npc.x = tx;
+    npc.y = ty;
+    const px = tx * TILE + TILE / 2;
+    const py = ty * TILE + TILE - 2;
+    this.tweens.add({ targets: npc.sprite, x: px, y: py, duration: 320, ease: 'Quad.easeInOut' });
+    this.tweens.add({ targets: npc.shadow, x: px, y: py - 1, duration: 320, ease: 'Quad.easeInOut' });
+    npc.sprite.setDepth(ty);
+    npc.shadow.setDepth(ty - 0.1);
   }
 
   faceNpc(npc, facing) {
@@ -188,18 +206,18 @@ class WorldScene extends Phaser.Scene {
     npc.sprite.setTexture(`npc_${npc.def.id}_${DIR_OF(facing)}_0`).setFlipX(facing === 'left');
   }
 
-  /** Idle life: non-trainer NPCs occasionally glance in a new direction. */
+  /** Idle life: non-trainer, non-gate NPCs occasionally glance around. */
   npcIdle() {
     if (this.uiLock) return;
     for (const npc of this.npcs) {
-      if (npc.def.battle || Math.random() > 0.25) continue;
+      if (npc.def.battle || npc.def.gate || Math.random() > 0.25) continue;
       const dirs = ['up', 'down', 'left', 'right'].filter((d) => d !== npc.facing);
       this.faceNpc(npc, dirs[Math.floor(Math.random() * dirs.length)]);
     }
   }
 
   npcAt(x, y) {
-    return this.npcs?.find((n) => n.def.x === x && n.def.y === y) ?? null;
+    return this.npcs?.find((n) => n.x === x && n.y === y) ?? null;
   }
 
   /**
@@ -217,15 +235,22 @@ class WorldScene extends Phaser.Scene {
     const state = Save.state.npcStates?.[def.id] ?? {};
     const battleWon = def.battle && Save.state.storyFlags[def.battle.flag];
     const battlePending = def.battle && !battleWon;
+    // Gate wardens: denied speech without the required flag, the granting
+    // speech once it's earned, repeat lines after they've stepped aside.
+    const gate = def.gate;
+    const gateGranted = gate && Save.state.storyFlags[gate.grantsFlag];
+    const gateGranting = gate && !gateGranted && Save.state.storyFlags[gate.requiresFlag];
 
     let raw;
-    if (battleWon) {
+    if (gate && !gateGranted) {
+      raw = gateGranting ? gate.grantedDialogue : gate.deniedDialogue;
+    } else if (battleWon) {
       // First conversation after the victory gets the aftermath lines.
       raw = !state.postWin && def.postWinDialogue?.length ? def.postWinDialogue : def.repeatDialogue ?? def.dialogue;
     } else if (battlePending) {
       raw = def.dialogue; // full challenge speech every time until beaten
     } else {
-      raw = state.talked && def.repeatDialogue?.length ? def.repeatDialogue : def.dialogue;
+      raw = state.talked && def.repeatDialogue?.length ? def.repeatDialogue : def.dialogue ?? def.repeatDialogue;
     }
     const pages = raw.map((p) => p.replaceAll('{player}', Save.state.playerName));
 
@@ -237,6 +262,11 @@ class WorldScene extends Phaser.Scene {
         if (!Save.state.npcStates) Save.state.npcStates = {};
         Save.state.npcStates[def.id] = { ...Save.state.npcStates[def.id], talked: true, ...(battleWon ? { postWin: true } : {}) };
         if (def.setFlags) Object.assign(Save.state.storyFlags, def.setFlags);
+        if (gateGranting) {
+          Save.state.storyFlags[gate.grantsFlag] = true;
+          this.stepAside(npc, gate.asideX, gate.asideY);
+          this.toast('The way east stands open.', true);
+        }
         if (battlePending) {
           await Save.autoSave(this, `dialogue:${def.id}`);
           this.scene.start('BattleScene', { trainer: buildTrainer(def.battle.trainerId), flag: def.battle.flag });
@@ -445,11 +475,46 @@ class WorldScene extends Phaser.Scene {
 
   openShrine() {
     this.uiLock = true;
-    new ConfirmBox(this, {
-      text: 'A Save Shrine hums with quiet light.\nRest here and record your journey?',
-      onYes: () => this.doShrineSave(),
-      onNo: () => {
+    const W = this.scale.width, H = this.scale.height;
+    this.shrineObjs = [
+      this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.45).setDepth(50),
+      drawPanel(this, W / 2 - 210, H / 2 - 104, 420, 208).setDepth(51),
+      this.add
+        .text(W / 2, H / 2 - 70, 'A Save Shrine hums with quiet light.', textStyle(15, UI.colors.parchment))
+        .setOrigin(0.5)
+        .setDepth(52),
+    ];
+    this.shrineMenu = new MenuList(this, {
+      x: W / 2, y: H / 2 - 22, spacing: 34, fontSize: 16, depth: 52,
+      items: [
+        { label: 'Rest & Record', onSelect: () => { this.closeShrineMenu(); this.doShrineSave(); } },
+        { label: 'Echo Vault', onSelect: () => { this.closeShrineMenu(); this.openVault(); } },
+        { label: 'Leave', onSelect: () => { this.closeShrineMenu(); this.uiLock = false; } },
+      ],
+      onCancel: () => {
+        this.closeShrineMenu();
         this.uiLock = false;
+      },
+    });
+  }
+
+  closeShrineMenu() {
+    this.shrineMenu?.destroy();
+    this.shrineMenu = null;
+    this.shrineObjs?.forEach((o) => o.destroy());
+    this.shrineObjs = null;
+  }
+
+  /** Shrine → Echo Vault: deposit/withdraw between party and vault. */
+  openVault() {
+    this.uiLock = true;
+    this.vaultPanel = new VaultPanel(this, {
+      onClose: async () => {
+        this.vaultPanel.destroy();
+        this.vaultPanel = null;
+        this.refreshHud();
+        this.uiLock = false;
+        await Save.autoSave(this, 'vault');
       },
     });
   }
