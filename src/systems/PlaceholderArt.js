@@ -33,6 +33,97 @@ function pixelTexture(scene, key, rows, palette, scale = 2) {
   c.refresh();
 }
 
+/** Multiply a #rrggbb color's channels (mult < 1 darkens, > 1 lightens). */
+function shade(hex, mult) {
+  const n = parseInt(hex.slice(1), 16);
+  const ch = (v) => Math.max(0, Math.min(255, Math.round(v * mult)));
+  const r = ch((n >> 16) & 255), g = ch((n >> 8) & 255), b = ch(n & 255);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
+/** Pixel map -> 2D color grid (null = transparent). */
+function gridFrom(rows, palette) {
+  const h = rows.length;
+  const w = Math.max(...rows.map((r) => r.length));
+  const grid = [];
+  for (let y = 0; y < h; y++) {
+    grid.push([]);
+    for (let x = 0; x < w; x++) grid[y].push(palette[rows[y][x]] ?? null);
+  }
+  return grid;
+}
+
+/**
+ * EPX/Scale2x — doubles a color grid while rounding staircase corners, the
+ * classic pixel-art smoothing pass. Keeps hard edges, kills the chunk.
+ */
+function epxScale(grid) {
+  const h = grid.length, w = grid[0].length;
+  const at = (x, y) => (y < 0 || x < 0 || y >= h || x >= w ? null : grid[y][x]);
+  const out = Array.from({ length: h * 2 }, () => new Array(w * 2));
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const p = at(x, y);
+      const a = at(x, y - 1), b = at(x + 1, y), c = at(x - 1, y), d = at(x, y + 1);
+      let tl = p, tr = p, bl = p, br = p;
+      if (c === a && c !== d && a !== b) tl = a;
+      if (a === b && a !== c && b !== d) tr = b;
+      if (d === c && d !== b && c !== a) bl = c;
+      if (b === d && b !== a && d !== c) br = d;
+      out[y * 2][x * 2] = tl;
+      out[y * 2][x * 2 + 1] = tr;
+      out[y * 2 + 1][x * 2] = bl;
+      out[y * 2 + 1][x * 2 + 1] = br;
+    }
+  }
+  return out;
+}
+
+/**
+ * Volume pass: lighten silhouette tops (sky light), darken undersides, and
+ * apply a soft top-to-bottom gradient so flat color regions read as round.
+ */
+function shadeGrid(grid) {
+  const h = grid.length, w = grid[0].length;
+  const solid = (x, y) => y >= 0 && x >= 0 && y < h && x < w && grid[y][x];
+  const out = grid.map((row) => row.slice());
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (!grid[y][x]) continue;
+      let mult = 1.04 - 0.13 * (y / h); // ambient gradient
+      if (!solid(x, y - 1)) mult *= 1.22; // lit top rim
+      else if (!solid(x, y + 1)) mult *= 0.74; // shaded underside
+      else if (!solid(x - 1, y)) mult *= 1.08; // soft left key light
+      else if (!solid(x + 1, y)) mult *= 0.88; // soft right falloff
+      out[y][x] = shade(grid[y][x], mult);
+    }
+  }
+  return out;
+}
+
+const OUTLINE_COLOR = '#10141f';
+
+/** Render a color grid to a canvas texture with a 1px dark outline around the silhouette. */
+function gridTexture(scene, key, grid, pixel = 1) {
+  if (scene.textures.exists(key)) return;
+  const h = grid.length, w = grid[0].length;
+  const c = scene.textures.createCanvas(key, (w + 2) * pixel, (h + 2) * pixel);
+  const ctx = c.context;
+  const solid = (x, y) => y >= 0 && x >= 0 && y < h && x < w && grid[y][x];
+  for (let y = -1; y <= h; y++) {
+    for (let x = -1; x <= w; x++) {
+      let color = solid(x, y) ? grid[y][x] : null;
+      if (!color && (solid(x - 1, y) || solid(x + 1, y) || solid(x, y - 1) || solid(x, y + 1))) {
+        color = OUTLINE_COLOR;
+      }
+      if (!color) continue;
+      ctx.fillStyle = color;
+      ctx.fillRect((x + 1) * pixel, (y + 1) * pixel, pixel, pixel);
+    }
+  }
+  c.refresh();
+}
+
 /** 32x32 tile: solid base color + seeded speckle noise + optional extra pass. */
 function noiseTile(scene, key, base, specks, seed, opts = {}) {
   if (scene.textures.exists(key)) return;
@@ -101,22 +192,45 @@ function ensureWorldTextures(scene) {
     },
   });
 
+  // Second water frame — same body, shifted glints. WorldScene swaps the two
+  // on a timer so every pool ripples gently.
+  noiseTile(scene, 'tile_water2', '#1c3a5e', ['#234a78'], 55, {
+    count: 30,
+    post: (ctx, rnd) => {
+      ctx.fillStyle = '#2e5a8e';
+      for (let i = 0; i < 4; i++) {
+        ctx.fillRect(2 + Math.floor(rnd() * 18), 2 + Math.floor(rnd() * 26), 7 + Math.floor(rnd() * 5), 1);
+      }
+      ctx.fillStyle = '#3f6f9f';
+      ctx.fillRect(10, 14, 6, 1);
+      ctx.fillRect(20, 6, 7, 1);
+    },
+  });
+
   noiseTile(scene, 'tile_tree', '#2e4f36', ['#27452f'], 66, {
     count: 20,
     post: (ctx) => {
-      ctx.fillStyle = '#3a2b1d';
-      ctx.fillRect(13, 18, 6, 12);
+      // Crisp stepped-circle canopy (no AA) over a shaded trunk.
+      const disc = (cx, cy, r, color) => {
+        ctx.fillStyle = color;
+        for (let dy = -r; dy <= r; dy++) {
+          const half = Math.floor(Math.sqrt(r * r - dy * dy));
+          ctx.fillRect(cx - half, cy + dy, half * 2 + 1, 1);
+        }
+      };
+      ctx.fillStyle = 'rgba(10,16,10,0.45)'; // ground shadow
+      ctx.fillRect(8, 27, 16, 3);
       ctx.fillStyle = '#241a10';
-      ctx.fillRect(13, 18, 2, 12);
-      ctx.fillStyle = '#16301f';
-      ctx.fillRect(3, 4, 26, 18);
-      ctx.fillStyle = '#1f4029';
-      ctx.fillRect(5, 2, 22, 18);
-      ctx.fillStyle = '#2a5236';
-      ctx.fillRect(7, 4, 18, 12);
-      ctx.fillStyle = '#356445';
-      ctx.fillRect(9, 6, 4, 3);
-      ctx.fillRect(18, 9, 5, 3);
+      ctx.fillRect(13, 17, 6, 12);
+      ctx.fillStyle = '#3a2b1d';
+      ctx.fillRect(15, 17, 4, 12);
+      disc(16, 11, 10, '#16301f'); // canopy: dark base, mid, lit crown
+      disc(15, 10, 9, '#1f4029');
+      disc(14, 8, 7, '#2a5236');
+      disc(12, 6, 4, '#356445');
+      ctx.fillStyle = '#41684a'; // glints
+      ctx.fillRect(10, 4, 2, 2);
+      ctx.fillRect(17, 7, 2, 1);
     },
   });
 
@@ -224,72 +338,174 @@ const PLAYER_PALETTE = {
   b: '#241d18', // boots
 };
 
-const PLAYER_DOWN = [
-  '..hhhh..',
-  '.hhhhhh.',
-  '.hhhhhh.',
-  '.hffffh.',
-  '.hfefeh.',
-  '..ffff..',
-  '..cggc..',
-  '.cccccc.',
-  '.cccccc.',
-  'fccccccf',
-  '..cccc..',
-  '..c..c..',
-  '..b..b..',
-  '.bb..bb.',
-];
+/**
+ * Expand the 6-key character palette (h/f/e/c/g/b, the schema map NPC defs
+ * already use) into the full shaded glyph set the hi-res maps draw with.
+ */
+function charPalette(p) {
+  return {
+    h: p.h, H: shade(p.h, 0.66),
+    f: p.f, F: shade(p.f, 0.74),
+    e: p.e,
+    c: p.c, C: shade(p.c, 0.62), l: shade(p.c, 1.35),
+    g: p.g,
+    b: p.b, B: shade(p.b, 1.9),
+  };
+}
 
-const PLAYER_UP = [
-  '..hhhh..',
-  '.hhhhhh.',
-  '.hhhhhh.',
-  '.hhhhhh.',
-  '.hhhhhh.',
-  '..hhhh..',
-  '..cggc..',
-  '.cccccc.',
-  '.cccccc.',
-  'fccccccf',
-  '..cccc..',
-  '..c..c..',
-  '..b..b..',
-  '.bb..bb.',
-];
+/**
+ * Character bodies are 16x18 pixel maps (head + torso); legs are 16x6 maps
+ * composed underneath, with idle / stride-A / stride-B variants per facing.
+ * Final frames are 16x24, rendered at 2px = 32x48 with a generated outline.
+ * Side maps face RIGHT; flipX gives left.
+ */
+const CHAR_BODY = {
+  down: [
+    '.....hhhhhh.....',
+    '....hhhhhhhh....',
+    '...hhhhhhhhhh...',
+    '...hhhhhhhhhh...',
+    '...hHhhhhhhHh...',
+    '...hffffffffh...',
+    '...HfeffffefH...',
+    '...HfeffffefH...',
+    '....ffffffff....',
+    '....FFffffFF....',
+    '....occggcco....',
+    '...cccccccccc...',
+    '..clcccccccclc..',
+    '..clcccccccclc..',
+    '..cfccccccccfc..',
+    '..cFccccccccFc..',
+    '...CCccccccCC...',
+    '...CCCccccCCC...',
+  ],
+  up: [
+    '.....hhhhhh.....',
+    '....hhhhhhhh....',
+    '...hhhhhhhhhh...',
+    '...hhhhhhhhhh...',
+    '...hhhhhhhhhh...',
+    '...hhhhhhhhhh...',
+    '...HhhhhhhhhH...',
+    '...HhhhhhhhhH...',
+    '....hhhhhhhh....',
+    '....HHhhhhHH....',
+    '....cccccccc....',
+    '...cccccccccc...',
+    '..cccccccccccc..',
+    '..cccccccccccc..',
+    '..cCccccccccCc..',
+    '..cCccccccccCc..',
+    '...CCccccccCC...',
+    '...CCCccccCCC...',
+  ],
+  side: [
+    '.....hhhhhh.....',
+    '....hhhhhhhh....',
+    '....hhhhhhhhh...',
+    '....hhhhhhhhh...',
+    '....hHhhhhhhh...',
+    '....hhhhfffff...',
+    '....Hhhhfefff...',
+    '....Hhhhfffff...',
+    '.....hhhffff....',
+    '.....HHhFFF.....',
+    '......cccgc.....',
+    '.....ccccccc....',
+    '....ccccccccc...',
+    '....clcccccCc...',
+    '....clcccccCc...',
+    '....cfcccccCc...',
+    '.....CccccCC....',
+    '.....CCccCCC....',
+  ],
+};
 
-// Drawn facing right; flipX renders the left-facing version.
-const PLAYER_SIDE = [
-  '..hhhh..',
-  '.hhhhhh.',
-  '.hhhhhh.',
-  '..hffff.',
-  '..hffef.',
-  '..ffff..',
-  '..cggc..',
-  '..ccccc.',
-  '..ccccc.',
-  '..ccccf.',
-  '..cccc..',
-  '..c.c...',
-  '..b.b...',
-  '..bb.b..',
-];
+const CHAR_LEGS = {
+  down: {
+    idle: [
+      '...bbb....bbb...',
+      '...bbb....bbb...',
+      '...bbb....bbb...',
+      '...Bbb....Bbb...',
+      '...BBb....BBb...',
+      '................',
+    ],
+    a: [
+      '...bbb....bbb...',
+      '...bbb....bbb...',
+      '...bbb....BBb...',
+      '...Bbb..........',
+      '...BBb..........',
+      '................',
+    ],
+    b: [
+      '...bbb....bbb...',
+      '...bbb....bbb...',
+      '...Bbb....bbb...',
+      '..........Bbb...',
+      '..........BBb...',
+      '................',
+    ],
+  },
+  side: {
+    idle: [
+      '.....bbbbb......',
+      '.....bbbbb......',
+      '.....bbbbb......',
+      '.....Bbbbb......',
+      '.....BBBBb......',
+      '................',
+    ],
+    a: [
+      '.....bbbbb......',
+      '....bbb.bbb.....',
+      '...bbb...bbb....',
+      '...Bbb...Bbb....',
+      '...BBb....BB....',
+      '................',
+    ],
+    b: [
+      '.....bbbbb......',
+      '.....bbbbb......',
+      '....bbb.bb......',
+      '....Bbb.Bbb.....',
+      '....BBb..BB.....',
+      '................',
+    ],
+  },
+};
+CHAR_LEGS.up = CHAR_LEGS.down; // legs read the same from behind
+
+const CHAR_FRAMES = ['idle', 'a', 'b'];
+
+/**
+ * Build the 9 frame textures for one character:
+ * `<base>_down_0..2`, `<base>_up_0..2`, `<base>_side_0..2`
+ * (0 = standing, 1/2 = stride frames; side faces right, flipX for left).
+ */
+function ensureCharTextures(scene, base, sixKeyPalette) {
+  if (scene.textures.exists(`${base}_down_0`)) return;
+  const pal = charPalette(sixKeyPalette);
+  for (const dir of ['down', 'up', 'side']) {
+    CHAR_FRAMES.forEach((variant, i) => {
+      const rows = [...CHAR_BODY[dir], ...CHAR_LEGS[dir][variant]];
+      gridTexture(scene, `${base}_${dir}_${i}`, gridFrom(rows, pal), 2);
+    });
+  }
+}
 
 function ensurePlayerTextures(scene) {
-  pixelTexture(scene, 'player_down', PLAYER_DOWN, PLAYER_PALETTE, 3);
-  pixelTexture(scene, 'player_up', PLAYER_UP, PLAYER_PALETTE, 3);
-  pixelTexture(scene, 'player_side', PLAYER_SIDE, PLAYER_PALETTE, 3);
+  ensureCharTextures(scene, 'player', PLAYER_PALETTE);
 }
 
 /**
  * NPCs reuse the player pixel-maps with their own palette (hair/skin/cloak
- * colors come from the map data). Keys: npc_<id>_down / _up / _side.
+ * colors come from the map data). Keys: npc_<id>_<dir>_<frame>.
  */
 function ensureNpcTextures(scene, id, palette) {
-  pixelTexture(scene, `npc_${id}_down`, PLAYER_DOWN, palette, 3);
-  pixelTexture(scene, `npc_${id}_up`, PLAYER_UP, palette, 3);
-  pixelTexture(scene, `npc_${id}_side`, PLAYER_SIDE, palette, 3);
+  ensureCharTextures(scene, `npc_${id}`, palette);
 }
 
 /** Hand-pixelled placeholder portraits for starters + early wild Luminary. */
@@ -625,9 +841,13 @@ Object.assign(STARTER_PIXELMAPS, {
   },
 });
 
-/** Texture key is `lum_<speciesId>` (e.g. lum_embrik). */
+/**
+ * Texture key is `lum_<speciesId>` (e.g. lum_embrik). The 16-wide pixel map
+ * is EPX-doubled twice (16x the pixels, staircases rounded into curves) and
+ * outlined. Canvas is ~66x50 — call sites display at half their old scale.
+ */
 function ensureLuminaryTexture(scene, speciesId) {
   const def = STARTER_PIXELMAPS[speciesId];
   if (!def) return;
-  pixelTexture(scene, `lum_${speciesId}`, def.rows, def.palette, 2);
+  gridTexture(scene, `lum_${speciesId}`, shadeGrid(epxScale(epxScale(gridFrom(def.rows, def.palette)))), 1);
 }

@@ -126,7 +126,7 @@ class NewGameScene extends Phaser.Scene {
       const cx = W / 2 + (i - 1) * 290;
       const card = { cx, id };
 
-      card.sprite = this.add.image(cx, 242, `lum_${id}`).setScale(4).setDepth(2);
+      card.sprite = this.add.image(cx, 242, `lum_${id}`).setScale(2).setDepth(2);
       card.name = this.add.text(cx, 326, species.name, titleStyle(24, UI.colors.parchment)).setOrigin(0.5).setDepth(2);
 
       const typeColor = Phaser.Display.Color.HexStringToColor(TYPE_COLORS[species.types[0]]).color;
@@ -153,7 +153,7 @@ class NewGameScene extends Phaser.Scene {
         edge: selected ? UI.colors.panelEdge : UI.colors.panelEdgeDim,
         alpha: selected ? 0.97 : 0.85,
       }).setDepth(1);
-      card.sprite.setScale(selected ? 4.5 : 4);
+      card.sprite.setScale(selected ? 2.25 : 2);
       card.name.setColor(selected ? UI.colors.gold : UI.colors.parchment);
     });
   }

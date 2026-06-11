@@ -12,6 +12,9 @@ const SOLID_TILES = new Set(['T', 'W', 'S', 'B', 'R', 'D', 'C']);
 const ENCOUNTER_TILES = new Set(['g', 'e']);
 const FACING_DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
+/** Facing -> sprite sheet direction (side frames face right; flipX gives left). */
+const DIR_OF = (facing) => (facing === 'left' || facing === 'right' ? 'side' : facing);
+
 class WorldScene extends Phaser.Scene {
   constructor() {
     super('WorldScene');
@@ -34,7 +37,31 @@ class WorldScene extends Phaser.Scene {
     this.buildMap();
     this.spawnNpcs();
     this.spawnPlayer();
+    this.buildAmbient();
     this.buildHud();
+
+    // Shared dust emitter for footsteps (explode() repositions per puff).
+    this.dustEmitter = this.add.particles(0, 0, 'spark', {
+      speed: { min: 8, max: 24 }, lifespan: 280,
+      scale: { start: 0.9, end: 0 }, alpha: { start: 0.6, end: 0 },
+      emitting: false,
+    }).setDepth(30);
+
+    // Gentle ripple: every water tile swaps between two glint frames.
+    if (this.waterTiles.length) {
+      let flip = false;
+      this.time.addEvent({
+        delay: 650, loop: true,
+        callback: () => {
+          flip = !flip;
+          const key = flip ? 'tile_water2' : 'tile_water';
+          this.waterTiles.forEach((img) => img.setTexture(key));
+        },
+      });
+    }
+
+    // Bystanders glance around now and then (trainers hold their stare).
+    this.time.addEvent({ delay: 2400, loop: true, callback: () => this.npcIdle() });
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,A,S,D');
@@ -78,12 +105,14 @@ class WorldScene extends Phaser.Scene {
     };
 
     this.shrineTile = null;
+    this.waterTiles = [];
     for (let y = 0; y < this.mapH; y++) {
       for (let x = 0; x < this.mapW; x++) {
         const ch = this.tileAt(x, y);
         const px = x * TILE + TILE / 2;
         const py = y * TILE + TILE / 2;
-        this.add.image(px, py, groundFor[ch] ?? 'tile_grass').setDepth(0);
+        const img = this.add.image(px, py, groundFor[ch] ?? 'tile_grass').setDepth(0);
+        if (ch === 'W') this.waterTiles.push(img);
 
         if (ch === 'S') {
           this.shrineTile = { x, y };
@@ -94,6 +123,26 @@ class WorldScene extends Phaser.Scene {
         }
       }
     }
+  }
+
+  /** Per-map drifting motes: fireflies, leaves, seed fluff, cave glimmer. */
+  buildAmbient() {
+    const presets = {
+      ashfen_grove: { tint: [0xd4af37, 0xefe2a0], frequency: 650, drift: 12 },
+      ashfen_town: { tint: [0x6aa052, 0xd4af37], frequency: 1000, drift: 18 },
+      north_road: { tint: [0xe8e4e0, 0xefe2a0], frequency: 900, drift: 16 },
+      hollow_cave: { tint: [0x9fd8ff, 0x6a5a8a], frequency: 800, drift: 7 },
+    };
+    const p = presets[this.map.id];
+    if (!p) return;
+    const W = this.scale.width, H = this.scale.height;
+    this.add.particles(0, 0, 'spark', {
+      x: { min: 0, max: W }, y: { min: 0, max: H },
+      lifespan: 5200, frequency: p.frequency,
+      speedX: { min: -p.drift, max: p.drift }, speedY: { min: -p.drift * 0.5, max: p.drift },
+      scale: { start: 0.85, end: 0 }, alpha: { start: 0.5, end: 0 },
+      tint: p.tint,
+    }).setDepth(40);
   }
 
   tileAt(x, y) {
@@ -123,14 +172,30 @@ class WorldScene extends Phaser.Scene {
     const visible = (this.map.npcs ?? []).filter((def) => !(def.hiddenIfFlag && Save.state.storyFlags[def.hiddenIfFlag]));
     this.npcs = visible.map((def) => {
       ensureNpcTextures(this, def.id, def.palette);
-      const tex = def.facing === 'up' ? `npc_${def.id}_up` : def.facing === 'down' ? `npc_${def.id}_down` : `npc_${def.id}_side`;
+      const px = def.x * TILE + TILE / 2;
+      const shadow = this.add.ellipse(px, def.y * TILE + TILE - 3, 20, 7, 0x000000, 0.3).setDepth(def.y - 0.1);
       const sprite = this.add
-        .image(def.x * TILE + TILE / 2, def.y * TILE + TILE - 2, tex)
+        .image(px, def.y * TILE + TILE - 2, `npc_${def.id}_${DIR_OF(def.facing)}_0`)
         .setOrigin(0.5, 1)
         .setDepth(def.y)
         .setFlipX(def.facing === 'left');
-      return { def, sprite };
+      return { def, sprite, shadow, facing: def.facing };
     });
+  }
+
+  faceNpc(npc, facing) {
+    npc.facing = facing;
+    npc.sprite.setTexture(`npc_${npc.def.id}_${DIR_OF(facing)}_0`).setFlipX(facing === 'left');
+  }
+
+  /** Idle life: non-trainer NPCs occasionally glance in a new direction. */
+  npcIdle() {
+    if (this.uiLock) return;
+    for (const npc of this.npcs) {
+      if (npc.def.battle || Math.random() > 0.25) continue;
+      const dirs = ['up', 'down', 'left', 'right'].filter((d) => d !== npc.facing);
+      this.faceNpc(npc, dirs[Math.floor(Math.random() * dirs.length)]);
+    }
   }
 
   npcAt(x, y) {
@@ -144,10 +209,10 @@ class WorldScene extends Phaser.Scene {
    */
   talkTo(npc) {
     const { def, sprite } = npc;
-    // NPC turns toward the player.
+    // NPC turns toward the player with a small acknowledging hop.
     const facePlayer = { up: 'down', down: 'up', left: 'right', right: 'left' }[this.facing];
-    const tex = facePlayer === 'up' ? `npc_${def.id}_up` : facePlayer === 'down' ? `npc_${def.id}_down` : `npc_${def.id}_side`;
-    sprite.setTexture(tex).setFlipX(facePlayer === 'left');
+    this.faceNpc(npc, facePlayer);
+    this.tweens.add({ targets: sprite, y: sprite.y - 4, duration: 90, yoyo: true, ease: 'Quad.easeOut' });
 
     const state = Save.state.npcStates?.[def.id] ?? {};
     const battleWon = def.battle && Save.state.storyFlags[def.battle.flag];
@@ -209,56 +274,83 @@ class WorldScene extends Phaser.Scene {
     this.tileX = pos.x;
     this.tileY = pos.y;
     this.facing = pos.facing ?? 'down';
+    this.stepParity = false;
+    this.turnLockUntil = 0;
+    const px = this.tileX * TILE + TILE / 2;
+    this.playerShadow = this.add.ellipse(px, this.tileY * TILE + TILE - 3, 20, 7, 0x000000, 0.3).setDepth(this.tileY - 0.1);
     this.player = this.add
-      .image(this.tileX * TILE + TILE / 2, this.tileY * TILE + TILE - 2, 'player_down')
+      .image(px, this.tileY * TILE + TILE - 2, 'player_down_0')
       .setOrigin(0.5, 1)
       .setDepth(this.tileY);
     this.applyFacing();
   }
 
-  applyFacing() {
-    const tex = this.facing === 'up' ? 'player_up' : this.facing === 'down' ? 'player_down' : 'player_side';
-    this.player.setTexture(tex);
+  /** frame 0 = standing, 1/2 = stride frames of the walk cycle. */
+  applyFacing(frame = 0) {
+    this.player.setTexture(`player_${DIR_OF(this.facing)}_${frame}`);
     this.player.setFlipX(this.facing === 'left');
   }
 
-  update() {
-    if (this.uiLock || this.moving) return;
-    const left = this.cursors.left.isDown || this.wasd.A.isDown;
-    const right = this.cursors.right.isDown || this.wasd.D.isDown;
-    const up = this.cursors.up.isDown || this.wasd.W.isDown;
-    const down = this.cursors.down.isDown || this.wasd.S.isDown;
+  heldDirection() {
+    if (this.cursors.left.isDown || this.wasd.A.isDown) return 'left';
+    if (this.cursors.right.isDown || this.wasd.D.isDown) return 'right';
+    if (this.cursors.up.isDown || this.wasd.W.isDown) return 'up';
+    if (this.cursors.down.isDown || this.wasd.S.isDown) return 'down';
+    return null;
+  }
 
-    if (left) this.tryStep(-1, 0, 'left');
-    else if (right) this.tryStep(1, 0, 'right');
-    else if (up) this.tryStep(0, -1, 'up');
-    else if (down) this.tryStep(0, 1, 'down');
+  update(time) {
+    if (this.uiLock || this.moving) return;
+    const dir = this.heldDirection();
+    if (!dir) return;
+    // A tap turns in place; holding past the grace period starts walking.
+    if (dir !== this.facing) {
+      this.facing = dir;
+      this.applyFacing();
+      this.turnLockUntil = time + 110;
+      return;
+    }
+    if (time < this.turnLockUntil) return;
+    const [dx, dy] = FACING_DELTA[dir];
+    this.tryStep(dx, dy, dir);
   }
 
   /** Grid step with collision; position is mirrored into the save state. */
   tryStep(dx, dy, facing) {
     this.facing = facing;
-    this.applyFacing();
     const nx = this.tileX + dx;
     const ny = this.tileY + dy;
 
     const exit = this.exitAt(nx, ny);
-    if (!exit && this.isSolid(nx, ny)) return;
+    if (!exit && this.isSolid(nx, ny)) {
+      this.applyFacing();
+      return;
+    }
 
     this.moving = true;
+    this.stepParity = !this.stepParity;
+    this.applyFacing(this.stepParity ? 1 : 2);
+    this.footDust(this.tileX, this.tileY);
     this.tileX = nx;
     this.tileY = ny;
     Save.state.position = { x: nx, y: ny, facing };
     this.player.setDepth(Math.max(this.player.depth, ny));
+    this.playerShadow.setDepth(this.player.depth - 0.1);
 
     this.tweens.add({
       targets: this.player,
       x: nx * TILE + TILE / 2,
       y: ny * TILE + TILE - 2,
-      duration: 150,
+      duration: 140,
+      onUpdate: (tw) => {
+        this.playerShadow.setPosition(this.player.x, this.player.y - 1);
+        if (tw.progress > 0.55) this.applyFacing(0); // foot lands mid-step
+      },
       onComplete: () => {
         this.moving = false;
+        this.applyFacing(0);
         this.player.setDepth(ny);
+        this.playerShadow.setDepth(ny - 0.1).setPosition(this.player.x, this.player.y - 1);
         if (exit) {
           this.warpTo(exit);
           return;
@@ -267,8 +359,18 @@ class WorldScene extends Phaser.Scene {
           this.rustle(nx, ny, this.tileAt(nx, ny) === 'e' ? 0x524a5c : 0x4e7a42);
           this.maybeEncounter();
         }
+        // Key still held? Chain straight into the next step — no stutter.
+        if (!this.uiLock) this.update(this.time.now);
       },
     });
+  }
+
+  /** Tiny dust puff at the tile being stepped off, tinted by the ground. */
+  footDust(x, y) {
+    const tile = this.tileAt(x, y);
+    const tint = tile === 'P' ? 0x8a7a5c : tile === 'c' || tile === 'e' ? 0x524a5c : 0x35573d;
+    this.dustEmitter.setParticleTint(tint);
+    this.dustEmitter.explode(2, x * TILE + TILE / 2, y * TILE + TILE - 4);
   }
 
   /** Cross into a connected map: persist position there, auto-save, restart. */

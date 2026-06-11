@@ -1,30 +1,41 @@
-# Project State — v0.5 "The Warden's Oath" checkpoint (2026-06-11)
+# Project State — v0.6 "A Living World" checkpoint (2026-06-11)
 
-> Paused after build-order step 7: Hollow Cave dungeon, cave trainers, and
-> the first Warden battle with the Warden's Oath mechanic.
+> Paused after the graphics/feel overhaul (between build-order steps 7 and 8).
 > All automated tests pass: 6 save-smoke, 120 engine checks, 59 live CDP
-> playtest checks.
+> playtest checks, plus visual verification via screenshot/texture dumps.
 
 ## What runs today
 
-Everything from v0.4 (3 overworld maps, 17 species, trainer battles, Lyra
-rival fight, shop, dex), plus:
+Everything from v0.5 (4 maps, 18 species, trainers, rival, Warden's Oath,
+badge, shop, dex), plus the v0.6 presentation overhaul:
 
-- **Hollow Cave** (`hollow_cave`): first dungeon, entered from a cave mouth
-  at the top of the North Road (22,0). New tile types: `C` cave rock (solid),
-  `c` cave floor, `e` cave gravel (wild encounters — Gloombat #21 new
-  Shadow/Wind species, Pebblump, Mirewisp at Lv 6–9, 16% rate)
-- **Cave gauntlet**: Acolyte Vren (lower gallery) and Acolyte Sila (upper
-  gallery) — optional trainer fights with their own flags and aftermath
-  dialogue, then **Warden Thane** in the high chamber
-- **Warden's Oath** (design-spec rule): when the Warden's LAST Luminary
-  drops below 30% HP, it is fully restored once per battle, with its own
-  animation. Implemented in `BattleScene.maybeWardenOath()`, driven by
-  `wardenOath: true` on the trainer def
-- Beating Thane: 600 Shards, `warden1_won` + `badge_lowlands` story flags
-  (trainer defs can now carry `setFlags`), and aftermath dialogue that
-  seeds Chapter 1 (Hollowed Chain on the coast, Lyra's father)
-- 18 species total; encounter tiles generalized (`g` grass, `e` gravel)
+- **Hi-res character sprites**: player + every NPC rebuilt as 16x24 pixel
+  maps (was 8x14) with auto-derived shading from the same 6-key palettes the
+  map NPC defs already used (`charPalette` derives hair/skin/cloak shades),
+  generated dark outline, and **3-frame walk cycles** for all 4 facings
+  (`player_down_0..2`, `npc_<id>_side_1`, …). Side frames face right, flipX
+  gives left. See `CHAR_BODY` / `CHAR_LEGS` in `PlaceholderArt.js`
+- **Luminary sprite upgrade**: every species map is EPX/Scale2x-doubled
+  TWICE (16x the pixels, staircase corners rounded), run through a volume
+  shading pass (`shadeGrid`: lit top rims, dark undersides, vertical
+  gradient) and outlined. Canvas is now ~66x50, so **all `lum_` call sites
+  display at half their old scale** (battle 2/2.5, party 0.8, summary 1.5,
+  dex 0.4, starter cards 2/2.25). Keep that rule for new UI
+- **Movement feel**: tap-to-turn (a short press turns in place, holding
+  walks), 140ms steps that chain with zero stutter (held key re-checked in
+  the tween's onComplete), stride frames swap mid-step, drop shadows under
+  characters, footstep dust tinted by ground tile
+- **Living world**: per-map ambient particles (grove fireflies, town leaves,
+  road seed fluff, cave motes), water tiles ripple between two glint frames,
+  non-trainer NPCs idly glance around, NPCs hop and turn to face you when
+  addressed, crisper tree tile (stepped-circle canopy)
+- **Battle life**: both sides slide onto platforms, idle breathing tweens
+  (scaleY so they never fight faint/shake tweens), attacker lunges on every
+  move, varied flavor text via `pick()` (intro/miss/crit/effectiveness) —
+  **message COUNT per turn is unchanged** (the CDP playtest drains a fixed
+  number of messages; vary text, never add messages)
+- **DialogueBox** pops in (fade + 6px rise; the page arrow is excluded — it
+  has its own bob tween)
 
 ## Verified tests (all passing at this commit)
 
@@ -37,8 +48,17 @@ npm run playtest       # terminal 2: 59 live checks — v0.4 set plus cave warp,
                        # collision, deterministic Oath unit check (fires once,
                        # never twice), full Warden fight via dialogue with
                        # flag/badge/reward assertions (uses + deletes slot_3)
-node scripts/screenshot-cdp.mjs  # PNG of the running game
+node scripts/screenshot-cdp.mjs   # PNG of the running game
+node scripts/cdp-eval.mjs "expr"  # eval JS in the running game, print JSON
+node scripts/cdp-press.mjs ArrowDown 700  # hold a REAL key (drives isDown —
+                                  # the only way to test held movement)
+node scripts/dump-texture.mjs lum_embrik 6  # save a generated texture as PNG
+                                  # (visual sprite check without squinting)
 ```
+
+v0.6 movement was verified with cdp-press: holding Down 700ms turned the
+spawned player and chained 4 steps (y 11 -> 15); a 250ms Left tap turned +
+stepped once with `player_side_0` applied.
 
 Playtest scripting gotchas (don't regress):
 - Wrap waitFor expressions in `Boolean(...)` — Phaser objects break CDP
@@ -58,12 +78,18 @@ Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
   ├─ data/items.js      ITEMS
   ├─ data/trainers.js   TRAINERS (lyra1, acolyte_vren, acolyte_sila,
   │                     warden_thane w/ wardenOath+setFlags) + buildTrainer
+  ├─ systems/PlaceholderArt.js  ALL generated art: epxScale + shadeGrid +
+  │                     gridTexture (outline) pipeline, CHAR_BODY/CHAR_LEGS
+  │                     walk frames, charPalette shading, tiles (2 water
+  │                     frames), STARTER_PIXELMAPS
   ├─ systems/BattleEngine.js  pure battle math
   ├─ systems/PartyPanel.js    PartyPanel + ItemsPanel overlays
   ├─ systems/ShopPanel.js     ShopPanel + DexPanel overlays
-  ├─ systems/DialogueBox.js   typewriter dialogue widget
-  ├─ scenes/WorldScene.js     maps (incl. cave tiles), NPC battle/shop hooks
-  ├─ scenes/BattleScene.js    wild + trainer battles, Oath, learn/evolve/bond
+  ├─ systems/DialogueBox.js   typewriter dialogue widget (pop-in)
+  ├─ scenes/WorldScene.js     maps, walk cycle, ambient, NPC idle/hop,
+  │                     battle/shop hooks
+  ├─ scenes/BattleScene.js    wild + trainer battles, Oath, learn/evolve/bond,
+  │                     breathing/lunge anims, pick() flavor text
   └─ window.LuminaryNative  ← preload.cjs → main.js
 ```
 

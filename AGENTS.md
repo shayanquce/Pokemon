@@ -6,9 +6,10 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.5 "The Warden's Oath" (PAUSED)
+## Current checkpoint — v0.6 "A Living World" (PAUSED)
 
-**Build order steps 1–7 are DONE.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–7 are DONE, plus a full graphics/feel overhaul.**
+Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -19,13 +20,25 @@
 | 5. Encounters + battle | ✅ | Fight/Item/Switch/Capture/Run, learning, evolutions, bond |
 | 6. North Road + species + rival + shop + dex | ✅ | Trainer battles, ShopPanel, DexPanel |
 | 7. First dungeon + Warden | ✅ | Hollow Cave, 2 acolytes, Warden Thane, Warden's Oath, badge |
+| 7.5 Graphics & feel overhaul (v0.6) | ✅ | Hi-res walk-cycle chars, EPX+shaded Luminary, smooth chained movement, ambient life, battle anims, flavor text |
 | 8. Echo Vault UI + Keldrath opener | ⏭️ **NEXT** | See "Next session" in `docs/PROJECT_STATE.md` |
 | 9–15 | pending | Status conditions, regions, story acts… |
 
-## Exactly where we left off (2026-06-11, session 3, v0.5)
+## Exactly where we left off (2026-06-11, session 4, v0.6)
 
-The last session ended after v0.5 was verified end-to-end
-(save-smoke 6/6, `npm run engine-test` 120/120, live playtest 59/59). Resume by:
+The last session was the **presentation overhaul** (no new story/content):
+hi-res outlined character sprites with 3-frame walk cycles, EPX-doubled +
+volume-shaded Luminary sprites (all `lum_` call sites now display at HALF
+their old scale — keep that for new UI), tap-to-turn + stutter-free chained
+grid movement, drop shadows, footstep dust, per-map ambient particles,
+rippling water, NPC idle glances + greeting hops, battle slide-in/breathing/
+lunge animations, varied battle flavor text via `pick()` (NEVER add messages
+to a battle turn — the playtest drains a fixed count; vary text only), and
+DialogueBox pop-in. Verified end-to-end: save-smoke 6/6, engine-test 120/120,
+live playtest 59/59, real-key movement via `scripts/cdp-press.mjs`, sprites
+eyeballed via `scripts/dump-texture.mjs` + `scripts/screenshot-cdp.mjs`.
+
+Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS
 2. Optional live verification: `npm run playtest-game` in one terminal, `npm run playtest` in another — 59 checks (uses and then deletes save slot_3)
@@ -37,6 +50,8 @@ The last session ended after v0.5 was verified end-to-end
 waitFor expressions in `Boolean(...)` (Phaser objects break CDP serialization);
 never blind-press Z while a ShopPanel might be open (it buys); trainer fights
 are losable — keep the test leads at Lv 20/25 or wins are nondeterministic.
+`keyboard.emit('keydown-X')` does NOT set isDown — use `scripts/cdp-press.mjs`
+to test held movement with real key events.
 
 ## Commands
 
@@ -49,6 +64,9 @@ npm run engine-test  # headless battle/data tests (120 checks, no Electron)
 npm run playtest-game  # terminal 1: game with CDP port 9223
 npm run playtest       # terminal 2: automated playthrough (59 checks)
 node scripts/screenshot-cdp.mjs  # PNG of the running game → %TEMP%/luminary-shot.png
+node scripts/cdp-eval.mjs "expr"          # eval JS in the running game
+node scripts/cdp-press.mjs ArrowDown 700  # hold a real key (tests held movement)
+node scripts/dump-texture.mjs lum_embrik 6  # generated texture → upscaled PNG
 ```
 
 ## Critical conventions

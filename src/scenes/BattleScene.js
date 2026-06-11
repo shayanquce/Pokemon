@@ -7,6 +7,11 @@
  * battles forbid Capture and Run and pay shards on victory.
  * Auto-saves on battle end and on capture, then returns to WorldScene.
  */
+/** Random flavor pick — battles shouldn't read like a manual. */
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 class BattleScene extends Phaser.Scene {
   constructor() {
     super('BattleScene');
@@ -43,10 +48,14 @@ class BattleScene extends Phaser.Scene {
     this.add.ellipse(W - 250, 215, 300, 70, 0x131f3a, 0.9).setStrokeStyle(2, 0x3a4a66);
     this.add.ellipse(250, 380, 320, 80, 0x131f3a, 0.9).setStrokeStyle(2, 0x3a4a66);
 
-    this.wildSprite = this.add.image(W - 250, 185, `lum_${this.wild.speciesId}`).setScale(4);
+    this.wildSprite = this.add.image(W - 250, 185, `lum_${this.wild.speciesId}`).setScale(2);
     this.playerMon = Save.state.party.find((m) => m.currentHp > 0) ?? Save.state.party[0];
     ensureLuminaryTexture(this, this.playerMon.speciesId);
-    this.playerSprite = this.add.image(250, 340, `lum_${this.playerMon.speciesId}`).setScale(5).setFlipX(true);
+    this.playerSprite = this.add.image(250, 340, `lum_${this.playerMon.speciesId}`).setScale(2.5).setFlipX(true);
+
+    // Idle breathing (scaleY so it never fights the faint/shake tweens).
+    this.tweens.add({ targets: this.wildSprite, scaleY: 2.08, duration: 1050, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: this.playerSprite, scaleY: 2.6, duration: 1250, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: 350 });
 
     this.wildPanel = this.buildInfoPanel(34, 40, this.wild, false);
     this.playerPanel = this.buildInfoPanel(W - 354, 290, this.playerMon, true);
@@ -160,18 +169,28 @@ class BattleScene extends Phaser.Scene {
   // ---------------------------------------------------------- battle flow --
 
   async intro() {
-    // Enemy slides in from the right.
-    const wx = this.wildSprite.x;
+    // Both sides slide onto their platforms.
+    const wx = this.wildSprite.x, px = this.playerSprite.x;
     this.wildSprite.setX(this.scale.width + 80);
+    this.playerSprite.setX(-80);
     this.tweens.add({ targets: this.wildSprite, x: wx, duration: 380, ease: 'Cubic.easeOut' });
+    this.tweens.add({ targets: this.playerSprite, x: px, duration: 420, ease: 'Cubic.easeOut', delay: 120 });
     if (this.trainer) {
       await this.say(`${this.trainer.name} wants to battle!`);
       await this.say(this.trainer.introText.replaceAll('{player}', Save.state.playerName));
       await this.say(`${this.trainer.name} sent out ${this.wild.name}!  (Lv ${this.wild.level})`);
     } else {
-      await this.say(`A wild ${this.wild.name} appeared!  (Lv ${this.wild.level})`);
+      await this.say(`${pick([
+        `A wild ${this.wild.name} appeared!`,
+        `A wild ${this.wild.name} springs from the undergrowth!`,
+        `A wild ${this.wild.name} blocks the way, hackles raised!`,
+      ])}  (Lv ${this.wild.level})`);
     }
-    await this.say(`Go, ${this.playerMon.nickname ?? this.playerMon.name}!`);
+    await this.say(pick([
+      `Go, ${this.playerMon.nickname ?? this.playerMon.name}!`,
+      `${this.playerMon.nickname ?? this.playerMon.name}, with me!`,
+      `Light the way, ${this.playerMon.nickname ?? this.playerMon.name}!`,
+    ]));
     this.openCommandMenu();
   }
 
@@ -334,8 +353,13 @@ class BattleScene extends Phaser.Scene {
 
     await this.say(`${atkName} used ${move.name}!`);
 
+    // Attacker lunges at its target as the move lands.
+    const atkSprite = side === 'player' ? this.playerSprite : this.wildSprite;
+    const lunge = side === 'player' ? 22 : -22;
+    this.tweens.add({ targets: atkSprite, x: atkSprite.x + lunge, duration: 100, yoyo: true, ease: 'Quad.easeOut' });
+
     if (Math.random() * 100 >= move.accuracy) {
-      await this.say('...but it missed!');
+      await this.say(pick(['...but it missed!', '...but it cut nothing but air!', '...but the target slipped aside!']));
       return;
     }
 
@@ -352,10 +376,10 @@ class BattleScene extends Phaser.Scene {
     this.time.delayedCall(140, () => defSprite.clearTint());
 
     await this.tweenHp(defPanel, Math.max(0, defender.currentHp - result.damage));
-    if (result.crit) await this.say('A critical hit!');
-    if (result.typeMult > 1) await this.say("It's super effective!");
+    if (result.crit) await this.say(pick(['A critical hit!', 'A devastating blow!', 'Struck true — critical hit!']));
+    if (result.typeMult > 1) await this.say(pick(["It's super effective!", "It's super effective — the hit tears through!"]));
     else if (result.typeMult === 0) await this.say(`It doesn't affect ${side === 'player' ? this.enemyLabel() : defender.nickname ?? defender.name}...`);
-    else if (result.typeMult < 1) await this.say("It's not very effective...");
+    else if (result.typeMult < 1) await this.say(pick(["It's not very effective...", 'It barely leaves a mark...']));
 
     if (side === 'player') await this.maybeWardenOath();
   }

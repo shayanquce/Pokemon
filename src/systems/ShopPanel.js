@@ -119,7 +119,7 @@ class DexPanel {
       );
       if (isCaught) {
         ensureLuminaryTexture(scene, sp.id);
-        this.objs.push(scene.add.image(x + 250, y + 8, `lum_${sp.id}`).setScale(0.8).setDepth(depth + 2));
+        this.objs.push(scene.add.image(x + 250, y + 8, `lum_${sp.id}`).setScale(0.4).setDepth(depth + 2));
       }
     });
 

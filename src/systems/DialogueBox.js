@@ -39,6 +39,16 @@ class DialogueBox {
     this.objs.push(this.textObj, this.moreArrow);
     scene.tweens.add({ targets: this.moreArrow, y: '+=4', duration: 420, yoyo: true, repeat: -1 });
 
+    // Pop-in: the box fades up from just below its resting spot. The arrow is
+    // skipped — it already runs its own endless bob tween on y.
+    for (const o of this.objs) {
+      if (o === this.moreArrow) continue;
+      const targetAlpha = o.alpha;
+      o.setAlpha(0);
+      o.y += 6;
+      scene.tweens.add({ targets: o, alpha: targetAlpha, y: '-=6', duration: 110, ease: 'Quad.easeOut' });
+    }
+
     const advance = () => this.advance();
     this.handlers = { 'keydown-Z': advance, 'keydown-ENTER': advance, 'keydown-X': advance };
     for (const [evt, fn] of Object.entries(this.handlers)) scene.input.keyboard.on(evt, fn);

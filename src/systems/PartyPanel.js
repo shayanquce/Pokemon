@@ -66,7 +66,7 @@ class PartyPanel {
       const nameColor = dim ? UI.colors.dim : UI.colors.parchment;
       ensureLuminaryTexture(this.scene, mon.speciesId);
       this.rowObjs.push(
-        this.scene.add.image(x + 30, y + 24, `lum_${mon.speciesId}`).setScale(1.6).setDepth(this.depth + 2).setAlpha(dim ? 0.4 : 1),
+        this.scene.add.image(x + 30, y + 24, `lum_${mon.speciesId}`).setScale(0.8).setDepth(this.depth + 2).setAlpha(dim ? 0.4 : 1),
         this.scene.add.text(x + 70, y + 8, `${mon.nickname ?? mon.name}`, textStyle(16, nameColor)).setDepth(this.depth + 2),
         this.scene.add.text(x + 70, y + 28, species.types.join(' / '), textStyle(11, TYPE_COLORS[species.types[0]] ?? UI.colors.dim)).setDepth(this.depth + 2),
         this.scene.add.text(x + 290, y + 8, `Lv ${mon.level}   Bond ${mon.bond}`, textStyle(13, UI.colors.gold)).setDepth(this.depth + 2),
@@ -183,7 +183,7 @@ class PartyPanel {
     ];
     this.summaryObjs = [
       drawPanel(this.scene, x, y, 500, H - 200).setDepth(this.depth + 5),
-      this.scene.add.image(x + 60, y + 60, `lum_${mon.speciesId}`).setScale(3).setDepth(this.depth + 6),
+      this.scene.add.image(x + 60, y + 60, `lum_${mon.speciesId}`).setScale(1.5).setDepth(this.depth + 6),
       this.scene.add
         .text(x + 120, y + 24, lines.join('\n'), textStyle(14, UI.colors.parchment, { lineSpacing: 5, wordWrap: { width: 360 } }))
         .setDepth(this.depth + 6),
