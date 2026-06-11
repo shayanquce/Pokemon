@@ -494,6 +494,95 @@ Object.assign(STARTER_PIXELMAPS, {
   },
 });
 
+// North Road wilds.
+Object.assign(STARTER_PIXELMAPS, {
+  voltail: {
+    palette: { b: '#b8893a', d: '#8a6428', y: '#e8c84a', k: '#241d10', w: '#f2e6b0' },
+    rows: [
+      '..........yy....',
+      '.........yy.....',
+      '..bb....yy......',
+      '.bbbb..yy.......',
+      '.bkbb.yy........',
+      '.bbbbbyy........',
+      '..bbbbby........',
+      '.bwwbbb.........',
+      '.bwwbbbb........',
+      '..bbbbbb........',
+      '..bb.bb.........',
+      '..d...d.........',
+    ],
+  },
+  mirewisp: {
+    palette: { s: '#b8c8e8', S: '#dce8f8', b: '#5a78b8', k: '#1c2030', g: '#8fd8c8' },
+    rows: [
+      '......gg........',
+      '.....gSSg.......',
+      '....gSSSSg......',
+      '....sSSSSs......',
+      '...ssSSSSss.....',
+      '...sskSSkss.....',
+      '...sssSSsss.....',
+      '....ssssss......',
+      '...s.ssss.s.....',
+      '....ssssss......',
+      '.....ssss.......',
+      '......ss........',
+    ],
+  },
+  bristleboar: {
+    palette: { b: '#6e5238', d: '#523c28', q: '#3a2c1c', y: '#d8b88a', k: '#1c130a', p: '#c89888' },
+    rows: [
+      '..qq.qq.qq......',
+      '.qqqqqqqqqq.....',
+      'qbbbbbbbbbbq....',
+      'qbkbbbbbbbbbq...',
+      '.bbbbbbbbbbbb...',
+      '.byybbbbbbbbb...',
+      '.bppbbbbbbbbbb..',
+      '..bbbbbbbbbbbb..',
+      '..bbbbbbbbbbb...',
+      '..bb.bb.bb.bb...',
+      '..dd.dd.dd.dd...',
+      '................',
+    ],
+  },
+  pebblump: {
+    palette: { s: '#9a8a66', d: '#7a6e52', l: '#b8a87e', k: '#241d10', m: '#5da55f' },
+    rows: [
+      '....ssssss......',
+      '..sslssssss.....',
+      '.ssssssssssss...',
+      '.sskssssskss....',
+      'ssssssssssssss..',
+      'sslsssssssslss..',
+      'ssssssmssssss...',
+      '.sssssssssss....',
+      '..sssssssss.....',
+      '...ddddddd......',
+      '....dd.dd.......',
+      '................',
+    ],
+  },
+  zephyrkit: {
+    palette: { c: '#9fd0c8', d: '#6ea8a0', w: '#cdeee8', k: '#1c3030', p: '#e8a8b8' },
+    rows: [
+      '..c.....c.......',
+      '..cc...cc.......',
+      '..ccccccc.......',
+      '..ckcccck.......',
+      '..ccpccpc.......',
+      '...ccccc........',
+      '..ccccccc..ww...',
+      '.cccccccccww....',
+      '.ccccccccww.....',
+      '..cccccccw......',
+      '..cc..cc........',
+      '..d....d........',
+    ],
+  },
+});
+
 /** Texture key is `lum_<speciesId>` (e.g. lum_embrik). */
 function ensureLuminaryTexture(scene, speciesId) {
   const def = STARTER_PIXELMAPS[speciesId];

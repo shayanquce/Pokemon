@@ -5,9 +5,18 @@ fractured continent of Veranthis. Built with **Electron + Phaser 3**, fully
 offline, with a checksum-validated save system that lives in the OS user-data
 folder.
 
-## Current build — v0.3 "Bonds & Bloom"
+## Current build — v0.4 "The North Road"
 
-Build-order steps 1–5 plus the party/bond/evolution systems pass are complete:
+Build-order steps 1–6 (opening pass) are complete:
+
+- **North Road**: third map with 5 new wild species (Voltail, Mirewisp,
+  Bristleboar, Pebblump, Zephyrkit) at Lv 4–7 — 17 species total
+- **Trainer battles**: multi-mon parties, no capture/run, Shard rewards —
+  starting with the **Lyra rival fight** (she counter-picks your starter)
+- **Bram's shop**: spend Shards on Capture Orbs and Ember Tonics
+- **Dex screen**: every known species — caught, seen, or ???
+
+From v0.3:
 
 - **Party menu** (pause → Party): HP bars, full summary pages, reordering
 - **Items menu** (pause → Items): Ember Tonics heal party members
@@ -36,7 +45,7 @@ And from earlier checkpoints:
   battles (Fight / Capture / Run), type chart, STAB, crits, stat stages,
   EXP + level-ups, Capture Orbs with shake animation, party/Echo Vault
   routing, blackout recovery at the shrine
-- 12 Luminary defined: 3 starter lines + 3 wild lines, two stages each
+- 17 Luminary defined across starter, grove, and road lines
 - Settings (music/SFX volume, text speed) persisted instantly
 
 ## Getting started
@@ -47,11 +56,11 @@ Requires Node.js 18+.
 npm install     # if dependencies are not already installed
 npm start       # launch the game
 npm run save-smoke   # headless self-test of the save system (no window)
-npm run engine-test  # headless battle/data tests (78 checks, no Electron)
+npm run engine-test  # headless battle/data tests (113 checks, no Electron)
 
 # Automated gameplay test (two terminals):
 npm run playtest-game   # terminal 1: launches the game with a CDP port
-npm run playtest        # terminal 2: drives a full playthrough, 31 checks
+npm run playtest        # terminal 2: drives a full playthrough, 46 checks
 ```
 
 ## Controls
@@ -89,8 +98,8 @@ menu. Closing the window abruptly loses anything after the last save.
 3. ~~Basic map rendering + player movement~~ ✅
 4. ~~First town (Ashfen) fully walkable with NPCs~~ ✅
 5. ~~Wild encounter system + battle engine~~ ✅ (incl. party/items menus, switch, move learning, evolutions, bond)
-6. First 30 Luminary ← **next** (north road map, new wild lines, Lyra rival battle, shop, dex UI)
-7. First dungeon + Warden battle
+6. ~~First wave toward 30 Luminary~~ ✅ (North Road, 17 species, Lyra rival battle, shop, dex)
+7. First dungeon + Warden battle ← **next**
 8. Inventory + healing + capture system
 9. Story Chapter 1 (dialogue system with choices)
 10. Echo Vault (storage)
@@ -122,12 +131,13 @@ GitHub: https://github.com/shayanquce/Pokemon
 │   └── DESIGN_SPEC.md   Full game design spec
 ├── scripts/
 │   ├── engine-test.mjs  Headless battle/data tests
-│   └── playtest-cdp.mjs Automated CDP playthrough test
+│   ├── playtest-cdp.mjs Automated CDP playthrough test
+│   └── screenshot-cdp.mjs Screenshot helper for the running game
 └── src/
     ├── index.html
     ├── game.js          Phaser bootstrap
     ├── scenes/          TitleScene, NewGameScene, SettingsScene, WorldScene, BattleScene
-    ├── data/            starters.js (species + moves), maps.js (maps/NPCs/encounters), items.js
+    ├── data/            starters.js, maps.js, items.js, trainers.js
     └── systems/         SaveSystem, SaveSlotPanel, UiKit, PlaceholderArt,
-                         DialogueBox, BattleEngine, PartyPanel
+                         DialogueBox, BattleEngine, PartyPanel, ShopPanel
 ```

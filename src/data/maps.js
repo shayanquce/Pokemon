@@ -73,7 +73,7 @@ const MAPS = {
       'TGGGRRRRGGGGGGPGGGGGGRRRRGGGGT', // 6
       'TGGGBBDBGGGGGGPGGGGGGBDBBGGGGT', // 7  <- doors at (6,7) and (22,7)
       'TGGGGGPGGGGGGGPGGGGGGGPGGGGGGT', // 8
-      'TGGPPPPPPPPPPPPPPPPPPPPPPPGGGT', // 9  <- main street
+      'TGGPPPPPPPPPPPPPPPPPPPPPPPPPPP', // 9  <- main street; east gate to North Road at (29,9)
       'TGGGGGFGGGGGGGPGGGGGGGFGGGGGGT', // 10
       'TGTGGGGGGGGGGGPGGGGGGGGGGGTGGT', // 11
       'TGGGGGGGGGGGGGPGGGGGGGGGGFGGGT', // 12
@@ -82,7 +82,10 @@ const MAPS = {
       'TGGGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 15
       'TTTTTTTTTTTTTTPTTTTTTTTTTTTTTT', // 16 <- south exit to Whispergrove at (14,16)
     ],
-    exits: [{ x: 14, y: 16, to: 'ashfen_grove', toX: 14, toY: 1, facing: 'down' }],
+    exits: [
+      { x: 14, y: 16, to: 'ashfen_grove', toX: 14, toY: 1, facing: 'down' },
+      { x: 29, y: 9, to: 'north_road', toX: 1, toY: 9, facing: 'right' },
+    ],
     doors: [
       { x: 14, y: 3, text: 'The Elder Hall. The doors are barred while the bonding-ceremony embers cool.' },
       { x: 6, y: 7, text: "Bram's house. A note on the door reads: \"Out front — mind the crates.\"" },
@@ -106,13 +109,14 @@ const MAPS = {
         id: 'lyra',
         name: 'Lyra',
         x: 12, y: 10, facing: 'down',
+        hiddenIfFlag: 'rival1_won', // she leaves for the coast after losing the road battle
         palette: { h: '#a03a4a', f: '#e8c39a', e: '#20203a', c: '#2a4a3a', g: '#d4af37', b: '#241d18' },
         dialogue: [
           "There you are. I watched the ceremony fire — it practically jumped at you. Mine, it just... considered.",
           "Doesn't matter. I'll out-train you by the time we reach Keldrath Coast. That's a promise, not a guess.",
           'Catch a few wild Luminary in the grove grass before you follow me north. You will need more than one friend out there.',
         ],
-        repeatDialogue: ["Still here? I'm leaving for the north road at first light. Try to keep up, rival."],
+        repeatDialogue: ["Still here? I'm waiting out on the North Road, east gate. Come find me when you stop stalling, rival."],
         setFlags: { met_lyra: true },
       },
       {
@@ -120,11 +124,15 @@ const MAPS = {
         name: 'Bram',
         x: 5, y: 10, facing: 'right',
         dialogue: [
-          'Capture Orbs, tonics, rope, regrets — Bram stocks it all. Well. Once my cart arrives from Keldrath, anyway.',
-          'You were given five Capture Orbs at the ceremony, eh? Weaken a wild Luminary first, then throw. Orbs are not free, friend.',
+          'Capture Orbs, tonics, rope, regrets — Bram stocks it all, and my cart finally rolled in from Keldrath this morning!',
+          'Weaken a wild Luminary first, then throw an orb. And keep a tonic on you — the North Road is rougher than it looks.',
         ],
-        repeatDialogue: ['When my cart arrives, the shop opens. Until then, those five orbs are your whole purse — aim well.'],
+        repeatDialogue: ['Welcome back, friend. Browse away — shards spend the same everywhere.'],
         palette: { h: '#5a3a22', f: '#d8a878', e: '#20203a', c: '#8a5a2a', g: '#8a93a0', b: '#241d18' },
+        shop: [
+          { itemId: 'capture_orb', price: 200 },
+          { itemId: 'ember_tonic', price: 150 },
+        ],
       },
       {
         id: 'kid_finn',
@@ -139,6 +147,61 @@ const MAPS = {
       },
     ],
     encounters: null,
+  },
+
+  north_road: {
+    id: 'north_road',
+    name: 'Ashfen Lowlands — North Road',
+    //       012345678901234567890123456789
+    rows: [
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
+      'TGGGGGTGGGGGGFGGGGGGGGTGGGGGGT', // 1
+      'TGggggGGGGggggggGGGGggggGGGGGT', // 2
+      'TGggggGGGGggggggGGGGggggGGFGGT', // 3
+      'TGggggGGGGggggggGGGGggggGGGGGT', // 4
+      'TGGGGGGTGGGGGGGGGGGGGGGGGTGGGT', // 5
+      'TGFGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 6
+      'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 7
+      'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 8  <- Lyra camps at (16,8)
+      'PPPPPPPPPPPPPPPPPPPPPPPPPPPPPT', // 9  <- west exit at (0,9); east blocked (Keldrath later)
+      'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 10
+      'TGGggggggGGGGTGGGGGggggggGGGGT', // 11
+      'TGGggggggGGGGGGFGGGGggggggGGGT', // 12
+      'TGGggggggGGGGGGGGGGGggggggGGGT', // 13
+      'TGGGGTGGGGGGGGGGGGGGGGGGGGGGGT', // 14
+      'TGGGGGGGGGGGFGGGGGGGGGGGGTGGGT', // 15
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 16
+    ],
+    exits: [{ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }],
+    doors: [],
+    npcs: [
+      {
+        id: 'lyra_road',
+        name: 'Lyra',
+        x: 16, y: 8, facing: 'down',
+        palette: { h: '#a03a4a', f: '#e8c39a', e: '#20203a', c: '#2a4a3a', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          'Took you long enough. The Keldrath gate-warden won\'t open the pass for unproven trainers — so prove something.',
+          'You and me, {player}. Right here on the road. Show me the ceremony fire wasn\'t just being dramatic.',
+        ],
+        battle: { trainerId: 'lyra1', flag: 'rival1_won' },
+        postWinDialogue: [
+          'Okay. OKAY. That was— fine, that was real.',
+          'I\'m heading for Keldrath Coast tonight. Train up, catch the pass-warden\'s eye, and don\'t you dare fall behind me.',
+        ],
+        repeatDialogue: ['Rematch later, rival. The coast is waiting for both of us.'],
+      },
+    ],
+    encounters: {
+      rate: 0.14,
+      table: [
+        { speciesId: 'voltail', weight: 25, min: 4, max: 6 },
+        { speciesId: 'bristleboar', weight: 25, min: 4, max: 7 },
+        { speciesId: 'zephyrkit', weight: 20, min: 4, max: 6 },
+        { speciesId: 'pebblump', weight: 18, min: 5, max: 7 },
+        { speciesId: 'mirewisp', weight: 12, min: 5, max: 7 },
+      ],
+    },
   },
 };
 

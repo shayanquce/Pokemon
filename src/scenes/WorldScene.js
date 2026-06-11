@@ -118,7 +118,8 @@ class WorldScene extends Phaser.Scene {
   // ---------------------------------------------------------------- npcs --
 
   spawnNpcs() {
-    this.npcs = (this.map.npcs ?? []).map((def) => {
+    const visible = (this.map.npcs ?? []).filter((def) => !(def.hiddenIfFlag && Save.state.storyFlags[def.hiddenIfFlag]));
+    this.npcs = visible.map((def) => {
       ensureNpcTextures(this, def.id, def.palette);
       const tex = def.facing === 'up' ? `npc_${def.id}_up` : def.facing === 'down' ? `npc_${def.id}_down` : `npc_${def.id}_side`;
       const sprite = this.add
@@ -134,7 +135,11 @@ class WorldScene extends Phaser.Scene {
     return this.npcs?.find((n) => n.def.x === x && n.def.y === y) ?? null;
   }
 
-  /** Face the player, run dialogue, persist npcStates + flags, auto-save. */
+  /**
+   * Face the player, run dialogue, persist npcStates + flags, auto-save.
+   * NPCs with `battle` start a trainer fight after their pre-win dialogue;
+   * NPCs with `shop` open their wares after talking.
+   */
   talkTo(npc) {
     const { def, sprite } = npc;
     // NPC turns toward the player.
@@ -142,8 +147,19 @@ class WorldScene extends Phaser.Scene {
     const tex = facePlayer === 'up' ? `npc_${def.id}_up` : facePlayer === 'down' ? `npc_${def.id}_down` : `npc_${def.id}_side`;
     sprite.setTexture(tex).setFlipX(facePlayer === 'left');
 
-    const talked = Save.state.npcStates?.[def.id]?.talked;
-    const raw = talked && def.repeatDialogue?.length ? def.repeatDialogue : def.dialogue;
+    const state = Save.state.npcStates?.[def.id] ?? {};
+    const battleWon = def.battle && Save.state.storyFlags[def.battle.flag];
+    const battlePending = def.battle && !battleWon;
+
+    let raw;
+    if (battleWon) {
+      // First conversation after the victory gets the aftermath lines.
+      raw = !state.postWin && def.postWinDialogue?.length ? def.postWinDialogue : def.repeatDialogue ?? def.dialogue;
+    } else if (battlePending) {
+      raw = def.dialogue; // full challenge speech every time until beaten
+    } else {
+      raw = state.talked && def.repeatDialogue?.length ? def.repeatDialogue : def.dialogue;
+    }
     const pages = raw.map((p) => p.replaceAll('{player}', Save.state.playerName));
 
     this.uiLock = true;
@@ -152,10 +168,34 @@ class WorldScene extends Phaser.Scene {
       pages,
       onDone: async () => {
         if (!Save.state.npcStates) Save.state.npcStates = {};
-        Save.state.npcStates[def.id] = { ...Save.state.npcStates[def.id], talked: true };
+        Save.state.npcStates[def.id] = { ...Save.state.npcStates[def.id], talked: true, ...(battleWon ? { postWin: true } : {}) };
         if (def.setFlags) Object.assign(Save.state.storyFlags, def.setFlags);
+        if (battlePending) {
+          await Save.autoSave(this, `dialogue:${def.id}`);
+          this.scene.start('BattleScene', { trainer: buildTrainer(def.battle.trainerId), flag: def.battle.flag });
+          return;
+        }
+        if (def.shop) {
+          this.openShop(def);
+          return;
+        }
         this.uiLock = false;
         await Save.autoSave(this, `dialogue:${def.id}`);
+      },
+    });
+  }
+
+  /** NPC shop: buy with shards, auto-save per purchase. */
+  openShop(def) {
+    this.uiLock = true;
+    this.shopPanel = new ShopPanel(this, {
+      stock: def.shop,
+      onClose: async () => {
+        this.shopPanel.destroy();
+        this.shopPanel = null;
+        this.refreshHud();
+        this.uiLock = false;
+        await Save.autoSave(this, `shop:${def.id}`);
       },
     });
   }
@@ -359,7 +399,7 @@ class WorldScene extends Phaser.Scene {
     const W = this.scale.width;
     const px = W - 252, py = 56;
     this.menuObjs = [
-      drawPanel(this, px, py, 212, 276).setDepth(80),
+      drawPanel(this, px, py, 212, 316).setDepth(80),
       this.add.text(px + 106, py + 28, 'PAUSE', titleStyle(20, UI.colors.gold)).setOrigin(0.5).setDepth(81),
     ];
     this.pauseMenu = new MenuList(this, {
@@ -372,6 +412,7 @@ class WorldScene extends Phaser.Scene {
         { label: 'Resume', onSelect: () => this.closeMenu() },
         { label: 'Party', onSelect: () => { this.closeMenu(); this.openParty(); } },
         { label: 'Items', onSelect: () => { this.closeMenu(); this.openItems(); } },
+        { label: 'Dex', onSelect: () => { this.closeMenu(); this.openDex(); } },
         {
           label: 'Quit to Title',
           onSelect: async () => {
@@ -409,6 +450,18 @@ class WorldScene extends Phaser.Scene {
         this.partyPanel.destroy();
         this.partyPanel = null;
         this.refreshHud();
+        this.uiLock = false;
+      },
+    });
+  }
+
+  /** Pause menu → Dex: seen/caught records. */
+  openDex() {
+    this.uiLock = true;
+    this.dexPanel = new DexPanel(this, {
+      onClose: () => {
+        this.dexPanel.destroy();
+        this.dexPanel = null;
         this.uiLock = false;
       },
     });

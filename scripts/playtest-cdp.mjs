@@ -61,6 +61,18 @@ async function eval_(expr) {
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** Poll an expression until truthy (map warps include async save + fade). */
+async function waitFor(expr, timeout = 10000) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < timeout) {
+    try {
+      if (await eval_(expr)) return true;
+    } catch {}
+    await sleep(300);
+  }
+  return false;
+}
 const pressZ = () => eval_(`(window.game.scene.getScenes(true)[0].input.keyboard.emit('keydown-Z'), true)`);
 
 // ----------------------------------------------------------------- flow --
@@ -83,8 +95,8 @@ check('NPC tile is solid', await eval_(`window.game.scene.getScene('WorldScene')
 
 // 4. Warp north to Ashfen Town.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 14, y: 0, to: 'ashfen_town', toX: 14, toY: 15, facing: 'up' }), true)`);
-await sleep(1500);
-check('town map loaded after warp', (await eval_(`window.game.scene.getScene('WorldScene').map.id`)) === 'ashfen_town');
+check('town map loaded after warp', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'ashfen_town' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
 check('town discovered', await eval_(`Save.state.discoveredLocations.includes('ashfen_town')`));
 check('4 town NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 4);
 
@@ -204,6 +216,69 @@ if (partySize >= 2) {
   await sleep(800);
   check('escaped follow-up battle', await eval_(`window.game.scene.isActive('WorldScene')`));
 }
+
+// 8c. North Road: warp out the east gate, beat Lyra's trainer battle.
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 12), true)`); // deterministic rival win
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 29, y: 9, to: 'north_road', toX: 1, toY: 9, facing: 'right' }), true)`);
+check('north road loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'north_road' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('north road discovered', await eval_(`Save.state.discoveredLocations.includes('north_road')`));
+
+const shardsBefore = await eval_(`Save.state.shards`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'lyra_road')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); } // challenge dialogue
+check('trainer battle started', await waitFor(`window.game.scene.isActive('BattleScene')`));
+await sleep(500);
+check('battle is trainer mode', await eval_(`Boolean(window.game.scene.getScene('BattleScene').trainer)`));
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(250); } // trainer intro messages
+
+for (let round = 0; round < 25; round++) {
+  const scene = await eval_(`window.game.scene.getScenes(true)[0].scene.key`);
+  if (scene !== 'BattleScene') break;
+  const menuOpen = await eval_(`Boolean(window.game.scene.getScene('BattleScene')?.menu)`);
+  await pressZ();
+  await sleep(menuOpen ? 400 : 350);
+  if (menuOpen) { await pressZ(); await sleep(400); }
+  for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+}
+await sleep(1500);
+check('rival battle won, back in world', await eval_(`window.game.scene.isActive('WorldScene')`));
+check('rival1_won flag set', await eval_(`Save.state.storyFlags.rival1_won === true`));
+check('shard reward paid', (await eval_(`Save.state.shards`)) >= shardsBefore + 300, `${shardsBefore} -> ${await eval_(`Save.state.shards`)}`);
+
+// 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);
+check('back in town after rival win', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'ashfen_town' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('town Lyra hidden after rival win', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 3);
+
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'down'; w.talkTo(w.npcs.find(n => n.def.id === 'merchant_bram')); return true; })()`);
+await sleep(300);
+// Advance dialogue only until the shop appears (extra Z presses would buy).
+for (let i = 0; i < 8; i++) {
+  if (await eval_(`Boolean(window.game.scene.getScene('WorldScene').shopPanel)`)) break;
+  await pressZ();
+  await sleep(300);
+}
+check('shop opened after dialogue', await eval_(`Boolean(window.game.scene.getScene('WorldScene').shopPanel)`));
+const orbsPreShop = await eval_(`Save.state.inventory.capture_orb ?? 0`);
+const shardsPreShop = await eval_(`Save.state.shards`);
+await pressZ(); // buy one capture orb
+await sleep(400);
+check('orb purchased', (await eval_(`Save.state.inventory.capture_orb`)) === orbsPreShop + 1, `${orbsPreShop} -> ${await eval_(`Save.state.inventory.capture_orb`)}`);
+check('shards spent', (await eval_(`Save.state.shards`)) === shardsPreShop - 200, `${shardsPreShop} -> ${await eval_(`Save.state.shards`)}`);
+await eval_(`(window.game.scene.getScene('WorldScene').input.keyboard.emit('keydown-X'), true)`);
+await sleep(500);
+check('shop closed, UI unlocked', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
+// 8e. Dex screen opens from the pause menu path.
+await eval_(`(window.game.scene.getScene('WorldScene').openDex(), true)`);
+await sleep(300);
+check('dex panel locks UI', await eval_(`window.game.scene.getScene('WorldScene').uiLock`));
+await eval_(`(window.game.scene.getScene('WorldScene').input.keyboard.emit('keydown-X'), true)`);
+await sleep(300);
+check('dex panel closes', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
 
 // 9. Save record on disk reflects the run.
 const saveOk = await eval_(`window.LuminaryNative.saves.read('slot_3').then(r => r.ok && r.record.data.storyFlags.met_lyra === true)`);

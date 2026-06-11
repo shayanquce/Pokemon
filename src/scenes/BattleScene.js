@@ -1,9 +1,10 @@
 /**
- * BattleScene — wild-encounter battles. Turn-based: Fight / Capture / Run.
+ * BattleScene — wild encounters AND trainer battles.
  *
- * Receives { wild } (a Luminary instance from makeLuminary). The player's
- * side is the first healthy party member; if it faints the next healthy one
- * is sent out automatically (switch UI arrives with the party menu phase).
+ * Receives { wild } (a Luminary instance) for wild battles, or { trainer }
+ * (from buildTrainer) for trainer fights. `this.wild` always points at the
+ * active enemy mon; trainers send their next mon when one faints. Trainer
+ * battles forbid Capture and Run and pay shards on victory.
  * Auto-saves on battle end and on capture, then returns to WorldScene.
  */
 class BattleScene extends Phaser.Scene {
@@ -12,7 +13,15 @@ class BattleScene extends Phaser.Scene {
   }
 
   init(data) {
-    this.wild = data.wild;
+    this.trainer = data.trainer ?? null;
+    this.trainerFlag = data.flag ?? null; // story flag set when the trainer is beaten
+    this.enemyIndex = 0;
+    this.wild = this.trainer ? this.trainer.party[0] : data.wild;
+  }
+
+  /** "The wild Sprigling" / "Lyra's Tidalink" — message prefix for the enemy. */
+  enemyLabel() {
+    return this.trainer ? `${this.trainer.name}'s ${this.wild.name}` : `The wild ${this.wild.name}`;
   }
 
   create() {
@@ -150,11 +159,17 @@ class BattleScene extends Phaser.Scene {
   // ---------------------------------------------------------- battle flow --
 
   async intro() {
-    // Wild slides in from the right.
+    // Enemy slides in from the right.
     const wx = this.wildSprite.x;
     this.wildSprite.setX(this.scale.width + 80);
     this.tweens.add({ targets: this.wildSprite, x: wx, duration: 380, ease: 'Cubic.easeOut' });
-    await this.say(`A wild ${this.wild.name} appeared!  (Lv ${this.wild.level})`);
+    if (this.trainer) {
+      await this.say(`${this.trainer.name} wants to battle!`);
+      await this.say(this.trainer.introText.replaceAll('{player}', Save.state.playerName));
+      await this.say(`${this.trainer.name} sent out ${this.wild.name}!  (Lv ${this.wild.level})`);
+    } else {
+      await this.say(`A wild ${this.wild.name} appeared!  (Lv ${this.wild.level})`);
+    }
     await this.say(`Go, ${this.playerMon.nickname ?? this.playerMon.name}!`);
     this.openCommandMenu();
   }
@@ -307,7 +322,7 @@ class BattleScene extends Phaser.Scene {
     const defStages = side === 'player' ? this.wildStages : this.playerStages;
     const defPanel = side === 'player' ? this.wildPanel : this.playerPanel;
     const defSprite = side === 'player' ? this.wildSprite : this.playerSprite;
-    const atkName = side === 'player' ? (attacker.nickname ?? attacker.name) : `The wild ${attacker.name}`;
+    const atkName = side === 'player' ? (attacker.nickname ?? attacker.name) : this.enemyLabel();
 
     if (!slot) {
       await this.say(`${atkName} has no moves left! It struggles!`);
@@ -338,20 +353,43 @@ class BattleScene extends Phaser.Scene {
     await this.tweenHp(defPanel, Math.max(0, defender.currentHp - result.damage));
     if (result.crit) await this.say('A critical hit!');
     if (result.typeMult > 1) await this.say("It's super effective!");
-    else if (result.typeMult === 0) await this.say(`It doesn't affect ${side === 'player' ? `the wild ${defender.name}` : defender.nickname ?? defender.name}...`);
+    else if (result.typeMult === 0) await this.say(`It doesn't affect ${side === 'player' ? this.enemyLabel() : defender.nickname ?? defender.name}...`);
     else if (result.typeMult < 1) await this.say("It's not very effective...");
   }
 
   // ------------------------------------------------------------- endings --
 
   async winBattle() {
-    this.tweens.add({ targets: this.wildSprite, alpha: 0, y: this.wildSprite.y + 24, duration: 420 });
-    await this.say(`The wild ${this.wild.name} fainted!`);
+    const spriteY = this.wildSprite.y;
+    this.tweens.add({ targets: this.wildSprite, alpha: 0, y: spriteY + 24, duration: 420 });
+    await this.say(`${this.enemyLabel()} fainted!`);
     await this.grantBattleExp();
     await this.maybeEvolve();
+
+    // Trainers send their next Luminary; the battle continues.
+    if (this.trainer && this.enemyIndex < this.trainer.party.length - 1) {
+      this.enemyIndex++;
+      this.wild = this.trainer.party[this.enemyIndex];
+      this.wildStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+      ensureLuminaryTexture(this, this.wild.speciesId);
+      this.wildSprite.setTexture(`lum_${this.wild.speciesId}`).setAlpha(1).setY(spriteY);
+      this.setPanelMon(this.wildPanel, this.wild);
+      await this.say(`${this.trainer.name} sent out ${this.wild.name}!  (Lv ${this.wild.level})`);
+      this.openCommandMenu();
+      return;
+    }
+
     await this.applyBondGain();
+    let resultText = `Victory! ${this.playerMon.nickname ?? this.playerMon.name} grows stronger.`;
+    if (this.trainer) {
+      await this.say(this.trainer.winText.replaceAll('{player}', Save.state.playerName));
+      Save.state.shards += this.trainer.reward;
+      if (this.trainerFlag) Save.state.storyFlags[this.trainerFlag] = true;
+      await this.say(`${Save.state.playerName} received ${this.trainer.reward} Shards!`);
+      resultText = `${this.trainer.winText}  (+${this.trainer.reward} Shards)`;
+    }
     await Save.autoSave(this, 'battle-end');
-    this.scene.start('WorldScene', { battleResult: { text: `Victory! ${this.playerMon.nickname ?? this.playerMon.name} grows stronger.`, ok: true } });
+    this.scene.start('WorldScene', { battleResult: { text: resultText, ok: true } });
   }
 
   async grantBattleExp() {
@@ -470,6 +508,7 @@ class BattleScene extends Phaser.Scene {
     }
 
     // Blacked out: party restored, returned to the Whispergrove shrine.
+    if (this.trainer?.loseText) await this.say(this.trainer.loseText.replaceAll('{player}', Save.state.playerName));
     await this.say(`${Save.state.playerName} blacked out!`);
     for (const mon of Save.state.party) {
       mon.currentHp = mon.stats.hp;
@@ -485,6 +524,11 @@ class BattleScene extends Phaser.Scene {
 
   async tryCapture() {
     this.closeMenu();
+    if (this.trainer) {
+      await this.say("You can't capture another trainer's bonded Luminary!");
+      this.openCommandMenu();
+      return;
+    }
     const orbs = Save.state.inventory.capture_orb ?? 0;
     if (orbs <= 0) {
       await this.say('No Capture Orbs left! Bram said the shop opens when his cart arrives...');
@@ -543,6 +587,11 @@ class BattleScene extends Phaser.Scene {
 
   async tryRun() {
     this.closeMenu();
+    if (this.trainer) {
+      await this.say("You can't flee a trainer battle!");
+      this.openCommandMenu();
+      return;
+    }
     this.runAttempts++;
     if (rollEscape(this.playerMon, this.wild, this.runAttempts)) {
       await this.say('Got away safely!');

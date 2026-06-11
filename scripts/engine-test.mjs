@@ -14,13 +14,13 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 // Game files use top-level const/function (classic scripts), which stay in
 // the script's lexical scope — the shim line copies them onto the context.
 const exported = [
-  'MAPS', 'MOVES', 'LUMINARY_SPECIES', 'ITEMS', 'makeLuminary', 'calcStats', 'rollEncounter',
+  'MAPS', 'MOVES', 'LUMINARY_SPECIES', 'ITEMS', 'TRAINERS', 'makeLuminary', 'calcStats', 'rollEncounter',
   'typeMultiplier', 'stageMultiplier', 'computeDamage', 'applySupportEffect', 'expToNext',
   'expReward', 'grantExp', 'movesLearnedAt', 'learnMove', 'evolutionFor', 'evolve', 'gainBond',
   'rollCapture', 'rollEscape',
 ];
 const source =
-  ['src/data/starters.js', 'src/data/items.js', 'src/data/maps.js', 'src/systems/BattleEngine.js']
+  ['src/data/starters.js', 'src/data/items.js', 'src/data/maps.js', 'src/data/trainers.js', 'src/systems/BattleEngine.js']
     .map((f) => readFileSync(join(root, f), 'utf8'))
     .join('\n') + `\n;${JSON.stringify(exported)}.forEach((n) => { globalThis[n] = eval(n); });\n`;
 const ctx = vm.createContext({ console });
@@ -129,6 +129,33 @@ check('encounter level bounds', boundsOk);
 // --- items ------------------------------------------------------------------------
 check('ember_tonic heals 40', G.ITEMS.ember_tonic.heal === 40);
 check('capture_orb is battle-only', G.ITEMS.capture_orb.battleOnly === true);
+
+// --- trainers ----------------------------------------------------------------------
+for (const [starter, expected] of [['embrik', 'tidalink'], ['tidalink', 'thornpaw'], ['thornpaw', 'embrik']]) {
+  const party = G.TRAINERS.lyra1.buildParty({ starterId: starter });
+  check(`lyra1 counter-picks ${expected} vs ${starter}`, party[0].speciesId === expected && party.length === 2);
+}
+check('lyra1 reward defined', G.TRAINERS.lyra1.reward > 0);
+
+// --- shop stock + NPC battle refs resolve --------------------------------------------
+for (const m of Object.values(G.MAPS)) {
+  for (const npc of m.npcs ?? []) {
+    if (npc.shop) for (const s of npc.shop) check(`shop item exists: ${npc.id}/${s.itemId}`, !!G.ITEMS[s.itemId]);
+    if (npc.battle) check(`trainer exists: ${npc.id} -> ${npc.battle.trainerId}`, !!G.TRAINERS[npc.battle.trainerId]);
+  }
+}
+
+// --- map integrity --------------------------------------------------------------------
+for (const m of Object.values(G.MAPS)) {
+  check(`map ${m.id} rows are 30 wide x 17 tall`, m.rows.length === 17 && m.rows.every((r) => r.length === 30));
+  for (const e of m.exits ?? []) {
+    check(`exit target exists: ${m.id} -> ${e.to}`, !!G.MAPS[e.to]);
+    if (G.MAPS[e.to]) {
+      const landing = G.MAPS[e.to].rows[e.toY]?.[e.toX];
+      check(`exit landing walkable: ${m.id} -> ${e.to} (${e.toX},${e.toY})`, !'TWSBRD'.includes(landing));
+    }
+  }
+}
 
 console.log(fail === 0 ? 'RESULT: ALL PASS' : `RESULT: ${fail} FAILURES`);
 process.exit(fail === 0 ? 0 : 1);

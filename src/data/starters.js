@@ -85,6 +85,32 @@ const MOVES = {
     power: 34, accuracy: 100, pp: 25,
     desc: 'Shed wing-scales that sting like sunlight.',
   },
+  // North Road wild moves.
+  spark_nip: {
+    id: 'spark_nip', name: 'Spark Nip', type: 'Volt', category: 'physical',
+    power: 40, accuracy: 100, pp: 30,
+    desc: 'A static-charged bite that crackles on contact.',
+  },
+  wisp_flare: {
+    id: 'wisp_flare', name: 'Wisp Flare', type: 'Spirit', category: 'special',
+    power: 42, accuracy: 100, pp: 25,
+    desc: 'A cold blue flame that passes through armor.',
+  },
+  hoof_rush: {
+    id: 'hoof_rush', name: 'Hoof Rush', type: 'Beast', category: 'physical',
+    power: 50, accuracy: 90, pp: 20,
+    desc: 'A headlong charge with no plan B.',
+  },
+  stone_guard: {
+    id: 'stone_guard', name: 'Stone Guard', type: 'Stone', category: 'support',
+    power: 0, accuracy: 100, pp: 20, effect: 'raise_def_1',
+    desc: 'Dust hardens into a granite shell. Raises Defense.',
+  },
+  zephyr_slice: {
+    id: 'zephyr_slice', name: 'Zephyr Slice', type: 'Wind', category: 'special',
+    power: 45, accuracy: 100, pp: 25,
+    desc: 'A crescent of compressed air.',
+  },
   // Signature moves — unlocked at high Bond, powered up at Bond 10 (Echo Surge).
   cindershroud: {
     id: 'cindershroud', name: 'Cindershroud', type: 'Flame', category: 'special',
@@ -217,6 +243,48 @@ const LUMINARY_SPECIES = {
     lore: 'Lumenmoth wings are panes of hardened light, and moonless nights belong to them. The oldest ones are said to carry a sliver of the dawn Solen never came back to.',
     captureRate: 110, baseExp: 124,
     learnset: [{ id: 'gust_flick', level: 1 }, { id: 'glimmer_dust', level: 1 }, { id: 'glowpulse', level: 9 }],
+  },
+
+  // --- North Road wilds (Ashfen Lowlands, Lv 4–7) ---
+  voltail: {
+    id: 'voltail', dexNo: 16, name: 'Voltail', types: ['Volt'],
+    baseStats: { hp: 44, atk: 50, def: 38, spa: 52, spd: 40, spe: 66 },
+    tagline: 'A storm-squirrel with a lightning-rod tail.',
+    lore: 'Voltail climb the tallest tree on the road before a storm and dare it to strike. The scorch-marks down their tails are kept like trophies, compared at length, and exaggerated.',
+    captureRate: 180, baseExp: 62,
+    learnset: [{ id: 'spark_nip', level: 1 }, { id: 'scrabble', level: 1 }, { id: 'zephyr_slice', level: 11 }],
+  },
+  mirewisp: {
+    id: 'mirewisp', dexNo: 17, name: 'Mirewisp', types: ['Spirit'],
+    baseStats: { hp: 40, atk: 30, def: 42, spa: 58, spd: 56, spe: 48 },
+    tagline: 'A lantern that went looking for its keeper.',
+    lore: 'Mirewisp gather where travelers last lost their way, burning softly over the safe path. Whether they are guiding you or collecting you is a subject Ashfen does not discuss after dark.',
+    captureRate: 150, baseExp: 68,
+    learnset: [{ id: 'wisp_flare', level: 1 }, { id: 'glimmer_dust', level: 5 }],
+  },
+  bristleboar: {
+    id: 'bristleboar', dexNo: 18, name: 'Bristleboar', types: ['Beast'],
+    baseStats: { hp: 62, atk: 60, def: 50, spa: 28, spd: 38, spe: 44 },
+    tagline: 'A wall of quills with opinions about fences.',
+    lore: 'Bristleboar plough the road-banks for roots and consider every fence a personal insult. Farmers along the North Road rebuild in spring and have learned to plant extra.',
+    captureRate: 160, baseExp: 70,
+    learnset: [{ id: 'gnaw', level: 1 }, { id: 'hoof_rush', level: 6 }, { id: 'stone_guard', level: 10 }],
+  },
+  pebblump: {
+    id: 'pebblump', dexNo: 19, name: 'Pebblump', types: ['Stone'],
+    baseStats: { hp: 56, atk: 48, def: 68, spa: 26, spd: 48, spe: 22 },
+    tagline: 'A boulder that blinks if you stare long enough.',
+    lore: 'Pebblump sleep for years in the road-cut and wake mid-rockslide, mildly apologetic. Carters leave the biggest stones alone on principle.',
+    captureRate: 170, baseExp: 66,
+    learnset: [{ id: 'pebble_toss', level: 1 }, { id: 'stone_guard', level: 1 }],
+  },
+  zephyrkit: {
+    id: 'zephyrkit', dexNo: 20, name: 'Zephyrkit', types: ['Wind'],
+    baseStats: { hp: 42, atk: 44, def: 36, spa: 48, spd: 42, spe: 70 },
+    tagline: 'A cat made mostly of running away.',
+    lore: 'Zephyrkit outrun everything, including their own meals, which they then have to track back down. The fastest ones learn to stop showing off. Eventually.',
+    captureRate: 180, baseExp: 60,
+    learnset: [{ id: 'zephyr_slice', level: 1 }, { id: 'scrabble', level: 1 }, { id: 'gust_flick', level: 5 }],
   },
 };
 

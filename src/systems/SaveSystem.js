@@ -21,6 +21,7 @@ class SaveSystemClass {
     this.state = {
       schemaVersion: 1,
       playerName,
+      starterId,
       playtimeSeconds: 0,
       currentMap: 'ashfen_grove',
       position: { x: 14, y: 11, facing: 'up' },

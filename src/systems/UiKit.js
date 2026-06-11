@@ -124,6 +124,7 @@ function formatTimestamp(ms) {
 const MAP_DISPLAY_NAMES = {
   ashfen_grove: 'Ashfen — Whispergrove',
   ashfen_town: 'Ashfen Town',
+  north_road: 'Ashfen Lowlands — North Road',
 };
 
 function prettyMapName(id) {
