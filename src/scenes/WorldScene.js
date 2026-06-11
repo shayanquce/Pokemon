@@ -8,7 +8,8 @@
 
 const TILE = 32;
 
-const SOLID_TILES = new Set(['T', 'W', 'S', 'B', 'R', 'D']);
+const SOLID_TILES = new Set(['T', 'W', 'S', 'B', 'R', 'D', 'C']);
+const ENCOUNTER_TILES = new Set(['g', 'e']);
 const FACING_DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
 class WorldScene extends Phaser.Scene {
@@ -73,6 +74,7 @@ class WorldScene extends Phaser.Scene {
     const groundFor = {
       G: 'tile_grass', g: 'tile_grass_tall', F: 'tile_flowers', P: 'tile_path',
       W: 'tile_water', T: 'tile_tree', S: 'tile_grass', R: 'tile_roof', B: 'tile_wall', D: 'tile_door',
+      C: 'tile_cave_wall', c: 'tile_cave_floor', e: 'tile_cave_gravel',
     };
 
     this.shrineTile = null;
@@ -261,8 +263,8 @@ class WorldScene extends Phaser.Scene {
           this.warpTo(exit);
           return;
         }
-        if (this.tileAt(nx, ny) === 'g') {
-          this.rustle(nx, ny);
+        if (ENCOUNTER_TILES.has(this.tileAt(nx, ny))) {
+          this.rustle(nx, ny, this.tileAt(nx, ny) === 'e' ? 0x524a5c : 0x4e7a42);
           this.maybeEncounter();
         }
       },
@@ -279,13 +281,13 @@ class WorldScene extends Phaser.Scene {
     this.cameras.main.once('camerafadeoutcomplete', () => this.scene.restart({}));
   }
 
-  /** Cosmetic leaf-rustle when wading through tall grass. */
-  rustle(x, y) {
+  /** Cosmetic rustle when wading through tall grass or cave gravel. */
+  rustle(x, y, tint = 0x4e7a42) {
     const p = this.add.particles(x * TILE + TILE / 2, y * TILE + 20, 'spark', {
       speed: { min: 10, max: 30 },
       lifespan: 350,
       scale: { start: 1, end: 0 },
-      tint: 0x4e7a42,
+      tint,
       emitting: false,
     });
     p.explode(4);

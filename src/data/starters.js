@@ -111,6 +111,11 @@ const MOVES = {
     power: 45, accuracy: 100, pp: 25,
     desc: 'A crescent of compressed air.',
   },
+  gloom_fang: {
+    id: 'gloom_fang', name: 'Gloom Fang', type: 'Shadow', category: 'physical',
+    power: 45, accuracy: 100, pp: 25,
+    desc: 'A bite from somewhere the light is not.',
+  },
   // Signature moves — unlocked at high Bond, powered up at Bond 10 (Echo Surge).
   cindershroud: {
     id: 'cindershroud', name: 'Cindershroud', type: 'Flame', category: 'special',
@@ -285,6 +290,16 @@ const LUMINARY_SPECIES = {
     lore: 'Zephyrkit outrun everything, including their own meals, which they then have to track back down. The fastest ones learn to stop showing off. Eventually.',
     captureRate: 180, baseExp: 60,
     learnset: [{ id: 'zephyr_slice', level: 1 }, { id: 'scrabble', level: 1 }, { id: 'gust_flick', level: 5 }],
+  },
+
+  // --- Hollow Cave wild ---
+  gloombat: {
+    id: 'gloombat', dexNo: 21, name: 'Gloombat', types: ['Shadow', 'Wind'],
+    baseStats: { hp: 46, atk: 52, def: 38, spa: 44, spd: 40, spe: 62 },
+    tagline: 'It hangs where the cave forgets the sun.',
+    lore: 'Gloombat drink the dark itself, and a colony can dim a torch from across the gallery. Miners pay them in fruit to leave one lantern alone.',
+    captureRate: 150, baseExp: 72,
+    learnset: [{ id: 'gloom_fang', level: 1 }, { id: 'gust_flick', level: 1 }, { id: 'zephyr_slice', level: 12 }],
   },
 };
 

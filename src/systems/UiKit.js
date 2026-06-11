@@ -125,6 +125,7 @@ const MAP_DISPLAY_NAMES = {
   ashfen_grove: 'Ashfen — Whispergrove',
   ashfen_town: 'Ashfen Town',
   north_road: 'Ashfen Lowlands — North Road',
+  hollow_cave: 'Hollow Cave',
 };
 
 function prettyMapName(id) {

@@ -218,7 +218,7 @@ if (partySize >= 2) {
 }
 
 // 8c. North Road: warp out the east gate, beat Lyra's trainer battle.
-await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 12), true)`); // deterministic rival win
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 20), true)`); // deterministic rival win (counter-pick + Oath are real threats at low levels)
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 29, y: 9, to: 'north_road', toX: 1, toY: 9, facing: 'right' }), true)`);
 check('north road loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'north_road' && window.game.scene.getScene('WorldScene').npcs)`));
 await sleep(500);
@@ -246,6 +246,63 @@ await sleep(1500);
 check('rival battle won, back in world', await eval_(`window.game.scene.isActive('WorldScene')`));
 check('rival1_won flag set', await eval_(`Save.state.storyFlags.rival1_won === true`));
 check('shard reward paid', (await eval_(`Save.state.shards`)) >= shardsBefore + 300, `${shardsBefore} -> ${await eval_(`Save.state.shards`)}`);
+
+// 8c-2. Hollow Cave: enter, deterministic Warden's Oath unit check, full Warden fight.
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 22, y: 0, to: 'hollow_cave', toX: 22, toY: 15, facing: 'up' }), true)`);
+check('hollow cave loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'hollow_cave' && window.game.scene.getScene('WorldScene').npcs)`));
+check('3 cave NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 3);
+check('cave rock is solid', await eval_(`window.game.scene.getScene('WorldScene').isSolid(0, 0)`));
+check('cave floor is walkable', !(await eval_(`window.game.scene.getScene('WorldScene').isSolid(22, 15)`)));
+
+// Oath unit check inside a real warden battle, then bail out.
+await eval_(`(window.game.scene.getScene('WorldScene').scene.start('BattleScene', { trainer: buildTrainer('warden_thane'), flag: 'warden1_won' }), true)`);
+check('warden battle starts', await waitFor(`window.game.scene.isActive('BattleScene')`));
+await sleep(800);
+const oathOk = await eval_(`(async () => {
+  const b = window.game.scene.getScene('BattleScene');
+  b.enemyIndex = b.trainer.party.length - 1;
+  b.wild = b.trainer.party[b.enemyIndex];
+  b.setPanelMon(b.wildPanel, b.wild);
+  b.wild.currentHp = Math.max(1, Math.floor(b.wild.stats.hp * 0.2));
+  const sayOrig = b.say.bind(b); b.say = () => Promise.resolve(); // skip message waits
+  await b.maybeWardenOath();
+  b.say = sayOrig;
+  return b.oathUsed && b.wild.currentHp === b.wild.stats.hp;
+})()`);
+check('Warden\'s Oath fully restores the last mon once', oathOk === true);
+const oathTwice = await eval_(`(async () => {
+  const b = window.game.scene.getScene('BattleScene');
+  b.wild.currentHp = 1;
+  await b.maybeWardenOath();
+  return b.wild.currentHp === 1; // second invocation must NOT heal
+})()`);
+check('Oath does not fire twice', oathTwice === true);
+await eval_(`(window.game.scene.getScene('BattleScene').scene.start('WorldScene', {}), true)`);
+check('back in cave', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').npcs)`));
+
+// Full Warden fight through dialogue, driven to victory.
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 25), true)`); // strong enough to out-damage the Oath heal
+const shardsPreWarden = await eval_(`Save.state.shards`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'warden_thane')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 8; i++) { await pressZ(); await sleep(250); }
+check('warden battle started via dialogue', await waitFor(`window.game.scene.isActive('BattleScene')`));
+await sleep(500);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+for (let round = 0; round < 40; round++) {
+  const scene = await eval_(`window.game.scene.getScenes(true)[0].scene.key`);
+  if (scene !== 'BattleScene') break;
+  const menuOpen = await eval_(`Boolean(window.game.scene.getScene('BattleScene')?.menu)`);
+  await pressZ();
+  await sleep(menuOpen ? 400 : 350);
+  if (menuOpen) { await pressZ(); await sleep(400); }
+  for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+}
+await sleep(1500);
+check('warden defeated, back in world', await eval_(`window.game.scene.isActive('WorldScene')`));
+check('warden1_won flag set', await eval_(`Save.state.storyFlags.warden1_won === true`));
+check('badge_lowlands flag set', await eval_(`Save.state.storyFlags.badge_lowlands === true`));
+check('warden reward paid', (await eval_(`Save.state.shards`)) >= shardsPreWarden + 600, `${shardsPreWarden} -> ${await eval_(`Save.state.shards`)}`);
 
 // 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);

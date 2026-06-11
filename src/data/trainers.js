@@ -17,6 +17,43 @@ const TRAINERS = {
       return [makeLuminary(counter[starterId] ?? 'tidalink', 7), makeLuminary('glimwing', 5)];
     },
   },
+
+  // --- Hollow Cave (first dungeon) ---
+  acolyte_vren: {
+    id: 'acolyte_vren',
+    name: 'Acolyte Vren',
+    introText: "Vren rapped his staff on the stone. 'The cave judges you now.'",
+    winText: 'You defeated Acolyte Vren!',
+    loseText: "Vren shook his head. 'The stones were not wrong about you yet.'",
+    reward: 150,
+    buildParty() {
+      return [makeLuminary('pebblump', 6), makeLuminary('voltail', 6)];
+    },
+  },
+  acolyte_sila: {
+    id: 'acolyte_sila',
+    name: 'Acolyte Sila',
+    introText: "Sila bowed once. 'One honest fight, as promised.'",
+    winText: 'You defeated Acolyte Sila!',
+    loseText: "Sila helped you up. 'Honest enough. Come back stronger.'",
+    reward: 150,
+    buildParty() {
+      return [makeLuminary('mirewisp', 7), makeLuminary('sprigling', 6)];
+    },
+  },
+  warden_thane: {
+    id: 'warden_thane',
+    name: 'Warden Thane',
+    introText: "Thane set his feet like a landslide. 'The Lowlands stand behind me, {player}.'",
+    winText: 'You defeated Warden Thane and earned the LOWLANDS SIGIL!',
+    loseText: "Thane steadied you with one hand. 'The Oath holds. Return when you can break it.'",
+    reward: 600,
+    wardenOath: true, // one-time full heal when his last mon falls below 30% HP
+    setFlags: { badge_lowlands: true },
+    buildParty() {
+      return [makeLuminary('pebblump', 8), makeLuminary('bristleboar', 9), makeLuminary('thorngrove', 11)];
+    },
+  },
 };
 
 /** Resolve a trainer id into a battle-ready object with a fresh party. */

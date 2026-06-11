@@ -158,6 +158,27 @@ function ensureWorldTextures(scene) {
     c.refresh();
   }
 
+  noiseTile(scene, 'tile_cave_wall', '#2c2c38', ['#222230', '#363646', '#1c1c28'], 99, {
+    count: 40,
+    post: (ctx) => {
+      ctx.fillStyle = '#16161f';
+      ctx.fillRect(0, 28, 32, 4);
+      ctx.fillRect(0, 0, 2, 32);
+    },
+  });
+
+  noiseTile(scene, 'tile_cave_floor', '#3e3a44', ['#363240', '#48424f', '#302c38'], 111);
+
+  noiseTile(scene, 'tile_cave_gravel', '#36323e', ['#2c2836', '#403a48'], 122, {
+    count: 50,
+    post: (ctx, rnd) => {
+      ctx.fillStyle = '#524a5c';
+      for (let i = 0; i < 8; i++) {
+        ctx.fillRect(2 + Math.floor(rnd() * 27), 2 + Math.floor(rnd() * 27), 3, 2);
+      }
+    },
+  });
+
   // Save Shrine: stone plinth + rune-marked pillar + floating crystal (32x48).
   if (!scene.textures.exists('shrine_obj')) {
     const c = scene.textures.createCanvas('shrine_obj', 32, 48);
@@ -579,6 +600,27 @@ Object.assign(STARTER_PIXELMAPS, {
       '..cccccccw......',
       '..cc..cc........',
       '..d....d........',
+    ],
+  },
+});
+
+// Hollow Cave wild.
+Object.assign(STARTER_PIXELMAPS, {
+  gloombat: {
+    palette: { p: '#6a5a8a', d: '#4e4268', w: '#8a7aaa', k: '#1c1424', r: '#c05a6a' },
+    rows: [
+      'p..............p',
+      'pp....pp.p....pp',
+      'ppp..pppppp..ppp',
+      'pwppppppppppppwp',
+      'pwwpppkppkpppwwp',
+      '.pwpppppppppwwp.',
+      '..ppppprrpppppp.',
+      '...pppprrpppp...',
+      '....pppppppp....',
+      '.....pp..pp.....',
+      '....pp....pp....',
+      '................',
     ],
   },
 });

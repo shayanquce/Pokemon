@@ -6,6 +6,7 @@
  * Tile legend:
  *   T tree (solid)      W water (solid)     S Save Shrine (solid, interact)
  *   R roof (solid)      B wall (solid)      D door (solid, interact)
+ *   C cave rock (solid) c cave floor        e cave gravel (wild encounters)
  *   G grass             g tall grass (wild encounters)
  *   P path              F flowers
  */
@@ -154,8 +155,8 @@ const MAPS = {
     name: 'Ashfen Lowlands — North Road',
     //       012345678901234567890123456789
     rows: [
-      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
-      'TGGGGGTGGGGGGFGGGGGGGGTGGGGGGT', // 1
+      'TTTTTTTTTTTTTTTTTTTTTTPTTTTTTT', // 0  <- Hollow Cave mouth at (22,0)
+      'TGGGGGTGGGGGGFGGGGGGGGPGGGGGGT', // 1
       'TGggggGGGGggggggGGGGggggGGGGGT', // 2
       'TGggggGGGGggggggGGGGggggGGFGGT', // 3
       'TGggggGGGGggggggGGGGggggGGGGGT', // 4
@@ -172,7 +173,10 @@ const MAPS = {
       'TGGGGGGGGGGGFGGGGGGGGGGGGTGGGT', // 15
       'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 16
     ],
-    exits: [{ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }],
+    exits: [
+      { x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' },
+      { x: 22, y: 0, to: 'hollow_cave', toX: 22, toY: 15, facing: 'up' },
+    ],
     doors: [],
     npcs: [
       {
@@ -200,6 +204,87 @@ const MAPS = {
         { speciesId: 'zephyrkit', weight: 20, min: 4, max: 6 },
         { speciesId: 'pebblump', weight: 18, min: 5, max: 7 },
         { speciesId: 'mirewisp', weight: 12, min: 5, max: 7 },
+      ],
+    },
+  },
+
+  hollow_cave: {
+    id: 'hollow_cave',
+    name: 'Hollow Cave',
+    //       012345678901234567890123456789
+    rows: [
+      'CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', // 0
+      'CCCCCCCCCCCcccccccCCCCCCCCCCCC', // 1  <- Warden chamber
+      'CCCCCCCCCCCcccccccCCCCCCCCCCCC', // 2  <- Warden Thane at (14,2)
+      'CCCCCCCCCCCcccccccCCCCCCCCCCCC', // 3
+      'CCCCCCCCCCCCCCcCCCCCCCCCCCCCCC', // 4  <- neck
+      'CCCCeeeeccccccccccccceeeeCCCCC', // 5
+      'CCCCeeeeccccccccccccceeeeCCCCC', // 6  <- Acolyte Sila at (10,6)
+      'CCCCcccccccccccccccccccccCCCCC', // 7
+      'CCCCcCCCCCCCCCCCCCCCCCCCcCCCCC', // 8  <- twin necks (4,8) and (24,8)
+      'CCCCcccccccccccccccccccccCCCCC', // 9
+      'CCCCCCCCCCCCcCCCCCCCCCCCCCCCCC', // 10 <- neck
+      'CCCCCCCCCeecccceeCCCCCCCCCCCCC', // 11
+      'CCCCCCCCCcccccccCCCCCCCCCCCCCC', // 12 <- Acolyte Vren at (12,12)
+      'CCCCCCcccccccccccccccccCCCCCCC', // 13
+      'CCCCCCCCCCCCCCCCCCCCCCcCCCCCCC', // 14
+      'CCCCCCCCCCCCCCCCCCCCCCcCCCCCCC', // 15
+      'CCCCCCCCCCCCCCCCCCCCCCcCCCCCCC', // 16 <- mouth back to the road at (22,16)
+    ],
+    exits: [{ x: 22, y: 16, to: 'north_road', toX: 22, toY: 1, facing: 'down' }],
+    doors: [],
+    npcs: [
+      {
+        id: 'acolyte_vren',
+        name: 'Acolyte Vren',
+        x: 12, y: 12, facing: 'down',
+        palette: { h: '#3a4a66', f: '#d8a878', e: '#20203a', c: '#39404f', g: '#9a8a66', b: '#241d18' },
+        dialogue: [
+          'Halt. The Warden takes no visitors while the deep stones are restless.',
+          'You want the Sigil? Then show me the Lowlands taught you something.',
+        ],
+        battle: { trainerId: 'acolyte_vren', flag: 'acolyte_vren_won' },
+        postWinDialogue: ['Hm. The stones did not warn me about you. Go on — Sila guards the upper gallery.'],
+        repeatDialogue: ['The Warden is past the upper gallery. Mind the gravel beds — things nest in them.'],
+      },
+      {
+        id: 'acolyte_sila',
+        name: 'Acolyte Sila',
+        x: 10, y: 6, facing: 'down',
+        palette: { h: '#c8c2b4', f: '#e0bc94', e: '#20203a', c: '#39404f', g: '#9a8a66', b: '#241d18' },
+        dialogue: [
+          'Vren let you through? Then you have earned one honest fight, traveler.',
+          'The Warden bends for no one who could not bend me.',
+        ],
+        battle: { trainerId: 'acolyte_sila', flag: 'acolyte_sila_won' },
+        postWinDialogue: ['Well bent. The Warden waits in the high chamber. Speak plainly — he respects little else.'],
+        repeatDialogue: ['Straight up the neck of stone. He already knows you are coming.'],
+      },
+      {
+        id: 'warden_thane',
+        name: 'Warden Thane',
+        x: 14, y: 2, facing: 'down',
+        palette: { h: '#8a93a0', f: '#caa07a', e: '#20203a', c: '#5e564c', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          'So. The one the ceremony fire leapt for. My acolytes speak well of your knuckles, {player}.',
+          'I am Thane, Warden of the Lowlands. This cave holds the first Sigil — and I hold this cave.',
+          'When my last stone stands bloodied, I invoke the Oath. Endure that, and the Sigil is yours.',
+        ],
+        battle: { trainerId: 'warden_thane', flag: 'warden1_won' },
+        postWinDialogue: [
+          'The Oath broke against you. That has not happened since Lyra\'s father stood where you stand.',
+          'Take the Lowlands Sigil, {player}. The pass-warden at Keldrath will open the coast road for its bearer.',
+          'One more thing. The Hollowed Chain was seen on the coast asking after an "echo". Walk carefully.',
+        ],
+        repeatDialogue: ['The Sigil is yours, bearer. The coast road past Keldrath is open to you — when the next region is built.'],
+      },
+    ],
+    encounters: {
+      rate: 0.16,
+      table: [
+        { speciesId: 'gloombat', weight: 45, min: 6, max: 9 },
+        { speciesId: 'pebblump', weight: 35, min: 6, max: 9 },
+        { speciesId: 'mirewisp', weight: 20, min: 7, max: 9 },
       ],
     },
   },

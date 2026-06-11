@@ -1,113 +1,105 @@
-# Project State — v0.4 "The North Road" checkpoint (2026-06-11)
+# Project State — v0.5 "The Warden's Oath" checkpoint (2026-06-11)
 
-> Paused after the step-6 opening pass: North Road map, 5 new wild species,
-> trainer battles (Lyra rival fight), Bram's shop, and the Dex screen.
-> All automated tests pass: 6 save-smoke, 113 engine checks, 46 live CDP
+> Paused after build-order step 7: Hollow Cave dungeon, cave trainers, and
+> the first Warden battle with the Warden's Oath mechanic.
+> All automated tests pass: 6 save-smoke, 120 engine checks, 59 live CDP
 > playtest checks.
 
 ## What runs today
 
-Everything from v0.3 (party/items menus, battle switch/items, move learning,
-evolutions, bond), plus:
+Everything from v0.4 (3 overworld maps, 17 species, trainer battles, Lyra
+rival fight, shop, dex), plus:
 
-- **North Road** (`north_road`): third map, east gate from Ashfen Town's main
-  street. Tall-grass fields with a Lv 4–7 encounter table of 5 new species:
-  Voltail (Volt), Mirewisp (Spirit), Bristleboar (Beast), Pebblump (Stone),
-  Zephyrkit (Wind) — 17 species total now
-- **Trainer battles**: `BattleScene` accepts `{ trainer, flag }` from
-  `buildTrainer()` (src/data/trainers.js). Trainers field multi-mon parties
-  sent in sequence, forbid Capture and Run, pay a Shard reward, and set a
-  story flag on defeat. The blackout path shows the trainer's loseText
-- **Lyra rival fight** (`lyra_road` NPC on the North Road): counter-picks the
-  player's starter (embrik→tidalink→thornpaw→embrik) + Glimwing Lv 5; reward
-  300 Shards, sets `rival1_won`. Until beaten she repeats her challenge; after,
-  one-time aftermath dialogue (tracked via `npcStates.lyra_road.postWin`),
-  then repeat lines. Town Lyra has `hiddenIfFlag: 'rival1_won'` and despawns
-- **Bram's shop**: talking to Bram now ends in `ShopPanel` — Capture Orb 200,
-  Ember Tonic 150 Shards; Z buys one, balance shown, auto-save on close
-- **Dex screen** (pause menu → Dex): all species by dexNo in two columns —
-  caught (gold + mini sprite), seen (parchment), or ??? (dim), with counters
-- `Save.state.starterId` recorded at new game (old saves fall back to
-  `dex.caught[0]`)
-- NPC schema additions: `battle: { trainerId, flag }`, `shop: [{itemId,
-  price}]`, `postWinDialogue`, `hiddenIfFlag`
+- **Hollow Cave** (`hollow_cave`): first dungeon, entered from a cave mouth
+  at the top of the North Road (22,0). New tile types: `C` cave rock (solid),
+  `c` cave floor, `e` cave gravel (wild encounters — Gloombat #21 new
+  Shadow/Wind species, Pebblump, Mirewisp at Lv 6–9, 16% rate)
+- **Cave gauntlet**: Acolyte Vren (lower gallery) and Acolyte Sila (upper
+  gallery) — optional trainer fights with their own flags and aftermath
+  dialogue, then **Warden Thane** in the high chamber
+- **Warden's Oath** (design-spec rule): when the Warden's LAST Luminary
+  drops below 30% HP, it is fully restored once per battle, with its own
+  animation. Implemented in `BattleScene.maybeWardenOath()`, driven by
+  `wardenOath: true` on the trainer def
+- Beating Thane: 600 Shards, `warden1_won` + `badge_lowlands` story flags
+  (trainer defs can now carry `setFlags`), and aftermath dialogue that
+  seeds Chapter 1 (Hollowed Chain on the coast, Lyra's father)
+- 18 species total; encounter tiles generalized (`g` grass, `e` gravel)
 
 ## Verified tests (all passing at this commit)
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 113 checks — adds trainer counter-picks, shop stock
-                       # refs, map row dimensions, exit-landing walkability
+npm run engine-test    # 120 checks — adds Warden party/Oath/badge checks,
+                       # cave map integrity, 'C' in the solid-landing set
 npm run playtest-game  # terminal 1: game with CDP port 9223
-npm run playtest       # terminal 2: 46 live checks — v0.3 set plus north road
-                       # warp, Lyra trainer battle (flag + 300-shard reward),
-                       # town Lyra despawn, shop purchase, dex open/close
-                       # (uses + deletes save slot_3)
-node scripts/screenshot-cdp.mjs  # PNG of the running game (SCREENSHOT_SETUP env opt.)
+npm run playtest       # terminal 2: 59 live checks — v0.4 set plus cave warp,
+                       # collision, deterministic Oath unit check (fires once,
+                       # never twice), full Warden fight via dialogue with
+                       # flag/badge/reward assertions (uses + deletes slot_3)
+node scripts/screenshot-cdp.mjs  # PNG of the running game
 ```
 
-Playtest scripting gotchas (already handled, don't regress):
-- `waitFor` expressions must return JSON-serializable values — wrap in
-  `Boolean(...)`; Phaser objects fail CDP `returnByValue`
-- Only act on the 5-item battle command menu (submenus have fewer items);
-  blind Z-press drains can buy from an open ShopPanel — poll for the panel
-  instead of pressing a fixed count
+Playtest scripting gotchas (don't regress):
+- Wrap waitFor expressions in `Boolean(...)` — Phaser objects break CDP
+  `returnByValue`
+- Only act on the 5-item battle command menu; cancel submenus first
+- Never blind-press Z while a ShopPanel may be open (it buys)
+- Trainer fights are genuinely losable — test leads are set to Lv 20 (rival)
+  and Lv 25 (Warden) to make wins deterministic; lower levels black out via
+  counter-picks and the Oath heal (that was a real test failure, not a bug)
 
 ## Architecture
 
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
-  ├─ data/starters.js   LUMINARY_SPECIES (17), MOVES, makeLuminary
-  ├─ data/maps.js       3 maps {rows, exits, doors, npcs, encounters}
+  ├─ data/starters.js   LUMINARY_SPECIES (18), MOVES, makeLuminary
+  ├─ data/maps.js       4 maps {rows, exits, doors, npcs, encounters}
   ├─ data/items.js      ITEMS
-  ├─ data/trainers.js   TRAINERS + buildTrainer(id) (party built per save state)
-  ├─ systems/BattleEngine.js  pure battle math (see v0.3 notes)
+  ├─ data/trainers.js   TRAINERS (lyra1, acolyte_vren, acolyte_sila,
+  │                     warden_thane w/ wardenOath+setFlags) + buildTrainer
+  ├─ systems/BattleEngine.js  pure battle math
   ├─ systems/PartyPanel.js    PartyPanel + ItemsPanel overlays
   ├─ systems/ShopPanel.js     ShopPanel + DexPanel overlays
   ├─ systems/DialogueBox.js   typewriter dialogue widget
-  ├─ scenes/WorldScene.js     maps, NPCs (battle/shop hooks), warps, pause menu
-  │                           (Resume/Party/Items/Dex/Quit×2)
-  ├─ scenes/BattleScene.js    wild + trainer battles, learn/evolve/bond flow
+  ├─ scenes/WorldScene.js     maps (incl. cave tiles), NPC battle/shop hooks
+  ├─ scenes/BattleScene.js    wild + trainer battles, Oath, learn/evolve/bond
   └─ window.LuminaryNative  ← preload.cjs → main.js
 ```
 
 ### Save `data` fields
 
-v0.3 fields plus `starterId`. Story flags in play: `chapter`,
-`echo_awakened`, `met_lyra`, `ceremony_complete`, `rival1_won`.
-`npcStates.<id>` = `{ talked, postWin? }`.
+v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
+`ceremony_complete`, `rival1_won`, `acolyte_vren_won`, `acolyte_sila_won`,
+`warden1_won`, `badge_lowlands`.
 
-## Implemented Luminary (17 of 180+)
+## Implemented Luminary (18 of 180+)
 
-- 3 starter lines (2 stages each, third stage named but undefined)
-- 3 Whispergrove wild lines (2 stages each)
-- 5 North Road wilds, single-stage: Voltail #16, Mirewisp #17,
-  Bristleboar #18, Pebblump #19, Zephyrkit #20
-
-## Known issues / fixes applied
-
-Everything from v0.3, plus the playtest gotchas listed above.
+Starter lines ×3 (2 stages), grove lines ×3 (2 stages), road wilds ×5,
+Gloombat (cave). Dex numbers 1–21 with gaps reserved for third stages.
 
 ## Not built yet (do not assume exists)
 
-- Evolutions for the 5 North Road wilds; second-stage evolutions (Embralion etc.)
-- Status conditions, Echo Surge (Bond 10), bond from shrine rests
-- Building interiors, more trainers besides Lyra, gym/Warden
 - Echo Vault UI (capture with full party silently vaults)
-- Audio, packaging, full 18×18 type chart
-- Keldrath Coast (the road's east end is walled off pending the next region)
+- Status conditions; Echo Surge (Bond 10); bond from shrine rests
+- Evolutions for road wilds + Gloombat; third-stage starter evolutions
+- Keldrath Coast (Sigil unlocks it narratively; map doesn't exist)
+- Building interiors, audio, packaging, full 18×18 type chart
+- Healer NPC (blackout/shrine are the only full heals)
 
 ## Next session — plan (in priority order)
 
-1. **First dungeon + Warden** (build order step 7): a cave/dungeon map off
-   the North Road (e.g. `hollow_cave` via a new entrance tile), 2–3 trainer
-   battles inside, Warden boss with the "Warden's Oath at 30% HP" rule from
-   the design spec, badge/story flag
-2. **Echo Vault UI** at the Save Shrine (deposit/withdraw between party and vault)
-3. **Evolutions for North Road wilds** + a few more species toward 30
-4. **Status conditions** (burn/sleep/etc. + Shattered/Echoed/Hollowed from spec)
-5. Chapter 1 story beats: Elder Maren follow-up after `rival1_won`, Hollowed
-   Chain teaser NPC
+1. **Echo Vault UI** at Save Shrines: deposit/withdraw between party (≤6)
+   and vault (≤300); reuse the PartyPanel pattern
+2. **Keldrath Coast region opener** (build order step 11 pulled early as
+   chapter momentum): `keldrath_gate` map east of the North Road,
+   pass-warden NPC checks `badge_lowlands`, first coast town + 4–6 new
+   Tide/Wind species toward 30
+3. **Status conditions** in battle (burn/sleep + spec's Shattered/Echoed/
+   Hollowed), then Echo Surge at Bond 10
+4. Chapter 1 story beats: Elder Maren post-badge dialogue, Hollowed Chain
+   scout encounter
+5. Healer NPC in Ashfen Town (free rest at Bram's neighbor?)
 
 ## Dependencies
 

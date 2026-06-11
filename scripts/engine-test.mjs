@@ -136,6 +136,11 @@ for (const [starter, expected] of [['embrik', 'tidalink'], ['tidalink', 'thornpa
   check(`lyra1 counter-picks ${expected} vs ${starter}`, party[0].speciesId === expected && party.length === 2);
 }
 check('lyra1 reward defined', G.TRAINERS.lyra1.reward > 0);
+const wardenParty = G.TRAINERS.warden_thane.buildParty({});
+check('warden_thane fields 3 mons', wardenParty.length === 3 && wardenParty.every((m) => m.currentHp > 0));
+check('warden_thane has the Oath', G.TRAINERS.warden_thane.wardenOath === true);
+check('warden_thane grants the badge flag', G.TRAINERS.warden_thane.setFlags.badge_lowlands === true);
+check('acolyte parties valid', G.TRAINERS.acolyte_vren.buildParty({}).length === 2 && G.TRAINERS.acolyte_sila.buildParty({}).length === 2);
 
 // --- shop stock + NPC battle refs resolve --------------------------------------------
 for (const m of Object.values(G.MAPS)) {
@@ -152,7 +157,7 @@ for (const m of Object.values(G.MAPS)) {
     check(`exit target exists: ${m.id} -> ${e.to}`, !!G.MAPS[e.to]);
     if (G.MAPS[e.to]) {
       const landing = G.MAPS[e.to].rows[e.toY]?.[e.toX];
-      check(`exit landing walkable: ${m.id} -> ${e.to} (${e.toX},${e.toY})`, !'TWSBRD'.includes(landing));
+      check(`exit landing walkable: ${m.id} -> ${e.to} (${e.toX},${e.toY})`, !'TWSBRDC'.includes(landing));
     }
   }
 }

@@ -16,6 +16,7 @@ class BattleScene extends Phaser.Scene {
     this.trainer = data.trainer ?? null;
     this.trainerFlag = data.flag ?? null; // story flag set when the trainer is beaten
     this.enemyIndex = 0;
+    this.oathUsed = false; // Warden's Oath fires at most once per battle
     this.wild = this.trainer ? this.trainer.party[0] : data.wild;
   }
 
@@ -355,6 +356,28 @@ class BattleScene extends Phaser.Scene {
     if (result.typeMult > 1) await this.say("It's super effective!");
     else if (result.typeMult === 0) await this.say(`It doesn't affect ${side === 'player' ? this.enemyLabel() : defender.nickname ?? defender.name}...`);
     else if (result.typeMult < 1) await this.say("It's not very effective...");
+
+    if (side === 'player') await this.maybeWardenOath();
+  }
+
+  /**
+   * Warden's Oath (design spec): when a Warden's LAST Luminary is driven
+   * below 30% HP, it is fully restored — once per battle.
+   */
+  async maybeWardenOath() {
+    if (!this.trainer?.wardenOath || this.oathUsed) return;
+    const isLast = this.enemyIndex === this.trainer.party.length - 1;
+    const hpFrac = this.wild.currentHp / this.wild.stats.hp;
+    if (!isLast || this.wild.currentHp <= 0 || hpFrac > 0.3) return;
+
+    this.oathUsed = true;
+    await this.say(`${this.trainer.name} slammed a fist to the stone — the WARDEN'S OATH awakens!`);
+    const glow = this.add.particles(this.wildSprite.x, this.wildSprite.y, 'spark', {
+      speed: { min: 30, max: 100 }, lifespan: 800, scale: { start: 1.8, end: 0 }, tint: [0x9a8a66, 0xd4af37], emitting: false,
+    });
+    glow.explode(30);
+    await this.tweenHp(this.wildPanel, this.wild.stats.hp);
+    await this.say(`${this.enemyLabel()} was fully restored by the Oath!`);
   }
 
   // ------------------------------------------------------------- endings --
@@ -385,6 +408,7 @@ class BattleScene extends Phaser.Scene {
       await this.say(this.trainer.winText.replaceAll('{player}', Save.state.playerName));
       Save.state.shards += this.trainer.reward;
       if (this.trainerFlag) Save.state.storyFlags[this.trainerFlag] = true;
+      if (this.trainer.setFlags) Object.assign(Save.state.storyFlags, this.trainer.setFlags);
       await this.say(`${Save.state.playerName} received ${this.trainer.reward} Shards!`);
       resultText = `${this.trainer.winText}  (+${this.trainer.reward} Shards)`;
     }

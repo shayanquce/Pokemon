@@ -5,9 +5,17 @@ fractured continent of Veranthis. Built with **Electron + Phaser 3**, fully
 offline, with a checksum-validated save system that lives in the OS user-data
 folder.
 
-## Current build — v0.4 "The North Road"
+## Current build — v0.5 "The Warden's Oath"
 
-Build-order steps 1–6 (opening pass) are complete:
+Build-order steps 1–7 are complete:
+
+- **Hollow Cave**: first dungeon off the North Road — dark caverns, gravel
+  encounter beds (new Gloombat species), two acolyte trainers
+- **Warden Thane**: first Warden boss. His **Warden's Oath** fully restores
+  his last Luminary once when it drops below 30% HP — endure it to earn the
+  **Lowlands Sigil**
+
+From v0.4:
 
 - **North Road**: third map with 5 new wild species (Voltail, Mirewisp,
   Bristleboar, Pebblump, Zephyrkit) at Lv 4–7 — 17 species total
@@ -45,7 +53,7 @@ And from earlier checkpoints:
   battles (Fight / Capture / Run), type chart, STAB, crits, stat stages,
   EXP + level-ups, Capture Orbs with shake animation, party/Echo Vault
   routing, blackout recovery at the shrine
-- 17 Luminary defined across starter, grove, and road lines
+- 18 Luminary defined across starter, grove, road, and cave lines
 - Settings (music/SFX volume, text speed) persisted instantly
 
 ## Getting started
@@ -56,11 +64,11 @@ Requires Node.js 18+.
 npm install     # if dependencies are not already installed
 npm start       # launch the game
 npm run save-smoke   # headless self-test of the save system (no window)
-npm run engine-test  # headless battle/data tests (113 checks, no Electron)
+npm run engine-test  # headless battle/data tests (120 checks, no Electron)
 
 # Automated gameplay test (two terminals):
 npm run playtest-game   # terminal 1: launches the game with a CDP port
-npm run playtest        # terminal 2: drives a full playthrough, 46 checks
+npm run playtest        # terminal 2: drives a full playthrough, 59 checks
 ```
 
 ## Controls
@@ -98,8 +106,9 @@ menu. Closing the window abruptly loses anything after the last save.
 3. ~~Basic map rendering + player movement~~ ✅
 4. ~~First town (Ashfen) fully walkable with NPCs~~ ✅
 5. ~~Wild encounter system + battle engine~~ ✅ (incl. party/items menus, switch, move learning, evolutions, bond)
-6. ~~First wave toward 30 Luminary~~ ✅ (North Road, 17 species, Lyra rival battle, shop, dex)
-7. First dungeon + Warden battle ← **next**
+6. ~~First wave toward 30 Luminary~~ ✅ (North Road, Lyra rival battle, shop, dex)
+7. ~~First dungeon + Warden battle~~ ✅ (Hollow Cave, Warden's Oath, Lowlands Sigil)
+   ← **next: Echo Vault UI + Keldrath Coast opener**
 8. Inventory + healing + capture system
 9. Story Chapter 1 (dialogue system with choices)
 10. Echo Vault (storage)
