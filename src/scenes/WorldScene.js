@@ -171,7 +171,11 @@ class WorldScene extends Phaser.Scene {
   // ---------------------------------------------------------------- npcs --
 
   spawnNpcs() {
-    const visible = (this.map.npcs ?? []).filter((def) => !(def.hiddenIfFlag && Save.state.storyFlags[def.hiddenIfFlag]));
+    const visible = (this.map.npcs ?? []).filter(
+      (def) =>
+        !(def.hiddenIfFlag && Save.state.storyFlags[def.hiddenIfFlag]) &&
+        !(def.showIfFlag && !Save.state.storyFlags[def.showIfFlag])
+    );
     this.npcs = visible.map((def) => {
       ensureNpcTextures(this, def.id, def.palette);
       // Gate wardens who already granted passage spawn at their aside spot.
@@ -241,6 +245,10 @@ class WorldScene extends Phaser.Scene {
     const gateGranted = gate && Save.state.storyFlags[gate.grantsFlag];
     const gateGranting = gate && !gateGranted && Save.state.storyFlags[gate.requiresFlag];
 
+    // Story-conditional dialogue: the first matching flag entry overrides the
+    // default lines (once with its pages, after that with its repeat lines).
+    const cond = (def.conditionalDialogue ?? []).find((c) => Save.state.storyFlags[c.flag]);
+
     let raw;
     if (gate && !gateGranted) {
       raw = gateGranting ? gate.grantedDialogue : gate.deniedDialogue;
@@ -249,6 +257,8 @@ class WorldScene extends Phaser.Scene {
       raw = !state.postWin && def.postWinDialogue?.length ? def.postWinDialogue : def.repeatDialogue ?? def.dialogue;
     } else if (battlePending) {
       raw = def.dialogue; // full challenge speech every time until beaten
+    } else if (cond) {
+      raw = state[cond.stateKey] ? cond.repeat ?? def.repeatDialogue ?? cond.pages : cond.pages;
     } else {
       raw = state.talked && def.repeatDialogue?.length ? def.repeatDialogue : def.dialogue ?? def.repeatDialogue;
     }
@@ -260,7 +270,12 @@ class WorldScene extends Phaser.Scene {
       pages,
       onDone: async () => {
         if (!Save.state.npcStates) Save.state.npcStates = {};
-        Save.state.npcStates[def.id] = { ...Save.state.npcStates[def.id], talked: true, ...(battleWon ? { postWin: true } : {}) };
+        Save.state.npcStates[def.id] = {
+          ...Save.state.npcStates[def.id],
+          talked: true,
+          ...(battleWon ? { postWin: true } : {}),
+          ...(cond && !battlePending ? { [cond.stateKey]: true } : {}),
+        };
         if (def.setFlags) Object.assign(Save.state.storyFlags, def.setFlags);
         if (gateGranting) {
           Save.state.storyFlags[gate.grantsFlag] = true;

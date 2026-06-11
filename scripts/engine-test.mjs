@@ -188,6 +188,8 @@ check('warden_thane fields 3 mons', wardenParty.length === 3 && wardenParty.ever
 check('warden_thane has the Oath', G.TRAINERS.warden_thane.wardenOath === true);
 check('warden_thane grants the badge flag', G.TRAINERS.warden_thane.setFlags.badge_lowlands === true);
 check('acolyte parties valid', G.TRAINERS.acolyte_vren.buildParty({}).length === 2 && G.TRAINERS.acolyte_sila.buildParty({}).length === 2);
+check('chain_scout fields 2 mons', G.TRAINERS.chain_scout.buildParty({}).length === 2);
+check('chain_scout advances the chapter', G.TRAINERS.chain_scout.setFlags.chapter === 2);
 
 // --- shop stock + NPC battle refs resolve --------------------------------------------
 for (const m of Object.values(G.MAPS)) {

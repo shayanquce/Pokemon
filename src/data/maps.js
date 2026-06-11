@@ -105,6 +105,19 @@ const MAPS = {
         ],
         repeatDialogue: ['Rest at the shrine in Whispergrove before you take the north road, {player}. Veranthis is patient. Be patient back.'],
         setFlags: { ceremony_complete: true },
+        // Once the Lowlands Sigil is won, Maren's counsel changes.
+        conditionalDialogue: [
+          {
+            flag: 'badge_lowlands',
+            stateKey: 'postBadge',
+            pages: [
+              'The Lowlands Sigil. Thane does not part with that stone for charm, {player}. So it begins.',
+              'Listen well. If strangers ask after your Echo, they have already found you. Do not let them choose the ground.',
+              "Lyra went to the coast chasing her father's shadow. Watch over her when your roads cross — promises weigh more out there.",
+            ],
+            repeat: ['The Echo grows louder around you, child. Let it. Solen chose its keeper well.'],
+          },
+        ],
       },
       {
         id: 'lyra',
@@ -337,6 +350,21 @@ const MAPS = {
           ],
         },
         repeatDialogue: ['The gate stands open for the Sigil-bearer. Keldrath is east along the shore.'],
+      },
+      {
+        // Appears on the shore once the harbor rumor is heard; driven off for
+        // good (hiddenIfFlag) when the battle is won — Chapter 1's closer.
+        id: 'chain_scout',
+        name: 'Stranger',
+        x: 24, y: 5, facing: 'down',
+        showIfFlag: 'heard_chain_rumor',
+        hiddenIfFlag: 'chain_scout_beaten',
+        palette: { h: '#2c2c38', f: '#cfae96', e: '#4a1c28', c: '#43355e', g: '#8a93a0', b: '#1c1620' },
+        dialogue: [
+          'A traveler. With a Sigil. With... ah. There it is — the hum behind your heartbeat.',
+          'The Hollowed Chain pays well for echoes, child. And it pays other ways, too.',
+        ],
+        battle: { trainerId: 'chain_scout', flag: 'chain_scout_beaten' },
       },
     ],
     encounters: {

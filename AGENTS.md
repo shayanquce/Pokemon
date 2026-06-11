@@ -6,10 +6,10 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.8 "Shattered Echoes" (PAUSED)
+## Current checkpoint — v0.9 "The Chain Surfaces" (PAUSED)
 
-**Build order steps 1–8 are DONE, plus the graphics overhaul and battle
-status systems.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–9 are DONE (graphics overhaul, status systems, and
+Chapter 1 story beats included).** Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -23,10 +23,11 @@ status systems.** Do not rebuild them unless fixing bugs.
 | 7.5 Graphics & feel overhaul (v0.6) | ✅ | Hi-res walk-cycle chars, EPX+shaded Luminary, smooth chained movement, ambient life, battle anims, flavor text |
 | 8. Echo Vault UI + Keldrath opener (v0.7) | ✅ | VaultPanel at shrines, keldrath_gate + gate-NPC mechanic, keldrath_town, 5 coast species (23 total) |
 | 9a. Status conditions + Echo Surge (v0.8) | ✅ | burn/sleep/Shattered/Echoed/Hollowed, move `inflicts`, Bond-10 surge |
-| 9b. Chapter 1 story beats | ⏭️ **NEXT** | Maren post-badge dialogue, Hollowed Chain scout on the coast |
-| 10–15 | pending | Wild evolutions, cliff road, regions, story acts… |
+| 9b. Chapter 1 story beats (v0.9) | ✅ | Maren post-badge counsel (`conditionalDialogue`), Chain scout (`showIfFlag`), chapter → 2 |
+| 10. Wild evolutions + Keldrath cliffs | ⏭️ **NEXT** | See "Next session" in `docs/PROJECT_STATE.md` |
+| 11–15 | pending | Cliff road, regions, story acts… |
 
-## Exactly where we left off (2026-06-11, session 4, v0.8)
+## Exactly where we left off (2026-06-11, session 4, v0.9)
 
 This session shipped **v0.6** (presentation overhaul: hi-res walk-cycle
 characters, EPX+shaded Luminary sprites — all `lum_` call sites display at
@@ -34,18 +35,19 @@ HALF their old scale, keep that for new UI — tap-to-turn chained movement,
 ambient life, battle animations, flavor text via `pick()`), **v0.7**
 (step 8: Echo Vault UI + Keldrath Coast opener — shrine menu, VaultPanel,
 `keldrath_gate`/`keldrath_town` maps, sand tile `s`, data-driven gate-NPC
-mechanic, 5 new coast species, dex 22–26) and **v0.8** (status conditions
+mechanic, 5 new coast species, dex 22–26), **v0.8** (status conditions
 burn/sleep/Shattered/Echoed/Hollowed via move `inflicts`, panel status tags,
-Echo Surge x1.5 once per battle at Bond 10). Verified end-to-end:
-save-smoke 6/6, engine-test 177/177, live playtest 74/74 twice (status
-procs add messages mid-battle; the playtest drain loops absorb them).
+Echo Surge x1.5 once per battle at Bond 10) and **v0.9** (Chapter 1 beats:
+`conditionalDialogue` + `showIfFlag` NPC mechanics, Maren post-badge
+counsel, Hollowed Chain scout fight on the gate shore → `chapter` 2).
+Verified end-to-end: save-smoke 6/6, engine-test 180/180, playtest 84/84.
 
 Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS
-2. Optional live verification: `npm run playtest-game` in one terminal, `npm run playtest` in another — 74 checks (uses and then deletes save slot_3)
-3. Start on **Chapter 1 story beats**: Elder Maren post-badge dialogue, first Hollowed Chain scout encounter on the coast (hooks off `heard_chain_rumor`; likely needs a `showIfFlag` NPC counterpart to `hiddenIfFlag`)
-4. Then wild evolutions (road/cave/coast) and the `keldrath_cliffs` route north (Lyra rematch on the way)
+2. Optional live verification: `npm run playtest-game` in one terminal, `npm run playtest` in another — 84 checks (uses and then deletes save slot_3)
+3. Start on **wild evolutions** (road/cave/coast: Voltail, Bristleboar, Zephyrkit, Gloombat, Brinepup… — stats + pixel maps + dex numbers; reuse the `evolution: { toId, to, level }` schema)
+4. Then the **`keldrath_cliffs`** route north (Chapter 2, Lyra rematch — Pim's dialogue seeds it)
 5. Then healer NPC / status-cure items, audio, packaging
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn

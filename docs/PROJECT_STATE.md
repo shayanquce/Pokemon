@@ -1,11 +1,25 @@
-# Project State — v0.8 "Shattered Echoes" checkpoint (2026-06-11)
+# Project State — v0.9 "The Chain Surfaces" checkpoint (2026-06-11)
 
-> Paused after status conditions + Echo Surge (build-order step 9, first
-> half). All automated tests pass: 6 save-smoke, 177 engine checks, 74 live
-> CDP playtest checks (run twice to confirm status procs don't flake the
-> scripted battles).
+> Paused after build-order step 9 complete: status conditions, Echo Surge,
+> and the Chapter 1 story beats. All automated tests pass: 6 save-smoke,
+> 180 engine checks, 84 live CDP playtest checks.
 
 ## What runs today
+
+### v0.9 Chapter 1 beats (step 9b)
+
+- **Conditional NPC dialogue** (data-driven): `conditionalDialogue:
+  [{ flag, stateKey, pages, repeat }]` on an NPC def — the first entry whose
+  story flag is set overrides the default lines (pages once, then repeat);
+  seen-state persists in `npcStates[id][stateKey]`. Elder Maren uses it for
+  her post-badge counsel (warns about the Chain, points at Lyra's road)
+- **`showIfFlag`** on NPC defs (counterpart to `hiddenIfFlag`): the NPC only
+  spawns once a flag is set
+- **Hollowed Chain scout** (Chapter 1 closer): hearing Orla's rumor
+  (`heard_chain_rumor`) makes a Stranger appear on the Keldrath Gate shore
+  (24,5). Beating Chain Scout Veyl (gloombat 11 + mirewisp 12, 400 shards)
+  sets `chain_scout_beaten`, advances `storyFlags.chapter` to **2**, and he
+  never respawns (hiddenIfFlag)
 
 ### v0.8 battle systems (step 9a)
 
@@ -86,13 +100,13 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 177 checks — maps/species/exits are auto-derived;
+npm run engine-test    # 180 checks — maps/species/exits are auto-derived;
                        # status/surge multipliers are checked statistically
 npm run playtest-game  # terminal 1: game with CDP port 9223
-npm run playtest       # terminal 2: 74 live checks — v0.5 set plus Echo Vault
-                       # (deposit/withdraw/last-companion rule), Keldrath gate
-                       # (block, grant, step-aside), coast town flags, coast
-                       # wild battle + flee (uses + deletes slot_3)
+npm run playtest       # terminal 2: 84 live checks — v0.7 set plus Echo Vault
+                       # rules, gate flow, coast town, chain-scout battle
+                       # (chapter -> 2, despawn), Maren post-badge counsel
+                       # (uses + deletes slot_3)
 node scripts/screenshot-cdp.mjs   # PNG of the running game
 node scripts/cdp-eval.mjs "expr"  # eval JS in the running game, print JSON
 node scripts/cdp-press.mjs ArrowDown 700  # hold a REAL key (drives isDown —
@@ -164,15 +178,12 @@ third stages.
 
 ## Next session — plan (in priority order)
 
-1. **Chapter 1 story beats**: Elder Maren post-badge dialogue, first
-   Hollowed Chain scout encounter on the coast (follows `heard_chain_rumor`,
-   could be a `battle:` NPC appearing on the keldrath_gate shore once the
-   rumor flag is set — use `hiddenIfFlag` inverted or a `showIfFlag` addition)
-2. **Evolutions** for road/cave/coast wilds (Voltail, Bristleboar, Gloombat,
+1. **Evolutions** for road/cave/coast wilds (Voltail, Bristleboar, Gloombat,
    Brinepup… — design stats + pixel maps)
-3. **Keldrath cliff road** north (`keldrath_cliffs`): next route toward the
-   second Warden, Lyra rematch on the way
-4. Healer NPC in Ashfen Town or Keldrath (free rest); status-curing items
+2. **Keldrath cliff road** north (`keldrath_cliffs`): Chapter 2 route toward
+   the second Warden, Lyra rematch on the way (Pim's dialogue seeds it)
+3. Healer NPC in Ashfen Town or Keldrath (free rest); status-curing items
+4. Chapter 2 beats: what the Chain wanted, Lyra's father's trail
 5. Audio pass (region BGM + battle SFX) or packaging when content settles
 
 ## Dependencies

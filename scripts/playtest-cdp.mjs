@@ -362,6 +362,35 @@ for (let i = 0; i < 6; i++) {
 await sleep(800);
 check('escaped coast battle', await eval_(`window.game.scene.isActive('WorldScene')`));
 
+// 8c-6. Chapter 1 closer: the rumor summons a Hollowed Chain scout to the gate shore.
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'keldrath_gate', toX: 28, toY: 9, facing: 'left' }), true)`);
+check('back at the gate', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'keldrath_gate' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('chain scout appears after the rumor', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 2);
+const shardsPreScout = await eval_(`Save.state.shards`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'chain_scout')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+check('scout battle started', await waitFor(`window.game.scene.isActive('BattleScene')`));
+await sleep(500);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(250); }
+for (let round = 0; round < 25; round++) {
+  const scene = await eval_(`window.game.scene.getScenes(true)[0].scene.key`);
+  if (scene !== 'BattleScene') break;
+  const menuOpen = await eval_(`Boolean(window.game.scene.getScene('BattleScene')?.menu)`);
+  await pressZ();
+  await sleep(menuOpen ? 400 : 350);
+  if (menuOpen) { await pressZ(); await sleep(400); }
+  for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+}
+await sleep(1500);
+check('scout driven off, back in world', await eval_(`window.game.scene.isActive('WorldScene')`));
+check('chain_scout_beaten flag set', await eval_(`Save.state.storyFlags.chain_scout_beaten === true`));
+check('chapter advanced to 2', (await eval_(`Save.state.storyFlags.chapter`)) === 2);
+check('scout reward paid', (await eval_(`Save.state.shards`)) >= shardsPreScout + 400, `${shardsPreScout} -> ${await eval_(`Save.state.shards`)}`);
+await sleep(500);
+check('scout gone after the rout', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 1);
+
 // 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);
 check('back in town after rival win', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'ashfen_town' && window.game.scene.getScene('WorldScene').npcs)`));
@@ -394,6 +423,14 @@ check('dex panel locks UI', await eval_(`window.game.scene.getScene('WorldScene'
 await eval_(`(window.game.scene.getScene('WorldScene').input.keyboard.emit('keydown-X'), true)`);
 await sleep(300);
 check('dex panel closes', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
+// 8f. Elder Maren's counsel changes after the badge (conditionalDialogue).
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'down'; w.talkTo(w.npcs.find(n => n.def.id === 'elder_maren')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+await sleep(400);
+check('Maren post-badge counsel recorded', await eval_(`Save.state.npcStates.elder_maren?.postBadge === true`));
+check('uiLock released after Maren', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
 
 // 9. Save record on disk reflects the run.
 const saveOk = await eval_(`window.LuminaryNative.saves.read('slot_3').then(r => r.ok && r.record.data.storyFlags.met_lyra === true)`);

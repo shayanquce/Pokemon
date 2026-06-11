@@ -54,6 +54,20 @@ const TRAINERS = {
       return [makeLuminary('pebblump', 8), makeLuminary('bristleboar', 9), makeLuminary('thorngrove', 11)];
     },
   },
+
+  // --- Chapter 1 closer: the Hollowed Chain reaches the coast ---
+  chain_scout: {
+    id: 'chain_scout',
+    name: 'Chain Scout Veyl',
+    introText: "The stranger's smile never moved. 'The echo, child. The Chain always collects.'",
+    winText: 'You drove off the Hollowed Chain scout!',
+    loseText: "Veyl turned away, unhurried. 'Keep it warm for us. We know the roads you sleep on.'",
+    reward: 400,
+    setFlags: { chapter: 2 },
+    buildParty() {
+      return [makeLuminary('gloombat', 11), makeLuminary('mirewisp', 12)];
+    },
+  },
 };
 
 /** Resolve a trainer id into a battle-ready object with a fresh party. */
