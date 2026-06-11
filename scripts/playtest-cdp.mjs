@@ -104,6 +104,28 @@ check('door dialogue locks UI', await eval_(`window.game.scene.getScene('WorldSc
 await pressZ(); await sleep(200); await pressZ(); await sleep(300);
 check('door dialogue closes', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
 
+// 6b. Party panel from the world: opens, reorders, closes.
+await eval_(`(window.game.scene.getScene('WorldScene').openParty(), true)`);
+await sleep(300);
+check('party panel locks UI', await eval_(`window.game.scene.getScene('WorldScene').uiLock`));
+await eval_(`(window.game.scene.getScene('WorldScene').input.keyboard.emit('keydown-X'), true)`);
+await sleep(300);
+check('party panel closes', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
+// 6c. Ember Tonic heals a damaged lead from the Items menu.
+await eval_(`(Save.state.party[0].currentHp = Math.max(1, Save.state.party[0].currentHp - 10), true)`);
+const tonicsBefore = await eval_(`Save.state.inventory.ember_tonic`);
+const hpBeforeTonic = await eval_(`Save.state.party[0].currentHp`);
+await eval_(`(window.game.scene.getScene('WorldScene').openItems(), true)`);
+await sleep(300);
+await pressZ(); // choose Ember Tonic
+await sleep(300);
+await pressZ(); // target the lead
+await sleep(600);
+check('tonic healed the lead', (await eval_(`Save.state.party[0].currentHp`)) > hpBeforeTonic);
+check('tonic consumed', (await eval_(`Save.state.inventory.ember_tonic`)) === tonicsBefore - 1);
+check('uiLock released after item use', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
 // 7. Forced wild battle: win with moves.
 await eval_(`(window.game.scene.getScene('WorldScene').scene.start('BattleScene', { wild: makeLuminary('sprigling', 2) }), true)`);
 await sleep(1000);
@@ -136,8 +158,11 @@ const orbsBefore = await eval_(`Save.state.inventory.capture_orb`);
 for (let attempt = 0; attempt < 5; attempt++) {
   const scene = await eval_(`window.game.scene.getScenes(true)[0].scene.key`);
   if (scene !== 'BattleScene') break;
-  // Move cursor down to Capture and select.
-  await eval_(`(() => { const b = window.game.scene.getScene('BattleScene'); if (b?.menu) { b.menu.index = 1; b.menu.refresh(); b.menu.select(); } return true; })()`);
+  // If a submenu (e.g. the move list) is open from drain presses, back out first.
+  await eval_(`(() => { const b = window.game.scene.getScene('BattleScene'); if (b?.menu && b.menu.items.length < 5) b.menu.cancel(); return true; })()`);
+  await sleep(250);
+  // Move cursor down to Capture (Fight / Item / Switch / Capture / Run) and select.
+  await eval_(`(() => { const b = window.game.scene.getScene('BattleScene'); if (b?.menu && b.menu.items.length === 5) { b.menu.index = 3; b.menu.refresh(); b.menu.select(); } return true; })()`);
   await sleep(2500); // orb arc + shakes
   for (let i = 0; i < 8; i++) { await pressZ(); await sleep(300); }
 }
@@ -148,6 +173,37 @@ const caught = await eval_(`Save.state.dex.caught.includes('ashvole')`);
 const partySize = await eval_(`Save.state.party.length`);
 check('capture flow completed (caught or out of orbs/fled)', caught || orbsAfter === 0 || (await eval_(`window.game.scene.isActive('WorldScene')`)));
 if (caught) check('captured ashvole joined party', partySize === 2, `party=${partySize}`);
+
+// 8b. With 2 party members: in-battle Switch keeps the turn.
+if (partySize >= 2) {
+  await eval_(`(window.game.scene.getScene('WorldScene').scene.start('BattleScene', { wild: makeLuminary('sprigling', 2) }), true)`);
+  await sleep(1000);
+  await pressZ(); await sleep(300); await pressZ(); await sleep(500); // intro
+  const leadBefore = await eval_(`window.game.scene.getScene('BattleScene').playerMon.speciesId`);
+  // Select Switch (index 2), then pick the other party member in the panel.
+  await eval_(`(() => { const b = window.game.scene.getScene('BattleScene'); if (b?.menu && b.menu.items.length === 5) { b.menu.index = 2; b.menu.refresh(); b.menu.select(); } return true; })()`);
+  await sleep(400);
+  await eval_(`(window.game.scene.getScene('BattleScene').input.keyboard.emit('keydown-DOWN'), true)`);
+  await sleep(150);
+  await pressZ(); // choose
+  await sleep(300);
+  await pressZ(); await sleep(300); await pressZ(); await sleep(500); // come back / go messages
+  const leadAfter = await eval_(`window.game.scene.getScene('BattleScene').playerMon.speciesId`);
+  check('switch changed the active mon', leadAfter !== leadBefore, `${leadBefore} -> ${leadAfter}`);
+  check('switch kept the turn (command menu reopen)', await eval_(`Boolean(window.game.scene.getScene('BattleScene')?.menu)`));
+  // Flee to clean up (Run is index 4).
+  for (let i = 0; i < 6; i++) {
+    const inBattle = await eval_(`window.game.scene.isActive('BattleScene')`);
+    if (!inBattle) break;
+    await eval_(`(() => { const b = window.game.scene.getScene('BattleScene'); if (b?.menu && b.menu.items.length < 5) b.menu.cancel(); return true; })()`);
+    await sleep(250);
+    await eval_(`(() => { const b = window.game.scene.getScene('BattleScene'); if (b?.menu && b.menu.items.length === 5) { b.menu.index = 4; b.menu.refresh(); b.menu.select(); } return true; })()`);
+    await sleep(500);
+    for (let j = 0; j < 6; j++) { await pressZ(); await sleep(250); }
+  }
+  await sleep(800);
+  check('escaped follow-up battle', await eval_(`window.game.scene.isActive('WorldScene')`));
+}
 
 // 9. Save record on disk reflects the run.
 const saveOk = await eval_(`window.LuminaryNative.saves.read('slot_3').then(r => r.ok && r.record.data.storyFlags.met_lyra === true)`);

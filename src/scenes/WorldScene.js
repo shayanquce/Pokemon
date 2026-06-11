@@ -359,7 +359,7 @@ class WorldScene extends Phaser.Scene {
     const W = this.scale.width;
     const px = W - 252, py = 56;
     this.menuObjs = [
-      drawPanel(this, px, py, 212, 196).setDepth(80),
+      drawPanel(this, px, py, 212, 276).setDepth(80),
       this.add.text(px + 106, py + 28, 'PAUSE', titleStyle(20, UI.colors.gold)).setOrigin(0.5).setDepth(81),
     ];
     this.pauseMenu = new MenuList(this, {
@@ -370,6 +370,8 @@ class WorldScene extends Phaser.Scene {
       depth: 81,
       items: [
         { label: 'Resume', onSelect: () => this.closeMenu() },
+        { label: 'Party', onSelect: () => { this.closeMenu(); this.openParty(); } },
+        { label: 'Items', onSelect: () => { this.closeMenu(); this.openItems(); } },
         {
           label: 'Quit to Title',
           onSelect: async () => {
@@ -396,6 +398,57 @@ class WorldScene extends Phaser.Scene {
     this.menuObjs?.forEach((o) => o.destroy());
     this.menuObjs = null;
     this.uiLock = false;
+  }
+
+  /** Pause menu → Party: view, summary, reorder (lead = first slot). */
+  openParty() {
+    this.uiLock = true;
+    this.partyPanel = new PartyPanel(this, {
+      mode: 'manage',
+      onCancel: () => {
+        this.partyPanel.destroy();
+        this.partyPanel = null;
+        this.refreshHud();
+        this.uiLock = false;
+      },
+    });
+  }
+
+  /** Pause menu → Items: pick a heal item, then the party member to use it on. */
+  openItems() {
+    this.uiLock = true;
+    const close = () => {
+      this.itemsPanel?.destroy();
+      this.itemsPanel = null;
+      this.refreshHud();
+      this.uiLock = false;
+    };
+    this.itemsPanel = new ItemsPanel(this, {
+      usableOnly: true,
+      onCancel: close,
+      onUse: (item) => {
+        this.itemsPanel.destroy();
+        this.itemsPanel = null;
+        const picker = new PartyPanel(this, {
+          mode: 'select',
+          title: `USE ${item.name.toUpperCase()} ON…`,
+          selectable: (mon) => mon.currentHp > 0 && mon.currentHp < mon.stats.hp,
+          onCancel: () => {
+            picker.destroy();
+            this.openItems();
+          },
+          onSelect: async (mon) => {
+            mon.currentHp = Math.min(mon.stats.hp, mon.currentHp + item.heal);
+            Save.state.inventory[item.id]--;
+            picker.destroy();
+            this.refreshHud();
+            this.uiLock = false;
+            this.toast(`${mon.nickname ?? mon.name} recovered with the ${item.name}.`, true);
+            await Save.autoSave(this, `item-use:${item.id}`);
+          },
+        });
+      },
+    });
   }
 
   // ------------------------------------------------------------------ hud --

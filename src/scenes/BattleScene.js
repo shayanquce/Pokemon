@@ -46,7 +46,7 @@ class BattleScene extends Phaser.Scene {
     this.msgText = this.add.text(36, H - 98, '', textStyle(17, UI.colors.parchment, { wordWrap: { width: W - 360 }, lineSpacing: 6 }));
     this.msgArrow = this.add.text(W - 320, H - 36, '▼', textStyle(14, UI.colors.gold)).setOrigin(1, 0.5).setVisible(false);
     this.tweens.add({ targets: this.msgArrow, y: '+=4', duration: 420, yoyo: true, repeat: -1 });
-    this.commandPanel = drawPanel(this, W - 284, H - 116, 268, 100);
+    this.commandPanel = drawPanel(this, W - 284, H - 152, 268, 136);
 
     this.intro();
   }
@@ -58,17 +58,26 @@ class BattleScene extends Phaser.Scene {
     const w = 320;
     const panel = { x, y, w, mon, isPlayer };
     drawPanel(this, x, y, w, isPlayer ? 86 : 68);
-    const species = LUMINARY_SPECIES[mon.speciesId];
-    this.add.text(x + 16, y + 20, mon.nickname ?? mon.name, textStyle(17, UI.colors.parchment));
-    this.add.text(x + w - 16, y + 20, `Lv ${mon.level}`, textStyle(15, UI.colors.gold)).setOrigin(1, 0);
-    this.add.text(x + 16, y + 41, species.types.join(' / '), textStyle(11, TYPE_COLORS[species.types[0]] ?? UI.colors.dim));
+    panel.nameText = this.add.text(x + 16, y + 20, '', textStyle(17, UI.colors.parchment));
+    panel.lvText = this.add.text(x + w - 16, y + 20, '', textStyle(15, UI.colors.gold)).setOrigin(1, 0);
+    panel.typeText = this.add.text(x + 16, y + 41, '', textStyle(11, UI.colors.dim));
     panel.bar = this.add.graphics();
     if (isPlayer) {
       panel.hpText = this.add.text(x + w - 16, y + 64, '', textStyle(13, UI.colors.parchment)).setOrigin(1, 0);
       panel.expBar = this.add.graphics();
     }
-    this.redrawPanel(panel);
+    this.setPanelMon(panel, mon);
     return panel;
+  }
+
+  /** Point a panel at a (possibly new) mon — used on switch-in and evolution. */
+  setPanelMon(panel, mon) {
+    panel.mon = mon;
+    const species = LUMINARY_SPECIES[mon.speciesId];
+    panel.nameText.setText(mon.nickname ?? mon.name);
+    panel.lvText.setText(`Lv ${mon.level}`);
+    panel.typeText.setText(species.types.join(' / ')).setColor(TYPE_COLORS[species.types[0]] ?? UI.colors.dim);
+    this.redrawPanel(panel);
   }
 
   redrawPanel(panel) {
@@ -155,9 +164,11 @@ class BattleScene extends Phaser.Scene {
     this.prompt(`What will ${this.playerMon.nickname ?? this.playerMon.name} do?`);
     const W = this.scale.width, H = this.scale.height;
     this.menu = new MenuList(this, {
-      x: W - 150, y: H - 92, spacing: 28, fontSize: 16, depth: 5,
+      x: W - 150, y: H - 130, spacing: 24, fontSize: 15, depth: 5,
       items: [
         { label: 'Fight', onSelect: () => this.openMoveMenu() },
+        { label: 'Item', onSelect: () => this.tryItem() },
+        { label: 'Switch', onSelect: () => this.trySwitch() },
         { label: `Capture  (${Save.state.inventory.capture_orb ?? 0})`, onSelect: () => this.tryCapture() },
         { label: 'Run', onSelect: () => this.tryRun() },
       ],
@@ -188,13 +199,75 @@ class BattleScene extends Phaser.Scene {
       };
     });
     this.menu = new MenuList(this, {
-      x: W - 150, y: H - 96, spacing: 26, fontSize: 15, depth: 5,
+      x: W - 150, y: H - 130, spacing: 26, fontSize: 15, depth: 5,
       items,
       onCancel: () => {
         this.closeMenu();
         this.openCommandMenu();
       },
     });
+  }
+
+  // ------------------------------------------------------- item / switch --
+
+  /** Item command: heal items only; using one consumes the turn. */
+  tryItem() {
+    this.closeMenu();
+    this.itemsPanel = new ItemsPanel(this, {
+      usableOnly: true,
+      onCancel: () => {
+        this.itemsPanel.destroy();
+        this.itemsPanel = null;
+        this.openCommandMenu();
+      },
+      onUse: async (item) => {
+        this.itemsPanel.destroy();
+        this.itemsPanel = null;
+        if (this.playerMon.currentHp >= this.playerMon.stats.hp) {
+          await this.say(`${this.playerMon.nickname ?? this.playerMon.name} is already at full health!`);
+          this.openCommandMenu();
+          return;
+        }
+        Save.state.inventory[item.id]--;
+        await this.say(`${Save.state.playerName} used the ${item.name}!`);
+        await this.tweenHp(this.playerPanel, Math.min(this.playerMon.stats.hp, this.playerMon.currentHp + item.heal));
+        await this.say(`${this.playerMon.nickname ?? this.playerMon.name} recovered HP!`);
+        // Using an item gives the wild a free move.
+        await this.useMove('wild', this.wildMove());
+        if (this.playerMon.currentHp <= 0) return this.handleFaint();
+        this.openCommandMenu();
+      },
+    });
+  }
+
+  /** Switch command — does NOT spend the turn (the incoming Luminary acts). */
+  trySwitch() {
+    this.closeMenu();
+    const picker = new PartyPanel(this, {
+      mode: 'select',
+      title: 'SWITCH TO…',
+      selectable: (mon) => mon.currentHp > 0 && mon !== this.playerMon,
+      onCancel: () => {
+        picker.destroy();
+        this.openCommandMenu();
+      },
+      onSelect: async (mon) => {
+        picker.destroy();
+        await this.say(`Come back, ${this.playerMon.nickname ?? this.playerMon.name}!`);
+        this.switchTo(mon);
+        await this.say(`Go, ${mon.nickname ?? mon.name}!`);
+        this.openCommandMenu();
+      },
+    });
+  }
+
+  /** Swap the active mon: sprite, panel, and reset its stat stages. */
+  switchTo(mon) {
+    this.playerMon = mon;
+    this.playerStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+    ensureLuminaryTexture(this, mon.speciesId);
+    this.playerSprite.setTexture(`lum_${mon.speciesId}`).setAlpha(1);
+    this.setPanelMon(this.playerPanel, mon);
   }
 
   /** Pick the wild's move: random among those with PP remaining. */
@@ -275,6 +348,8 @@ class BattleScene extends Phaser.Scene {
     this.tweens.add({ targets: this.wildSprite, alpha: 0, y: this.wildSprite.y + 24, duration: 420 });
     await this.say(`The wild ${this.wild.name} fainted!`);
     await this.grantBattleExp();
+    await this.maybeEvolve();
+    await this.applyBondGain();
     await Save.autoSave(this, 'battle-end');
     this.scene.start('WorldScene', { battleResult: { text: `Victory! ${this.playerMon.nickname ?? this.playerMon.name} grows stronger.`, ok: true } });
   }
@@ -282,12 +357,101 @@ class BattleScene extends Phaser.Scene {
   async grantBattleExp() {
     if (!Save.state.dex.seen.includes(this.wild.speciesId)) Save.state.dex.seen.push(this.wild.speciesId);
     const amount = expReward(this.wild);
-    const levels = grantExp(this.playerMon, amount);
-    this.redrawPanel(this.playerPanel);
-    await this.say(`${this.playerMon.nickname ?? this.playerMon.name} gained ${amount} EXP!`);
+    const mon = this.playerMon;
+    const levels = grantExp(mon, amount);
+    this.setPanelMon(this.playerPanel, mon);
+    await this.say(`${mon.nickname ?? mon.name} gained ${amount} EXP!`);
     for (const lv of levels) {
-      this.redrawPanel(this.playerPanel);
-      await this.say(`${this.playerMon.nickname ?? this.playerMon.name} grew to Lv ${lv}!`);
+      this.setPanelMon(this.playerPanel, mon);
+      await this.say(`${mon.nickname ?? mon.name} grew to Lv ${lv}!`);
+      for (const moveId of movesLearnedAt(mon, lv)) {
+        await this.offerMove(mon, moveId);
+      }
+    }
+  }
+
+  /** Teach a level-up move; with 4 moves known, ask which to forget. */
+  async offerMove(mon, moveId) {
+    const name = mon.nickname ?? mon.name;
+    if (mon.moves.length < 4) {
+      learnMove(mon, moveId);
+      await this.say(`${name} learned ${MOVES[moveId].name}!`);
+      return;
+    }
+    await this.say(`${name} wants to learn ${MOVES[moveId].name}, but already knows 4 moves.`);
+    const replaceIndex = await this.chooseMoveToReplace(mon, moveId);
+    if (replaceIndex < 0) {
+      await this.say(`${name} did not learn ${MOVES[moveId].name}.`);
+      return;
+    }
+    const forgotten = MOVES[mon.moves[replaceIndex].id].name;
+    learnMove(mon, moveId, replaceIndex);
+    await this.say(`${name} forgot ${forgotten} and learned ${MOVES[moveId].name}!`);
+  }
+
+  /** Modal: pick a move slot to overwrite, or Skip. Resolves to index or -1. */
+  chooseMoveToReplace(mon, newMoveId) {
+    return new Promise((resolve) => {
+      const W = this.scale.width, H = this.scale.height;
+      const panel = drawPanel(this, W / 2 - 150, H / 2 - 130, 300, 230).setDepth(20);
+      const title = this.add
+        .text(W / 2, H / 2 - 106, `Forget which move\nfor ${MOVES[newMoveId].name}?`, textStyle(14, UI.colors.parchment, { align: 'center' }))
+        .setOrigin(0.5)
+        .setDepth(21);
+      const cleanup = (idx) => {
+        menu.destroy();
+        panel.destroy();
+        title.destroy();
+        resolve(idx);
+      };
+      const menu = new MenuList(this, {
+        x: W / 2, y: H / 2 - 56, spacing: 30, fontSize: 14, depth: 21,
+        items: [
+          ...mon.moves.map((m, i) => ({ label: MOVES[m.id].name, onSelect: () => cleanup(i) })),
+          { label: 'Skip', onSelect: () => cleanup(-1) },
+        ],
+        onCancel: () => cleanup(-1),
+      });
+    });
+  }
+
+  /** Evolution check after exp — flash animation, transform, dex update. */
+  async maybeEvolve() {
+    const mon = this.playerMon;
+    if (!evolutionFor(mon)) return;
+    const oldName = mon.nickname ?? mon.name;
+    await this.say(`What? ${oldName} is changing...`);
+
+    const W = this.scale.width, H = this.scale.height;
+    const flash = this.add.rectangle(W / 2, H / 2, W, H, 0xffffff, 0).setDepth(30);
+    await new Promise((res) =>
+      this.tweens.add({ targets: flash, alpha: 0.9, duration: 500, yoyo: true, ease: 'Sine.easeInOut', onComplete: res })
+    );
+    flash.destroy();
+
+    const to = evolve(mon);
+    ensureLuminaryTexture(this, mon.speciesId);
+    this.playerSprite.setTexture(`lum_${mon.speciesId}`);
+    this.setPanelMon(this.playerPanel, mon);
+    if (!Save.state.dex.seen.includes(mon.speciesId)) Save.state.dex.seen.push(mon.speciesId);
+    if (!Save.state.dex.caught.includes(mon.speciesId)) Save.state.dex.caught.push(mon.speciesId);
+    const burst = this.add.particles(this.playerSprite.x, this.playerSprite.y, 'spark', {
+      speed: { min: 50, max: 140 }, lifespan: 800, scale: { start: 1.8, end: 0 }, tint: [0xd4af37, 0xefe2a0], emitting: false,
+    });
+    burst.explode(30);
+    await this.say(`${oldName} evolved into ${to.name}!`);
+  }
+
+  /** Shared danger deepens bonds; the signature move unlocks at Bond 8. */
+  async applyBondGain() {
+    const mon = this.playerMon;
+    const result = gainBond(mon);
+    if (result.gained) {
+      this.setPanelMon(this.playerPanel, mon);
+      await this.say(`${mon.nickname ?? mon.name}'s bond with ${Save.state.playerName} deepened. (Bond ${mon.bond})`);
+    }
+    if (result.unlockedSignature) {
+      await this.say(`${mon.nickname ?? mon.name} unlocked its signature move — ${result.unlockedSignature}!`);
     }
   }
 
@@ -297,13 +461,9 @@ class BattleScene extends Phaser.Scene {
 
     const next = Save.state.party.find((m) => m.currentHp > 0);
     if (next) {
-      // Auto-send the next healthy Luminary (manual switching comes with the party menu).
-      this.playerMon = next;
-      ensureLuminaryTexture(this, next.speciesId);
-      this.playerStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
-      this.playerSprite.setTexture(`lum_${next.speciesId}`).setAlpha(1).setY(this.playerSprite.y - 24);
-      this.playerPanel.mon = next;
-      this.redrawPanel(this.playerPanel);
+      // Auto-send the next healthy Luminary.
+      this.switchTo(next);
+      this.playerSprite.setY(this.playerSprite.y - 24);
       await this.say(`Go, ${next.nickname ?? next.name}!`);
       this.openCommandMenu();
       return;

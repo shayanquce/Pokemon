@@ -98,6 +98,66 @@ function grantExp(mon, amount) {
   return levelsGained;
 }
 
+/** Learnset moves unlocked exactly at `level` that the mon doesn't know. */
+function movesLearnedAt(mon, level) {
+  const species = LUMINARY_SPECIES[mon.speciesId];
+  return species.learnset
+    .filter((e) => e.level === level && !mon.moves.some((m) => m.id === e.id))
+    .map((e) => e.id);
+}
+
+/** Teach a move in place (assumes a free slot or that the caller replaced one). */
+function learnMove(mon, moveId, replaceIndex = -1) {
+  const slot = { id: moveId, pp: MOVES[moveId].pp, maxPp: MOVES[moveId].pp };
+  if (replaceIndex >= 0) mon.moves[replaceIndex] = slot;
+  else mon.moves.push(slot);
+}
+
+// -------------------------------------------------------------- evolution --
+
+/** The evolution this mon qualifies for right now, or null. */
+function evolutionFor(mon) {
+  const evo = LUMINARY_SPECIES[mon.speciesId].evolution;
+  if (!evo?.toId || !LUMINARY_SPECIES[evo.toId]) return null;
+  return mon.level >= evo.level ? evo : null;
+}
+
+/** Transform in place; stats recalc and the max-HP gain is added as healing. */
+function evolve(mon) {
+  const evo = evolutionFor(mon);
+  if (!evo) return null;
+  const to = LUMINARY_SPECIES[evo.toId];
+  const before = mon.stats;
+  mon.speciesId = to.id;
+  mon.name = to.name;
+  mon.stats = calcStats(to, mon.level);
+  mon.currentHp = Math.min(mon.stats.hp, mon.currentHp + (mon.stats.hp - before.hp));
+  return to;
+}
+
+// ------------------------------------------------------------------- bond --
+
+const SIGNATURE_BOND = 8;
+
+/**
+ * Post-victory bond growth for the active mon (~40% chance, cap 10).
+ * Returns { gained, unlockedSignature } — the signature move unlocks at
+ * Bond 8 when a move slot is free (Echo Surge at Bond 10 is a later phase).
+ */
+function gainBond(mon) {
+  const out = { gained: false, unlockedSignature: null };
+  if (mon.bond < 10 && Math.random() < 0.4) {
+    mon.bond++;
+    out.gained = true;
+  }
+  const sig = LUMINARY_SPECIES[mon.speciesId].signatureMove;
+  if (sig && mon.bond >= SIGNATURE_BOND && !mon.moves.some((m) => m.id === sig) && mon.moves.length < 4) {
+    learnMove(mon, sig);
+    out.unlockedSignature = MOVES[sig].name;
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------- capture --
 
 /**
