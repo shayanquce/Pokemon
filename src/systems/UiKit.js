@@ -123,6 +123,7 @@ function formatTimestamp(ms) {
 
 const MAP_DISPLAY_NAMES = {
   ashfen_grove: 'Ashfen — Whispergrove',
+  ashfen_town: 'Ashfen Town',
 };
 
 function prettyMapName(id) {

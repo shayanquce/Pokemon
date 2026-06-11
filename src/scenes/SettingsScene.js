@@ -82,6 +82,7 @@ class SettingsScene extends Phaser.Scene {
       this.values[row.key] = row.values[idx];
     }
     window.LuminaryNative.settings.set({ [row.key]: this.values[row.key] });
+    if (window.GameSettings) window.GameSettings[row.key] = this.values[row.key];
     this.refresh();
   }
 

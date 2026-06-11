@@ -1,7 +1,7 @@
 {
   "name": "luminary-game",
   "productName": "Luminary - Echoes of the Forgotten Age",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Luminary: Echoes of the Forgotten Age — a monster-taming RPG built with Electron + Phaser 3",
   "main": "main.js",
   "type": "module",
@@ -9,6 +9,8 @@
   "scripts": {
     "start": "electron .",
     "save-smoke": "electron . --save-smoke",
+    "playtest-game": "electron . --remote-debugging-port=9223",
+    "playtest": "node scripts/playtest-cdp.mjs",
     "fix-electron": "node node_modules/electron/install.js"
   },
   "license": "MIT",

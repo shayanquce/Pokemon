@@ -1,44 +1,14 @@
 /**
- * WorldScene — the first walkable map: Whispergrove, on the edge of Ashfen.
+ * WorldScene — renders any map from src/data/maps.js: grid movement,
+ * collision, NPCs with dialogue, doors, exit warps between maps, the Save
+ * Shrine, and wild-encounter rolls in tall grass (hands off to BattleScene).
  *
- * Phase-1 scope: grid-based movement, collision, depth-sorted Save Shrine
- * with manual save (confirmation animation + screenshot thumbnail), pause
- * menu with auto-save on exit. Encounters, NPCs and battles hook in next.
+ * Auto-saves on: arrival, map transition, dialogue completion, quit.
  */
 
 const TILE = 32;
 
-/**
- * Tile legend:
- *   T tree (solid)   W water (solid)   S Save Shrine (solid, interact)
- *   G grass          g tall grass      P path          F flowers
- */
-const ASHFEN_GROVE = {
-  id: 'ashfen_grove',
-  name: 'Ashfen — Whispergrove',
-  //       012345678901234567890123456789
-  rows: [
-    'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
-    'TGGGGGGGGGGFGGGGGGGGGGGWWWWWWT', // 1
-    'TGGGFGGGGGGGGGGGGTGGGGWWWWWWWT', // 2
-    'TGGGGGGGGGGGGGGGGGGGGGWWWWWWGT', // 3
-    'TGGTGGGGGGGGGGGGGGGGGGGWWWWGGT', // 4
-    'TGGGGGGGGGPPPPPPPPPGGGGGWWGGGT', // 5
-    'TGGGGGGFGGPGGGGGGGPGGGGGGGGGGT', // 6
-    'TGggGGGGGGPGGSGGGGPGGGGFGGGGGT', // 7  <- Save Shrine at (13,7)
-    'TGggggGGGGPGGGGGGGPGGGGGGGTGGT', // 8
-    'TGggggGGGGPPPPPPPPPGGGGGGGGGGT', // 9
-    'TGGggGGGGGGGGGPGGGGGGggggGGGGT', // 10
-    'TGGGGGGTGGGGGGPGGGGGGggggggGGT', // 11
-    'TGGGGGGGGGGGGGPGGGGGGGggggGGGT', // 12
-    'TGFGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 13
-    'TGGGGGGGGGGGGGPGGGGTGGGGGFGGGT', // 14
-    'TGGGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 15
-    'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 16
-  ],
-};
-
-const SOLID_TILES = new Set(['T', 'W', 'S']);
+const SOLID_TILES = new Set(['T', 'W', 'S', 'B', 'R', 'D']);
 const FACING_DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
 class WorldScene extends Phaser.Scene {
@@ -47,12 +17,13 @@ class WorldScene extends Phaser.Scene {
   }
 
   create(data) {
-    console.log('[boot] WorldScene ready');
+    this.map = MAPS[Save.state.currentMap] ?? MAPS.ashfen_grove;
+    console.log(`[boot] WorldScene ready — ${this.map.id}`);
     ensureWorldTextures(this);
     ensurePlayerTextures(this);
     ensureSparkTexture(this);
 
-    this.rows = ASHFEN_GROVE.rows;
+    this.rows = this.map.rows;
     this.mapW = this.rows[0].length;
     this.mapH = this.rows.length;
     this.rows.forEach((r, i) => {
@@ -60,6 +31,7 @@ class WorldScene extends Phaser.Scene {
     });
 
     this.buildMap();
+    this.spawnNpcs();
     this.spawnPlayer();
     this.buildHud();
 
@@ -73,21 +45,37 @@ class WorldScene extends Phaser.Scene {
     this.uiLock = false;
     this.pauseMenu = null;
 
-    Save.state.currentMap = ASHFEN_GROVE.id;
+    Save.state.currentMap = this.map.id;
+    this.announceDiscovery();
 
     if (data?.fresh) {
       this.toast(`Welcome to Whispergrove, ${Save.state.playerName}. Your journey was recorded.`, true);
     }
+    if (data?.battleResult) this.toast(data.battleResult.text, data.battleResult.ok !== false);
+
     // Capture a thumbnail for the slot card once the first frame has rendered.
     this.time.delayedCall(400, () => Save.autoSave(this, 'arrival'));
   }
 
+  /** First visit to a map: record it and show a discovery banner. */
+  announceDiscovery() {
+    const found = Save.state.discoveredLocations ?? (Save.state.discoveredLocations = []);
+    if (!found.includes(this.map.id)) {
+      found.push(this.map.id);
+      this.time.delayedCall(300, () => this.toast(`Discovered — ${this.map.name}`, true));
+    }
+  }
+
   // ----------------------------------------------------------------- map --
 
-  /** Place ground tiles, solids, and the Save Shrine object. */
+  /** Place ground tiles, solids, doors, and the Save Shrine object. */
   buildMap() {
-    const groundFor = { G: 'tile_grass', g: 'tile_grass_tall', F: 'tile_flowers', P: 'tile_path', W: 'tile_water', T: 'tile_tree', S: 'tile_grass' };
+    const groundFor = {
+      G: 'tile_grass', g: 'tile_grass_tall', F: 'tile_flowers', P: 'tile_path',
+      W: 'tile_water', T: 'tile_tree', S: 'tile_grass', R: 'tile_roof', B: 'tile_wall', D: 'tile_door',
+    };
 
+    this.shrineTile = null;
     for (let y = 0; y < this.mapH; y++) {
       for (let x = 0; x < this.mapW; x++) {
         const ch = this.tileAt(x, y);
@@ -111,8 +99,65 @@ class WorldScene extends Phaser.Scene {
   }
 
   isSolid(x, y) {
-    if (x < 0 || y < 0 || x >= this.mapW || y >= this.mapH) return true;
+    if (x < 0 || y < 0 || x >= this.mapW || y >= this.mapH) {
+      // Off-map is only reachable through an exit tile, which warps first.
+      return true;
+    }
+    if (this.npcAt(x, y)) return true;
     return SOLID_TILES.has(this.tileAt(x, y));
+  }
+
+  exitAt(x, y) {
+    return (this.map.exits ?? []).find((e) => e.x === x && e.y === y) ?? null;
+  }
+
+  doorAt(x, y) {
+    return (this.map.doors ?? []).find((d) => d.x === x && d.y === y) ?? null;
+  }
+
+  // ---------------------------------------------------------------- npcs --
+
+  spawnNpcs() {
+    this.npcs = (this.map.npcs ?? []).map((def) => {
+      ensureNpcTextures(this, def.id, def.palette);
+      const tex = def.facing === 'up' ? `npc_${def.id}_up` : def.facing === 'down' ? `npc_${def.id}_down` : `npc_${def.id}_side`;
+      const sprite = this.add
+        .image(def.x * TILE + TILE / 2, def.y * TILE + TILE - 2, tex)
+        .setOrigin(0.5, 1)
+        .setDepth(def.y)
+        .setFlipX(def.facing === 'left');
+      return { def, sprite };
+    });
+  }
+
+  npcAt(x, y) {
+    return this.npcs?.find((n) => n.def.x === x && n.def.y === y) ?? null;
+  }
+
+  /** Face the player, run dialogue, persist npcStates + flags, auto-save. */
+  talkTo(npc) {
+    const { def, sprite } = npc;
+    // NPC turns toward the player.
+    const facePlayer = { up: 'down', down: 'up', left: 'right', right: 'left' }[this.facing];
+    const tex = facePlayer === 'up' ? `npc_${def.id}_up` : facePlayer === 'down' ? `npc_${def.id}_down` : `npc_${def.id}_side`;
+    sprite.setTexture(tex).setFlipX(facePlayer === 'left');
+
+    const talked = Save.state.npcStates?.[def.id]?.talked;
+    const raw = talked && def.repeatDialogue?.length ? def.repeatDialogue : def.dialogue;
+    const pages = raw.map((p) => p.replaceAll('{player}', Save.state.playerName));
+
+    this.uiLock = true;
+    new DialogueBox(this, {
+      speaker: def.name,
+      pages,
+      onDone: async () => {
+        if (!Save.state.npcStates) Save.state.npcStates = {};
+        Save.state.npcStates[def.id] = { ...Save.state.npcStates[def.id], talked: true };
+        if (def.setFlags) Object.assign(Save.state.storyFlags, def.setFlags);
+        this.uiLock = false;
+        await Save.autoSave(this, `dialogue:${def.id}`);
+      },
+    });
   }
 
   // -------------------------------------------------------------- player --
@@ -154,7 +199,9 @@ class WorldScene extends Phaser.Scene {
     this.applyFacing();
     const nx = this.tileX + dx;
     const ny = this.tileY + dy;
-    if (this.isSolid(nx, ny)) return;
+
+    const exit = this.exitAt(nx, ny);
+    if (!exit && this.isSolid(nx, ny)) return;
 
     this.moving = true;
     this.tileX = nx;
@@ -170,9 +217,26 @@ class WorldScene extends Phaser.Scene {
       onComplete: () => {
         this.moving = false;
         this.player.setDepth(ny);
-        if (this.tileAt(nx, ny) === 'g') this.rustle(nx, ny);
+        if (exit) {
+          this.warpTo(exit);
+          return;
+        }
+        if (this.tileAt(nx, ny) === 'g') {
+          this.rustle(nx, ny);
+          this.maybeEncounter();
+        }
       },
     });
+  }
+
+  /** Cross into a connected map: persist position there, auto-save, restart. */
+  async warpTo(exit) {
+    this.uiLock = true;
+    Save.state.currentMap = exit.to;
+    Save.state.position = { x: exit.toX, y: exit.toY, facing: exit.facing };
+    await Save.autoSave(this, `map-transition:${exit.to}`);
+    this.cameras.main.fadeOut(220, 7, 11, 20);
+    this.cameras.main.once('camerafadeoutcomplete', () => this.scene.restart({}));
   }
 
   /** Cosmetic leaf-rustle when wading through tall grass. */
@@ -188,6 +252,28 @@ class WorldScene extends Phaser.Scene {
     this.time.delayedCall(600, () => p.destroy());
   }
 
+  /** Wild-encounter roll for the tall-grass tile just entered. */
+  maybeEncounter() {
+    const enc = this.map.encounters;
+    if (!enc || Math.random() >= enc.rate) return;
+    const { speciesId, level } = rollEncounter(enc);
+    this.uiLock = true;
+
+    // Brief alert flash, then hand off to the battle.
+    const W = this.scale.width, H = this.scale.height;
+    const flash = this.add.rectangle(W / 2, H / 2, W, H, 0x070b14, 0).setDepth(120);
+    this.tweens.add({
+      targets: flash,
+      alpha: 1,
+      duration: 160,
+      yoyo: true,
+      repeat: 1,
+      onComplete: () => {
+        this.scene.start('BattleScene', { wild: makeLuminary(speciesId, level) });
+      },
+    });
+  }
+
   // ------------------------------------------------------------ interact --
 
   /** Z/Enter: act on the tile the player is facing. */
@@ -196,6 +282,18 @@ class WorldScene extends Phaser.Scene {
     const [dx, dy] = FACING_DELTA[this.facing];
     const tx = this.tileX + dx;
     const ty = this.tileY + dy;
+
+    const npc = this.npcAt(tx, ty);
+    if (npc) {
+      this.talkTo(npc);
+      return;
+    }
+    const door = this.doorAt(tx, ty);
+    if (door) {
+      this.uiLock = true;
+      new DialogueBox(this, { pages: [door.text], onDone: () => (this.uiLock = false) });
+      return;
+    }
     if (this.shrineTile && tx === this.shrineTile.x && ty === this.shrineTile.y) {
       this.openShrine();
     }
@@ -305,7 +403,7 @@ class WorldScene extends Phaser.Scene {
   buildHud() {
     const W = this.scale.width, H = this.scale.height;
     drawPanel(this, 8, 8, 300, 34, { alpha: 0.8 }).setDepth(100);
-    this.add.text(22, 25, ASHFEN_GROVE.name, textStyle(15, UI.colors.gold)).setOrigin(0, 0.5).setDepth(101);
+    this.add.text(22, 25, this.map.name, textStyle(15, UI.colors.gold)).setOrigin(0, 0.5).setDepth(101);
 
     drawPanel(this, 8, H - 42, W - 16, 34, { alpha: 0.8 }).setDepth(100);
     this.hudText = this.add.text(22, H - 25, '', textStyle(14, UI.colors.parchment)).setOrigin(0, 0.5).setDepth(101);
@@ -320,7 +418,7 @@ class WorldScene extends Phaser.Scene {
     const s = Save.state;
     const lead = s.party[0];
     this.hudText.setText(
-      `${s.playerName}   Shards ${s.shards}   |   ${lead.name} Lv ${lead.level}   Bond ${lead.bond}   HP ${lead.currentHp}/${lead.stats.hp}`
+      `${s.playerName}   Shards ${s.shards}   Orbs ${s.inventory?.capture_orb ?? 0}   |   ${lead.nickname ?? lead.name} Lv ${lead.level}   Bond ${lead.bond}   HP ${lead.currentHp}/${lead.stats.hp}`
     );
   }
 

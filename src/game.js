@@ -8,6 +8,11 @@ const GAME_HEIGHT = 544; // 30 x 17 tiles at 32px
 window.addEventListener('load', () => {
   console.log('[boot] Luminary renderer starting — Phaser', Phaser.VERSION);
 
+  // Settings cache so widgets (e.g. DialogueBox text speed) read synchronously.
+  // SettingsScene keeps this object up to date as the player adjusts values.
+  window.GameSettings = { musicVolume: 7, sfxVolume: 7, textSpeed: 'normal' };
+  window.LuminaryNative.settings.get().then((s) => Object.assign(window.GameSettings, s));
+
   window.game = new Phaser.Game({
     type: Phaser.AUTO,
     parent: 'game-root',
@@ -20,6 +25,6 @@ window.addEventListener('load', () => {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [TitleScene, NewGameScene, SettingsScene, WorldScene],
+    scene: [TitleScene, NewGameScene, SettingsScene, WorldScene, BattleScene],
   });
 });

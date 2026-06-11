@@ -5,9 +5,9 @@ fractured continent of Veranthis. Built with **Electron + Phaser 3**, fully
 offline, with a checksum-validated save system that lives in the OS user-data
 folder.
 
-## Current build — v0.1 "Save Shrine"
+## Current build — v0.2 "Ashfen Stirs"
 
-Phase 1 of the build order is complete:
+Build-order steps 1–5 are complete:
 
 - Electron shell + game window
 - **Save system**: 3 named slots, SHA-256 checksums, 3 rolling round-robin
@@ -15,8 +15,17 @@ Phase 1 of the build order is complete:
   thumbnails, playtime tracking
 - Title screen (New Game / Load Game / Settings / Quit)
 - New-game flow: name entry → starter selection (Embrik / Tidalink / Thornpaw) → slot pick
-- First walkable map (Ashfen — Whispergrove) with grid movement, collision,
-  and an interactive **Save Shrine** (heals the party, confirmation animation)
+- Two connected maps — **Ashfen Town** (3 buildings, doors, 4 NPCs) and
+  **Whispergrove** (tall grass, Save Shrine) — with warps, discovery banners,
+  grid movement and collision
+- **Dialogue system**: typewriter text honoring the Text Speed setting,
+  speaker nameplates, first-time vs. repeat dialogue, story flags
+  (`met_lyra`, `ceremony_complete`), auto-save after every conversation
+- **Wild encounters & battles**: encounter tables in tall grass, turn-based
+  battles (Fight / Capture / Run), type chart, STAB, crits, stat stages,
+  EXP + level-ups, Capture Orbs with shake animation, party/Echo Vault
+  routing, blackout recovery at the shrine
+- 6 Luminary defined: 3 starters + 3 wilds (Sprigling, Ashvole, Glimwing)
 - Settings (music/SFX volume, text speed) persisted instantly
 
 ## Getting started
@@ -27,6 +36,10 @@ Requires Node.js 18+.
 npm install     # if dependencies are not already installed
 npm start       # launch the game
 npm run save-smoke   # headless self-test of the save system (no window)
+
+# Automated gameplay test (two terminals):
+npm run playtest-game   # terminal 1: launches the game with a CDP port
+npm run playtest        # terminal 2: drives a full playthrough, 22 checks
 ```
 
 ## Controls
@@ -61,9 +74,9 @@ menu. Closing the window abruptly loses anything after the last save.
 
 1. ~~Electron shell + save system~~ ✅
 2. ~~Title screen + new game flow~~ ✅
-3. ~~Basic map rendering + player movement~~ ✅ (first grove; Tiled maps next)
-4. First town (Ashfen) fully walkable with NPCs
-5. Wild encounter system + battle engine
+3. ~~Basic map rendering + player movement~~ ✅
+4. ~~First town (Ashfen) fully walkable with NPCs~~ ✅
+5. ~~Wild encounter system + battle engine~~ ✅ (Fight/Capture/Run; party menu & items next)
 6. First 30 Luminary
 7. First dungeon + Warden battle
 8. Inventory + healing + capture system
@@ -95,10 +108,13 @@ GitHub: https://github.com/shayanquce/Pokemon
 ├── docs/
 │   ├── PROJECT_STATE.md Checkpoint + architecture
 │   └── DESIGN_SPEC.md   Full game design spec
+├── scripts/
+│   └── playtest-cdp.mjs Automated CDP playthrough test
 └── src/
     ├── index.html
     ├── game.js          Phaser bootstrap
-    ├── scenes/          TitleScene, NewGameScene, SettingsScene, WorldScene
-    ├── data/            starters.js (species + moves; full dex grows here)
-    └── systems/         SaveSystem, SaveSlotPanel, UiKit, PlaceholderArt
+    ├── scenes/          TitleScene, NewGameScene, SettingsScene, WorldScene, BattleScene
+    ├── data/            starters.js (species + moves), maps.js (maps/NPCs/encounters)
+    └── systems/         SaveSystem, SaveSlotPanel, UiKit, PlaceholderArt,
+                         DialogueBox, BattleEngine
 ```

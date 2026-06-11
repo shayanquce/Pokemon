@@ -65,9 +65,9 @@ Balanced 18×18 type chart. Bond 1–10, signature move at high bond, Echo Surge
 1. ✅ Electron + save
 2. ✅ Title + new game
 3. ✅ Map + movement
-4. ⏭️ Ashfen town + NPCs
-5. Encounters + battle
-6. First 30 Luminary
+4. ✅ Ashfen town + NPCs
+5. ✅ Encounters + battle
+6. ⏭️ First 30 Luminary (party/inventory menus + bond + evolutions first — see PROJECT_STATE.md)
 7. First dungeon + Warden
 8. Inventory + capture
 9. Chapter 1 dialogue/choices
