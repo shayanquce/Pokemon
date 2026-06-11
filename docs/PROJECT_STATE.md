@@ -1,10 +1,28 @@
-# Project State — v0.7 "The Coast Road" checkpoint (2026-06-11)
+# Project State — v0.8 "Shattered Echoes" checkpoint (2026-06-11)
 
-> Paused after build-order step 8: Echo Vault UI + the Keldrath Coast opener.
-> All automated tests pass: 6 save-smoke, 162 engine checks, 74 live CDP
-> playtest checks, plus visual verification via screenshot/texture dumps.
+> Paused after status conditions + Echo Surge (build-order step 9, first
+> half). All automated tests pass: 6 save-smoke, 177 engine checks, 74 live
+> CDP playtest checks (run twice to confirm status procs don't flake the
+> scripted battles).
 
 ## What runs today
+
+### v0.8 battle systems (step 9a)
+
+- **Status conditions** (`BattleEngine.js` STATUSES): classic **burn**
+  (1/12 max-HP chip end of turn, physical damage dealt x0.75) and **sleep**
+  (skips 1–3 turns, then wakes), plus the spec's own three — **Shattered**
+  (+30% physical damage taken), **Echoed** (+30% special damage taken),
+  **Hollowed** (-30% damage dealt). One condition at a time
+  (`tryInflictStatus`); shrine rest and blackout clear them. Sleep is gated
+  in `statusCanAct`, burn chip in `statusEndOfTurn` (both ends of the turn,
+  in `resolveTurn`). Panels show a colored tag (BRN/SLP/SHT/ECH/HLW)
+- **Moves that inflict** (`inflicts: { id, chance }`): cinder_snap 10%/
+  flame_burst 15% burn, glowpulse 15% sleep, pebble_toss 10% shattered,
+  wisp_flare 15% echoed, gloom_fang 15% hollowed
+- **Echo Surge** (Bond 10): the first signature-move use each battle blazes
+  — x1.5 damage (`computeDamage` opts.surgeMult), gold burst + message,
+  `this.surgeUsed` once per battle (mirrors the Warden's Oath pattern)
 
 ### v0.7 content (step 8)
 
@@ -68,8 +86,8 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 162 checks — maps/species/exits are auto-derived, so
-                       # new content is covered by adding data alone
+npm run engine-test    # 177 checks — maps/species/exits are auto-derived;
+                       # status/surge multipliers are checked statistically
 npm run playtest-game  # terminal 1: game with CDP port 9223
 npm run playtest       # terminal 2: 74 live checks — v0.5 set plus Echo Vault
                        # (deposit/withdraw/last-companion rule), Keldrath gate
@@ -136,7 +154,8 @@ third stages.
 
 ## Not built yet (do not assume exists)
 
-- Status conditions; Echo Surge (Bond 10); bond from shrine rests
+- Status-curing items; status infliction from wild AI tuning beyond move data
+- Bond gain from shrine rests
 - Evolutions for road/cave/coast wilds; third-stage starter evolutions
 - Keldrath cliff road north (Pim mentions it; map doesn't exist)
 - Building interiors, audio, packaging, full 18×18 type chart
@@ -145,15 +164,16 @@ third stages.
 
 ## Next session — plan (in priority order)
 
-1. **Status conditions** in battle (burn/sleep + spec's Shattered/Echoed/
-   Hollowed), then Echo Surge at Bond 10
-2. **Chapter 1 story beats**: Elder Maren post-badge dialogue, first
-   Hollowed Chain scout encounter on the coast (follows `heard_chain_rumor`)
-3. **Evolutions** for road/cave/coast wilds (Voltail, Bristleboar, Gloombat,
+1. **Chapter 1 story beats**: Elder Maren post-badge dialogue, first
+   Hollowed Chain scout encounter on the coast (follows `heard_chain_rumor`,
+   could be a `battle:` NPC appearing on the keldrath_gate shore once the
+   rumor flag is set — use `hiddenIfFlag` inverted or a `showIfFlag` addition)
+2. **Evolutions** for road/cave/coast wilds (Voltail, Bristleboar, Gloombat,
    Brinepup… — design stats + pixel maps)
-4. **Keldrath cliff road** north (`keldrath_cliffs`): next route toward the
+3. **Keldrath cliff road** north (`keldrath_cliffs`): next route toward the
    second Warden, Lyra rematch on the way
-5. Healer NPC in Ashfen Town or Keldrath (free rest)
+4. Healer NPC in Ashfen Town or Keldrath (free rest); status-curing items
+5. Audio pass (region BGM + battle SFX) or packaging when content settles
 
 ## Dependencies
 

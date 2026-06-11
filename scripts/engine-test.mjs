@@ -17,7 +17,7 @@ const exported = [
   'MAPS', 'MOVES', 'LUMINARY_SPECIES', 'ITEMS', 'TRAINERS', 'makeLuminary', 'calcStats', 'rollEncounter',
   'typeMultiplier', 'stageMultiplier', 'computeDamage', 'applySupportEffect', 'expToNext',
   'expReward', 'grantExp', 'movesLearnedAt', 'learnMove', 'evolutionFor', 'evolve', 'gainBond',
-  'rollCapture', 'rollEscape',
+  'rollCapture', 'rollEscape', 'STATUSES', 'tryInflictStatus', 'statusCanAct', 'statusEndOfTurn',
 ];
 const source =
   ['src/data/starters.js', 'src/data/items.js', 'src/data/maps.js', 'src/data/trainers.js', 'src/systems/BattleEngine.js']
@@ -101,6 +101,53 @@ const maxBond = G.makeLuminary('embrik', 5);
 maxBond.bond = 10;
 for (let i = 0; i < 50; i++) G.gainBond(maxBond);
 check('bond capped at 10', maxBond.bond === 10);
+
+// --- status conditions ----------------------------------------------------------
+for (const [moveId, statusId] of [['cinder_snap', 'burn'], ['glowpulse', 'sleep'], ['pebble_toss', 'shattered'], ['wisp_flare', 'echoed'], ['gloom_fang', 'hollowed']]) {
+  check(`${moveId} inflicts ${statusId}`, G.MOVES[moveId].inflicts?.id === statusId && !!G.STATUSES[statusId]);
+}
+const victim = G.makeLuminary('sprigling', 5);
+const landed = G.tryInflictStatus({ inflicts: { id: 'burn', chance: 100 } }, victim, () => 0);
+check('status lands at 100% chance', landed?.id === 'burn' && victim.status?.id === 'burn');
+check('existing status not overwritten', G.tryInflictStatus({ inflicts: { id: 'sleep', chance: 100 } }, victim, () => 0) === null && victim.status.id === 'burn');
+const chip = G.statusEndOfTurn(victim);
+check('burn chips 1/12 max HP', chip.damage === Math.max(1, Math.floor(victim.stats.hp / 12)));
+
+const sleeper = G.makeLuminary('ashvole', 5);
+sleeper.status = { id: 'sleep', turns: 2 };
+check('sleeping mon skips its turn', G.statusCanAct(sleeper).act === false);
+G.statusCanAct(sleeper); // second skipped turn
+const wake = G.statusCanAct(sleeper);
+check('wakes after its sleep turns', wake.act === true && /woke/.test(wake.message) && sleeper.status === null);
+
+// Status multipliers, statistically (damage rolls carry crit/range variance).
+const avgDamage = (atkStatus, defStatus, move, n = 800) => {
+  const atk = G.makeLuminary('embrik', 20);
+  const def = G.makeLuminary('pebblump', 12);
+  const st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+  let total = 0;
+  for (let i = 0; i < n; i++) {
+    atk.status = atkStatus ? { id: atkStatus, turns: -1 } : null;
+    def.status = defStatus ? { id: defStatus, turns: -1 } : null;
+    total += G.computeDamage(atk, def, G.MOVES[move], st, { ...st }).damage;
+  }
+  return total / n;
+};
+check('burn weakens physical damage', avgDamage('burn', null, 'cinder_snap') < avgDamage(null, null, 'cinder_snap') * 0.9);
+check('hollowed weakens all damage', avgDamage('hollowed', null, 'flame_burst') < avgDamage(null, null, 'flame_burst') * 0.85);
+check('shattered amplifies physical taken', avgDamage(null, 'shattered', 'cinder_snap') > avgDamage(null, null, 'cinder_snap') * 1.15);
+check('echoed amplifies special taken', avgDamage(null, 'echoed', 'flame_burst') > avgDamage(null, null, 'flame_burst') * 1.15);
+
+// --- Echo Surge -------------------------------------------------------------------
+const surgeAtk = G.makeLuminary('embrik', 30);
+const surgeDef = G.makeLuminary('pebblump', 15);
+const stg = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+let surged = 0, plain = 0;
+for (let i = 0; i < 800; i++) {
+  surged += G.computeDamage(surgeAtk, surgeDef, G.MOVES.cindershroud, stg, { ...stg }, { surgeMult: 1.5 }).damage;
+  plain += G.computeDamage(surgeAtk, surgeDef, G.MOVES.cindershroud, stg, { ...stg }).damage;
+}
+check('Echo Surge multiplies signature damage ~1.5x', surged > plain * 1.35 && surged < plain * 1.65);
 
 // --- capture / escape ----------------------------------------------------------
 let loHp = 0, hiHp = 0;

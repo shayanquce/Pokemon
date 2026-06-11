@@ -33,9 +33,10 @@ function stageMultiplier(stage) {
 
 /**
  * Damage for one move use. `stages` are the in-battle stat stages of each
- * side ({atk, def, spa, spd, spe}). Returns 0-damage results for support moves.
+ * side ({atk, def, spa, spd, spe}). Returns 0-damage results for support
+ * moves. `opts.surgeMult` is the Echo Surge multiplier (Bond 10 signature).
  */
-function computeDamage(attacker, defender, move, attackerStages, defenderStages) {
+function computeDamage(attacker, defender, move, attackerStages, defenderStages, opts = {}) {
   if (!move.power) return { damage: 0, typeMult: 1, crit: false, stab: false };
   const species = LUMINARY_SPECIES[attacker.speciesId];
   const defSpecies = LUMINARY_SPECIES[defender.speciesId];
@@ -49,9 +50,62 @@ function computeDamage(attacker, defender, move, attackerStages, defenderStages)
   const crit = Math.random() < 1 / 16;
   const rand = 0.85 + Math.random() * 0.15;
 
+  // Status conditions bend the math: burns sap physical force, a Hollowed
+  // spirit strikes dimly, Shattered armor and Echoed wards crack open.
+  let statusMult = 1;
+  if (attacker.status?.id === 'burn' && physical) statusMult *= 0.75;
+  if (attacker.status?.id === 'hollowed') statusMult *= 0.7;
+  if (defender.status?.id === 'shattered' && physical) statusMult *= 1.3;
+  if (defender.status?.id === 'echoed' && !physical) statusMult *= 1.3;
+
   let damage = (((2 * attacker.level) / 5 + 2) * move.power * (atkStat / Math.max(1, defStat))) / 50 + 2;
-  damage *= typeMult * (stab ? 1.5 : 1) * (crit ? 1.5 : 1) * rand;
+  damage *= typeMult * (stab ? 1.5 : 1) * (crit ? 1.5 : 1) * rand * statusMult * (opts.surgeMult ?? 1);
   return { damage: Math.max(1, Math.floor(damage)), typeMult, crit, stab };
+}
+
+// ----------------------------------------------------------------- status --
+
+/**
+ * Status conditions. Classic burn/sleep plus the spec's own three:
+ * Shattered (armor cracked: +30% physical damage taken), Echoed (wards rung
+ * hollow: +30% special damage taken), Hollowed (spirit dimmed: -30% damage
+ * dealt). One condition at a time; shrine rests and blackouts clear them.
+ */
+const STATUSES = {
+  burn: { id: 'burn', name: 'Burned', tag: 'BRN', color: '#e0703a', applied: 'was burned!' },
+  sleep: { id: 'sleep', name: 'Asleep', tag: 'SLP', color: '#9fd8ff', applied: 'fell fast asleep!' },
+  shattered: { id: 'shattered', name: 'Shattered', tag: 'SHT', color: '#9a8a66', applied: "was Shattered — its armor cracks!" },
+  echoed: { id: 'echoed', name: 'Echoed', tag: 'ECH', color: '#d4af37', applied: 'was Echoed — its wards ring hollow!' },
+  hollowed: { id: 'hollowed', name: 'Hollowed', tag: 'HLW', color: '#6a5a8a', applied: 'was Hollowed — its light dims!' },
+};
+
+/**
+ * Roll a move's `inflicts: { id, chance }` against the defender. Returns the
+ * STATUSES entry when a new condition lands, else null.
+ */
+function tryInflictStatus(move, defender, rng = Math.random) {
+  if (!move.inflicts || defender.status || defender.currentHp <= 0) return null;
+  if (rng() * 100 >= move.inflicts.chance) return null;
+  const id = move.inflicts.id;
+  defender.status = { id, turns: id === 'sleep' ? 1 + Math.floor(rng() * 3) : -1 };
+  return STATUSES[id];
+}
+
+/** Sleep gate: skips the turn while `turns` remain, then wakes. */
+function statusCanAct(mon) {
+  if (mon.status?.id !== 'sleep') return { act: true, message: null };
+  if (mon.status.turns > 0) {
+    mon.status.turns--;
+    return { act: false, message: 'is fast asleep.' };
+  }
+  mon.status = null;
+  return { act: true, message: 'woke up!' };
+}
+
+/** End-of-turn chip damage (burn only, 1/12 max HP). */
+function statusEndOfTurn(mon) {
+  if (mon.status?.id !== 'burn' || mon.currentHp <= 0) return null;
+  return { damage: Math.max(1, Math.floor(mon.stats.hp / 12)), message: 'is seared by its burn!' };
 }
 
 /** Support-move effects: 'raise_<stat>_<n>' on self. Returns a message part. */

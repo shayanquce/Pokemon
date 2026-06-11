@@ -22,6 +22,7 @@ class BattleScene extends Phaser.Scene {
     this.trainerFlag = data.flag ?? null; // story flag set when the trainer is beaten
     this.enemyIndex = 0;
     this.oathUsed = false; // Warden's Oath fires at most once per battle
+    this.surgeUsed = false; // Echo Surge (Bond 10) fires at most once per battle
     this.wild = this.trainer ? this.trainer.party[0] : data.wild;
   }
 
@@ -80,6 +81,7 @@ class BattleScene extends Phaser.Scene {
     panel.nameText = this.add.text(x + 16, y + 20, '', textStyle(17, UI.colors.parchment));
     panel.lvText = this.add.text(x + w - 16, y + 20, '', textStyle(15, UI.colors.gold)).setOrigin(1, 0);
     panel.typeText = this.add.text(x + 16, y + 41, '', textStyle(11, UI.colors.dim));
+    panel.statusText = this.add.text(x + w - 16, y + 41, '', textStyle(11, UI.colors.dim)).setOrigin(1, 0);
     panel.bar = this.add.graphics();
     if (isPlayer) {
       panel.hpText = this.add.text(x + w - 16, y + 64, '', textStyle(13, UI.colors.parchment)).setOrigin(1, 0);
@@ -100,6 +102,8 @@ class BattleScene extends Phaser.Scene {
   }
 
   redrawPanel(panel) {
+    const st = panel.mon.status ? STATUSES[panel.mon.status.id] : null;
+    panel.statusText.setText(st ? st.tag : '').setColor(st ? st.color : UI.colors.dim);
     const { x, y, w, mon, bar } = panel;
     const frac = Math.max(0, mon.currentHp / mon.stats.hp);
     const color = frac > 0.5 ? 0x7ec97e : frac > 0.2 ? 0xe8c84a : 0xe06060;
@@ -329,6 +333,19 @@ class BattleScene extends Phaser.Scene {
       await this.useMove(side, slot);
     }
 
+    // End-of-turn status chip (burn) on both sides.
+    for (const [mon, panel, label] of [
+      [this.playerMon, this.playerPanel, this.playerMon.nickname ?? this.playerMon.name],
+      [this.wild, this.wildPanel, this.enemyLabel()],
+    ]) {
+      if (mon.currentHp <= 0) continue;
+      const chip = statusEndOfTurn(mon);
+      if (chip) {
+        await this.tweenHp(panel, Math.max(0, mon.currentHp - chip.damage));
+        await this.say(`${label} ${chip.message}`);
+      }
+    }
+
     if (this.wild.currentHp <= 0) return this.winBattle();
     if (this.playerMon.currentHp <= 0) return this.handleFaint();
     this.openCommandMenu();
@@ -344,12 +361,34 @@ class BattleScene extends Phaser.Scene {
     const defSprite = side === 'player' ? this.wildSprite : this.playerSprite;
     const atkName = side === 'player' ? (attacker.nickname ?? attacker.name) : this.enemyLabel();
 
+    // Sleep gate: a sleeping Luminary loses its action (and may wake).
+    const actCheck = statusCanAct(attacker);
+    if (actCheck.message) {
+      const atkPanel = side === 'player' ? this.playerPanel : this.wildPanel;
+      this.redrawPanel(atkPanel);
+      await this.say(`${atkName} ${actCheck.message}`);
+    }
+    if (!actCheck.act) return;
+
     if (!slot) {
       await this.say(`${atkName} has no moves left! It struggles!`);
       slot = { id: null };
     }
     const move = slot.id ? MOVES[slot.id] : { name: 'Struggle', type: 'Beast', category: 'physical', power: 25, accuracy: 100 };
     if (slot.pp !== undefined && slot.id) slot.pp--;
+
+    // Echo Surge: at Bond 10, the first signature-move use each battle blazes.
+    let surge = false;
+    if (side === 'player' && move.signature && attacker.bond >= 10 && !this.surgeUsed) {
+      this.surgeUsed = true;
+      surge = true;
+      const ring = this.add.particles(this.playerSprite.x, this.playerSprite.y, 'spark', {
+        speed: { min: 60, max: 160 }, lifespan: 900, scale: { start: 2, end: 0 }, tint: [0xd4af37, 0xfff2c0], emitting: false,
+      });
+      ring.explode(40);
+      this.time.delayedCall(1000, () => ring.destroy());
+      await this.say(`The bond between ${Save.state.playerName} and ${atkName} BLAZES — ECHO SURGE!`);
+    }
 
     await this.say(`${atkName} used ${move.name}!`);
 
@@ -369,7 +408,7 @@ class BattleScene extends Phaser.Scene {
       return;
     }
 
-    const result = computeDamage(attacker, defender, move, atkStages, defStages);
+    const result = computeDamage(attacker, defender, move, atkStages, defStages, { surgeMult: surge ? 1.5 : 1 });
     // Hit feedback: flash + shake on the defender.
     defSprite.setTintFill(0xffffff);
     this.tweens.add({ targets: defSprite, x: defSprite.x + 8, duration: 50, yoyo: true, repeat: 2 });
@@ -380,6 +419,14 @@ class BattleScene extends Phaser.Scene {
     if (result.typeMult > 1) await this.say(pick(["It's super effective!", "It's super effective — the hit tears through!"]));
     else if (result.typeMult === 0) await this.say(`It doesn't affect ${side === 'player' ? this.enemyLabel() : defender.nickname ?? defender.name}...`);
     else if (result.typeMult < 1) await this.say(pick(["It's not very effective...", 'It barely leaves a mark...']));
+
+    // Status proc on the defender (one condition at a time).
+    const inflicted = tryInflictStatus(move, defender);
+    if (inflicted) {
+      this.redrawPanel(defPanel);
+      const defName = side === 'player' ? this.enemyLabel() : defender.nickname ?? defender.name;
+      await this.say(`${defName} ${inflicted.applied}`);
+    }
 
     if (side === 'player') await this.maybeWardenOath();
   }

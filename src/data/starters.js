@@ -10,8 +10,8 @@
 const MOVES = {
   cinder_snap: {
     id: 'cinder_snap', name: 'Cinder Snap', type: 'Flame', category: 'physical',
-    power: 42, accuracy: 100, pp: 30,
-    desc: 'A darting bite wreathed in embers.',
+    power: 42, accuracy: 100, pp: 30, inflicts: { id: 'burn', chance: 10 },
+    desc: 'A darting bite wreathed in embers. May burn.',
   },
   tail_glimmer: {
     id: 'tail_glimmer', name: 'Tail Glimmer', type: 'Light', category: 'support',
@@ -25,8 +25,8 @@ const MOVES = {
   },
   glowpulse: {
     id: 'glowpulse', name: 'Glowpulse', type: 'Psyche', category: 'special',
-    power: 38, accuracy: 100, pp: 25,
-    desc: 'A hypnotic ripple of bioluminescence.',
+    power: 38, accuracy: 100, pp: 25, inflicts: { id: 'sleep', chance: 15 },
+    desc: 'A hypnotic ripple of bioluminescence. May lull to sleep.',
   },
   briar_swipe: {
     id: 'briar_swipe', name: 'Briar Swipe', type: 'Verdant', category: 'physical',
@@ -41,8 +41,8 @@ const MOVES = {
   // Mid-level moves learned by leveling (see each species' learnset).
   flame_burst: {
     id: 'flame_burst', name: 'Flame Burst', type: 'Flame', category: 'special',
-    power: 55, accuracy: 100, pp: 15,
-    desc: 'A blossom of fire that cracks the air.',
+    power: 55, accuracy: 100, pp: 15, inflicts: { id: 'burn', chance: 15 },
+    desc: 'A blossom of fire that cracks the air. May burn.',
   },
   brine_jet: {
     id: 'brine_jet', name: 'Brine Jet', type: 'Tide', category: 'special',
@@ -56,8 +56,8 @@ const MOVES = {
   },
   pebble_toss: {
     id: 'pebble_toss', name: 'Pebble Toss', type: 'Stone', category: 'physical',
-    power: 40, accuracy: 100, pp: 25,
-    desc: 'A hoarded stone, flung with surprising spite.',
+    power: 40, accuracy: 100, pp: 25, inflicts: { id: 'shattered', chance: 10 },
+    desc: 'A hoarded stone, flung with surprising spite. May Shatter armor.',
   },
   // Early wild-Luminary moves (Whispergrove encounter table).
   leaf_dart: {
@@ -93,8 +93,8 @@ const MOVES = {
   },
   wisp_flare: {
     id: 'wisp_flare', name: 'Wisp Flare', type: 'Spirit', category: 'special',
-    power: 42, accuracy: 100, pp: 25,
-    desc: 'A cold blue flame that passes through armor.',
+    power: 42, accuracy: 100, pp: 25, inflicts: { id: 'echoed', chance: 15 },
+    desc: 'A cold blue flame that passes through armor. May leave foes Echoed.',
   },
   hoof_rush: {
     id: 'hoof_rush', name: 'Hoof Rush', type: 'Beast', category: 'physical',
@@ -113,8 +113,8 @@ const MOVES = {
   },
   gloom_fang: {
     id: 'gloom_fang', name: 'Gloom Fang', type: 'Shadow', category: 'physical',
-    power: 45, accuracy: 100, pp: 25,
-    desc: 'A bite from somewhere the light is not.',
+    power: 45, accuracy: 100, pp: 25, inflicts: { id: 'hollowed', chance: 15 },
+    desc: 'A bite from somewhere the light is not. May leave foes Hollowed.',
   },
   // Signature moves — unlocked at high Bond, powered up at Bond 10 (Echo Surge).
   cindershroud: {
