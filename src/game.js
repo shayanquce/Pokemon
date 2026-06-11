@@ -1,0 +1,25 @@
+/**
+ * Phaser bootstrap. Scenes and systems are classic-script globals for now;
+ * a bundler can be introduced later without touching game code.
+ */
+const GAME_WIDTH = 960;
+const GAME_HEIGHT = 544; // 30 x 17 tiles at 32px
+
+window.addEventListener('load', () => {
+  console.log('[boot] Luminary renderer starting — Phaser', Phaser.VERSION);
+
+  window.game = new Phaser.Game({
+    type: Phaser.AUTO,
+    parent: 'game-root',
+    width: GAME_WIDTH,
+    height: GAME_HEIGHT,
+    backgroundColor: '#070b14',
+    pixelArt: true,
+    roundPixels: true,
+    scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+    scene: [TitleScene, NewGameScene, SettingsScene, WorldScene],
+  });
+});

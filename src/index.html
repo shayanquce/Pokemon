@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Luminary: Echoes of the Forgotten Age</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #070b14;
+      overflow: hidden;
+    }
+    #game-root {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    canvas { image-rendering: pixelated; }
+  </style>
+</head>
+<body>
+  <div id="game-root"></div>
+
+  <!-- Surface uncaught renderer errors in the main-process terminal. -->
+  <script>
+    window.addEventListener('error', (e) => console.error('[uncaught]', e.message, e.filename, 'line', e.lineno));
+    window.addEventListener('unhandledrejection', (e) => console.error('[unhandled-promise]', String(e.reason)));
+  </script>
+
+  <!-- Classic scripts (no bundler yet): order matters. -->
+  <script src="../node_modules/phaser/dist/phaser.min.js"></script>
+  <script src="systems/UiKit.js"></script>
+  <script src="data/starters.js"></script>
+  <script src="systems/PlaceholderArt.js"></script>
+  <script src="systems/SaveSystem.js"></script>
+  <script src="systems/SaveSlotPanel.js"></script>
+  <script src="scenes/TitleScene.js"></script>
+  <script src="scenes/NewGameScene.js"></script>
+  <script src="scenes/SettingsScene.js"></script>
+  <script src="scenes/WorldScene.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

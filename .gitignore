@@ -1,0 +1,11 @@
+node_modules/
+dist/
+out/
+.electron-cache/
+*.log
+.DS_Store
+Thumbs.db
+
+# Player saves live in OS AppData — never commit
+luminary-saves.json
+luminary-settings.json
