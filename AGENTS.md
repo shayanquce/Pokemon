@@ -6,9 +6,9 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.16 "The Doors Answer" (PAUSED)
+## Current checkpoint — v0.17 "Grown Deep" (PAUSED)
 
-**Build order steps 1–14 are DONE.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–15 are DONE.** Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -30,32 +30,31 @@
 | 12. Deep eaves + drowned sanctum (v0.14) | ✅ | `mirewood_deep` dungeon, Keeper Ilse, Warden Mira (badge_mirewood), Chapter 3 seeds |
 | 13. Mirewood town (v0.15) | ✅ | `mirewood_town` Reedlight Village: Tamsin (healer), Hobb shop + Lantern Dew, Elder Wren postBadge counsel, per-merchant shop titles, playtest-mode setTimeout loop |
 | 14. Chapter 3 beats (v0.16) | ✅ | Awakened-door mechanic, Sanctum Doors (`A` tile) → `sanctum_inner` hall, Echo of Solen (eight doors, Cinderpeaks), Lyra in Reedlight, chapter → 3 |
-| 15–17 | ⏭️ **NEXT** | Coast/Mirewood evolutions, Cinderpeaks opener, audio, packaging… |
+| 15. Coast/Mirewood evolutions (v0.17) | ✅ | 9 second stages (dex 37–45, 42 species), 4 new moves, rare evolved spawns in both Mirewood maps |
+| 16–18 | ⏭️ **NEXT** | Cinderpeaks opener, third-stage starters, audio, packaging… |
 
-## Exactly where we left off (2026-06-12, session 6, v0.16)
+## Exactly where we left off (2026-06-12, session 6, v0.17)
 
-Steps 1–14 are all complete. Most recent: **v0.16 "The Doors Answer"** —
-data-driven **awakened doors** (`awakened: { flag, pages, repeat, setFlags,
-warp }` on a door def; `WorldScene.openDoor`, seen-state in
-`npcStates[door.id].opened`). The Sanctum Doors (`mirewood_deep` (15,1),
-solid tile `A` / `tile_sanctum_door`; Mira moved to (14,2)) open on
-`badge_mirewood`: set `sanctum_doors_opened` + `chapter: 3` and warp into
-**`sanctum_inner`** (First Shrine, pillared hall). **Echo of Solen** there:
-he died sealing one of EIGHT doors, the Chain knows the eighth is failing,
-next Sigil in the **Cinderpeaks**; sets `echo_answered`. **Lyra appears in
-Reedlight** (`showIfFlag: badge_mirewood`), names the Cinderpeaks race, sets
-`lyra_sigil_seen` (the snowed-in pass is the next gate hook). v0.15 brought
-Reedlight Village (Tamsin healer, Hobb shop, Lantern Dew, Elder Wren) and
-the playtest-mode setTimeout loop fix (`?playtest=1` → `forceSetTimeOut`).
+Steps 1–15 are all complete. Most recent: **v0.17 "Grown Deep"** — nine
+coast/Mirewood second stages (dex 37–45, **42 species**): Brinehound,
+Galewraith, Saltbastion, Driftcrown, Surgefin (coast, evolve 22–24) and
+Mossbruin, Mirehornet, Murkmaw, Wickbloom (Mirewood, 24–26); new moves
+Riptide Maw / Gale Burst / Venom Bloom / Dawn Lance; rare evolved spawns in
+mirewood_marsh + mirewood_deep (cliffs pattern). `lum_` textures generate on
+demand (`ensureLuminaryTexture`). **v0.16**: awakened-door mechanic
+(`awakened` on door defs, `WorldScene.openDoor`), Sanctum Doors (tile `A`)
+→ `sanctum_inner` + Echo of Solen (chapter → 3), Lyra in Reedlight. **v0.15**:
+Reedlight Village (Tamsin healer, Hobb shop, Lantern Dew, Elder Wren),
+playtest-mode setTimeout loop fix.
 
-Verified end-to-end: save-smoke 6/6, engine-test 274/274, playtest 133/133.
+Verified end-to-end: save-smoke 6/6, engine-test 323/323, playtest 133/133.
 
 Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS
 2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2) — 133 checks (uses/deletes slot_3)
-3. Start on **coast/Mirewood evolutions** (9 species need second stages as the curve rises)
-4. Then the **Cinderpeaks opener** (third region, third Warden, snow-gate via the Lyra hook), audio
+3. Start on the **Cinderpeaks opener** (third region: mountain route, snow gate via Lyra's "snowed in" hook, third Warden seat, new species)
+4. Then **third-stage starters** (Embralion/Runedeep/Grovemaw, Lv 32–34), audio
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn
 message flow compatible with the playtest drain loops (they tolerate the

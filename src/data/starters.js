@@ -133,6 +133,27 @@ const MOVES = {
     power: 46, accuracy: 100, pp: 25,
     desc: 'A hooked stinger slick with marsh toxin.',
   },
+  // Coast/Mirewood second-stage moves (evolved Lv 22-26).
+  riptide_maw: {
+    id: 'riptide_maw', name: 'Riptide Maw', type: 'Tide', category: 'physical',
+    power: 60, accuracy: 95, pp: 15,
+    desc: 'A bite that drags like an undertow.',
+  },
+  gale_burst: {
+    id: 'gale_burst', name: 'Gale Burst', type: 'Wind', category: 'special',
+    power: 60, accuracy: 95, pp: 15,
+    desc: 'A bottled squall, uncorked all at once.',
+  },
+  venom_bloom: {
+    id: 'venom_bloom', name: 'Venom Bloom', type: 'Venom', category: 'special',
+    power: 58, accuracy: 95, pp: 15, inflicts: { id: 'hollowed', chance: 10 },
+    desc: 'A bursting spore-cloud of marsh toxin. May leave foes Hollowed.',
+  },
+  dawn_lance: {
+    id: 'dawn_lance', name: 'Dawn Lance', type: 'Light', category: 'special',
+    power: 60, accuracy: 95, pp: 15,
+    desc: 'A spear of first light, patient and exact.',
+  },
   // Signature moves — unlocked at high Bond, powered up at Bond 10 (Echo Surge).
   cindershroud: {
     id: 'cindershroud', name: 'Cindershroud', type: 'Flame', category: 'special',
@@ -368,6 +389,7 @@ const LUMINARY_SPECIES = {
   brinepup: {
     id: 'brinepup', dexNo: 22, name: 'Brinepup', types: ['Tide', 'Beast'],
     baseStats: { hp: 54, atk: 56, def: 44, spa: 38, spd: 42, spe: 52 },
+    evolution: { toId: 'brinehound', to: 'Brinehound', level: 22 },
     tagline: 'A salt-crusted pup that herds the tide.',
     lore: 'Brinepup run the wave-line at dawn, barking the sea back into place. Keldrath fisherfolk swear the tide comes in twenty minutes late on mornings the pups oversleep.',
     captureRate: 170, baseExp: 74,
@@ -376,6 +398,7 @@ const LUMINARY_SPECIES = {
   gullwisp: {
     id: 'gullwisp', dexNo: 23, name: 'Gullwisp', types: ['Wind', 'Spirit'],
     baseStats: { hp: 44, atk: 36, def: 38, spa: 56, spd: 50, spe: 64 },
+    evolution: { toId: 'galewraith', to: 'Galewraith', level: 23 },
     tagline: 'The gull that never came ashore.',
     lore: 'Gullwisp ride the storm-edge where drowned sailors last saw land. They scream at ships that sail toward bad water — Keldrath harbor pays them in fish guts and gratitude.',
     captureRate: 150, baseExp: 76,
@@ -384,6 +407,7 @@ const LUMINARY_SPECIES = {
   saltshell: {
     id: 'saltshell', dexNo: 24, name: 'Saltshell', types: ['Tide', 'Stone'],
     baseStats: { hp: 60, atk: 50, def: 72, spa: 30, spd: 52, spe: 24 },
+    evolution: { toId: 'saltbastion', to: 'Saltbastion', level: 24 },
     tagline: 'A fist-sized fortress with opinions about waves.',
     lore: 'Saltshell armor themselves in whatever the sea regrets losing — coins, cleats, one famous tax ledger. Prying one off a dock piling takes two sailors and costs three friendships.',
     captureRate: 160, baseExp: 78,
@@ -392,6 +416,7 @@ const LUMINARY_SPECIES = {
   driftbloom: {
     id: 'driftbloom', dexNo: 25, name: 'Driftbloom', types: ['Verdant', 'Wind'],
     baseStats: { hp: 46, atk: 34, def: 40, spa: 58, spd: 54, spe: 58 },
+    evolution: { toId: 'driftcrown', to: 'Driftcrown', level: 23 },
     tagline: 'A flower that mistook the wind for soil.',
     lore: 'Driftbloom seeds root in the air itself, trailing petals like a slow comet. Where one finally settles, the coast grows a garden by spring — so children chase them with flowerpots.',
     captureRate: 150, baseExp: 75,
@@ -400,6 +425,7 @@ const LUMINARY_SPECIES = {
   sparkfin: {
     id: 'sparkfin', dexNo: 26, name: 'Sparkfin', types: ['Volt', 'Tide'],
     baseStats: { hp: 48, atk: 44, def: 38, spa: 60, spd: 44, spe: 68 },
+    evolution: { toId: 'surgefin', to: 'Surgefin', level: 24 },
     tagline: 'A storm in a puddle, and proud of it.',
     lore: 'Sparkfin school under thunderheads to drink the charge off the water. A netted Sparkfin will short every lantern on the boat, which is why Keldrath nets are wax-dipped and prayers are short.',
     captureRate: 150, baseExp: 77,
@@ -410,6 +436,7 @@ const LUMINARY_SPECIES = {
   mossling: {
     id: 'mossling', dexNo: 33, name: 'Mossling', types: ['Verdant', 'Beast'],
     baseStats: { hp: 70, atk: 58, def: 60, spa: 40, spd: 56, spe: 30 },
+    evolution: { toId: 'mossbruin', to: 'Mossbruin', level: 25 },
     tagline: 'A sloth so slow the forest moved in.',
     lore: 'Mossling wake twice a day to change branches and consider this exhausting. The garden on its back is old enough to have opinions, and birds pay rent in seeds.',
     captureRate: 130, baseExp: 96,
@@ -418,6 +445,7 @@ const LUMINARY_SPECIES = {
   bogstinger: {
     id: 'bogstinger', dexNo: 34, name: 'Bogstinger', types: ['Venom', 'Wind'],
     baseStats: { hp: 52, atk: 66, def: 44, spa: 50, spd: 46, spe: 74 },
+    evolution: { toId: 'mirehornet', to: 'Mirehornet', level: 24 },
     tagline: 'The mire hums. That is not the mire.',
     lore: 'Bogstinger drone in chords to herd prey toward the deep pools. Mirewood folk hang chimes on their porches — not for luck, but so the swarm has something else to argue with.',
     captureRate: 120, baseExp: 102,
@@ -426,6 +454,7 @@ const LUMINARY_SPECIES = {
   murkfin: {
     id: 'murkfin', dexNo: 35, name: 'Murkfin', types: ['Tide', 'Shadow'],
     baseStats: { hp: 58, atk: 62, def: 50, spa: 58, spd: 48, spe: 60 },
+    evolution: { toId: 'murkmaw', to: 'Murkmaw', level: 26 },
     tagline: 'The ripple you saw second. Not first.',
     lore: 'Murkfin swim in the dark water UNDER the water. Lantern light slides off them like rain off wax, which is why the mire ferry charges double after dusk.',
     captureRate: 110, baseExp: 104,
@@ -434,10 +463,87 @@ const LUMINARY_SPECIES = {
   lanternreed: {
     id: 'lanternreed', dexNo: 36, name: 'Lanternreed', types: ['Verdant', 'Light'],
     baseStats: { hp: 54, atk: 36, def: 52, spa: 72, spd: 62, spe: 46 },
+    evolution: { toId: 'wickbloom', to: 'Wickbloom', level: 25 },
     tagline: 'A reed that lights the safe path. Usually.',
     lore: 'Lanternreed glow brighter when travelers keep to the firm ground — and dim, gently, over the pools. The Mirewood says they are kind. The Mirewood also counts its visitors.',
     captureRate: 110, baseExp: 100,
     learnset: [{ id: 'leaf_dart', level: 1 }, { id: 'glimmer_dust', level: 1 }, { id: 'glowpulse', level: 20 }],
+  },
+
+  // --- Coast second stages (evolved Lv 22-24) ---
+  brinehound: {
+    id: 'brinehound', dexNo: 37, name: 'Brinehound', types: ['Tide', 'Beast'],
+    baseStats: { hp: 72, atk: 78, def: 58, spa: 48, spd: 54, spe: 68 },
+    tagline: 'The tide herder grew. The tide noticed.',
+    lore: 'A Brinehound runs the whole harbor-line alone, and the sea keeps its schedule. Old captains tip their hats to it the way they tip them to the harbormaster — slightly, and first.',
+    captureRate: 90, baseExp: 144,
+    learnset: [{ id: 'drip_lash', level: 1 }, { id: 'gnaw', level: 1 }, { id: 'brine_jet', level: 12 }, { id: 'riptide_maw', level: 24 }],
+  },
+  galewraith: {
+    id: 'galewraith', dexNo: 38, name: 'Galewraith', types: ['Wind', 'Spirit'],
+    baseStats: { hp: 58, atk: 46, def: 50, spa: 76, spd: 66, spe: 84 },
+    tagline: 'The storm-edge gave it a name. Nobody says it twice.',
+    lore: 'Galewraith fly INSIDE the squall now, screaming the names of ships that have not sunk yet. Keldrath argues about whether they are warnings or invoices. The fish guts continue either way.',
+    captureRate: 75, baseExp: 148,
+    learnset: [{ id: 'gust_flick', level: 1 }, { id: 'wisp_flare', level: 4 }, { id: 'zephyr_slice', level: 11 }, { id: 'gale_burst', level: 25 }],
+  },
+  saltbastion: {
+    id: 'saltbastion', dexNo: 39, name: 'Saltbastion', types: ['Tide', 'Stone'],
+    baseStats: { hp: 80, atk: 64, def: 96, spa: 38, spd: 66, spe: 26 },
+    tagline: 'The dock gave up. It is the dock now.',
+    lore: 'A Saltbastion armors itself in shipwreck — keel plates, anchor flukes, the figurehead it liked best. Keldrath charges it no mooring fee, mostly because nobody volunteers to collect.',
+    captureRate: 65, baseExp: 152,
+    learnset: [{ id: 'pebble_toss', level: 1 }, { id: 'stone_guard', level: 1 }, { id: 'drip_lash', level: 8 }, { id: 'riptide_maw', level: 26 }],
+  },
+  driftcrown: {
+    id: 'driftcrown', dexNo: 40, name: 'Driftcrown', types: ['Verdant', 'Wind'],
+    baseStats: { hp: 60, atk: 44, def: 54, spa: 78, spd: 70, spe: 74 },
+    tagline: 'The flower that finally rooted — in the sky.',
+    lore: 'A Driftcrown anchors a whole garden to the wind, trailing vines like a slow green comet. Where it lingers a season, the coast blooms out of order, and the bees write it off as a miracle.',
+    captureRate: 75, baseExp: 146,
+    learnset: [{ id: 'leaf_dart', level: 1 }, { id: 'gust_flick', level: 1 }, { id: 'glimmer_dust', level: 9 }, { id: 'gale_burst', level: 25 }],
+  },
+  surgefin: {
+    id: 'surgefin', dexNo: 41, name: 'Surgefin', types: ['Volt', 'Tide'],
+    baseStats: { hp: 62, atk: 56, def: 50, spa: 82, spd: 58, spe: 88 },
+    tagline: 'The puddle was practice. This is the storm.',
+    lore: 'Surgefin ride ahead of thunderheads with the charge already drunk, glowing like a fuse the length of a wave. Wax-dipped nets do nothing. The prayers have gotten longer.',
+    captureRate: 70, baseExp: 150,
+    learnset: [{ id: 'spark_nip', level: 1 }, { id: 'drip_lash', level: 5 }, { id: 'brine_jet', level: 13 }, { id: 'storm_coil', level: 26 }],
+  },
+
+  // --- Mirewood second stages (evolved Lv 24-26) ---
+  mossbruin: {
+    id: 'mossbruin', dexNo: 42, name: 'Mossbruin', types: ['Verdant', 'Beast'],
+    baseStats: { hp: 94, atk: 76, def: 78, spa: 48, spd: 70, spe: 32 },
+    tagline: 'The sloth stood up. The forest stood up with it.',
+    lore: 'A Mossbruin wakes once a season, and the mire rearranges itself politely around the event. The garden on its shoulders is old enough to have tenants, a canopy, and a waiting list.',
+    captureRate: 60, baseExp: 156,
+    learnset: [{ id: 'briar_swipe', level: 1 }, { id: 'rootbrace', level: 1 }, { id: 'thorn_volley', level: 19 }, { id: 'hoof_rush', level: 27 }],
+  },
+  mirehornet: {
+    id: 'mirehornet', dexNo: 43, name: 'Mirehornet', types: ['Venom', 'Wind'],
+    baseStats: { hp: 64, atk: 84, def: 56, spa: 64, spd: 56, spe: 92 },
+    tagline: 'The hum found a chord the chimes cannot answer.',
+    lore: 'A Mirehornet hunts alone because the swarm voted it out — too patient, too quiet, too good. Mirewood porches hang a second set of chimes now. The Mirehornet has learned to play them.',
+    captureRate: 60, baseExp: 158,
+    learnset: [{ id: 'venom_barb', level: 1 }, { id: 'gust_flick', level: 1 }, { id: 'zephyr_slice', level: 20 }, { id: 'venom_bloom', level: 26 }],
+  },
+  murkmaw: {
+    id: 'murkmaw', dexNo: 44, name: 'Murkmaw', types: ['Tide', 'Shadow'],
+    baseStats: { hp: 74, atk: 82, def: 64, spa: 72, spd: 60, spe: 76 },
+    tagline: 'You will not see the ripple at all.',
+    lore: 'The dark water under the water has a current, and Murkmaw is what swims it. The mire ferry now runs a daylight-only schedule, posted beside a drawing the ferryman refuses to explain.',
+    captureRate: 55, baseExp: 162,
+    learnset: [{ id: 'drip_lash', level: 1 }, { id: 'gloom_fang', level: 1 }, { id: 'brine_jet', level: 21 }, { id: 'umbral_rend', level: 27 }],
+  },
+  wickbloom: {
+    id: 'wickbloom', dexNo: 45, name: 'Wickbloom', types: ['Verdant', 'Light'],
+    baseStats: { hp: 68, atk: 44, def: 66, spa: 92, spd: 78, spe: 54 },
+    tagline: 'The reed that lights the path — all of it, at once.',
+    lore: 'When a Lanternreed has guided enough travelers, it blooms into a Wickbloom, and a stretch of mire simply stops being dangerous. The night the whole marsh lit gold, every reed was bowing to one.',
+    captureRate: 55, baseExp: 160,
+    learnset: [{ id: 'leaf_dart', level: 1 }, { id: 'glimmer_dust', level: 1 }, { id: 'glowpulse', level: 20 }, { id: 'dawn_lance', level: 26 }],
   },
 
   // --- Hollow Cave wild ---

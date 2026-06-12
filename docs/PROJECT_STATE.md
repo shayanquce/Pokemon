@@ -1,10 +1,27 @@
-# Project State — v0.16 "The Doors Answer" checkpoint (2026-06-12)
+# Project State — v0.17 "Grown Deep" checkpoint (2026-06-12)
 
-> Paused after the Chapter 3 beats (build-order step 14).
-> All automated tests pass: 6 save-smoke, 274 engine checks, 133 live CDP
+> Paused after the coast/Mirewood evolutions (build-order step 15).
+> All automated tests pass: 6 save-smoke, 323 engine checks, 133 live CDP
 > playtest checks.
 
 ## What runs today
+
+### v0.17 Coast/Mirewood evolutions (step 15)
+
+- **Nine second stages (42 species total, dex 37–45)**: Brinepup →
+  **Brinehound** (22), Gullwisp → **Galewraith** (23), Saltshell →
+  **Saltbastion** (24), Driftbloom → **Driftcrown** (23), Sparkfin →
+  **Surgefin** (24), Mossling → **Mossbruin** (25), Bogstinger →
+  **Mirehornet** (24), Murkfin → **Murkmaw** (26), Lanternreed →
+  **Wickbloom** (25) — full stats, lore, pixel maps
+- **Four new moves**: Riptide Maw (Tide phys 60), Gale Burst (Wind spec 60),
+  Venom Bloom (Venom spec 58, 10% Hollowed), Dawn Lance (Light spec 60)
+- **Rare evolved spawns**: mirewood_marsh adds Mossbruin/Mirehornet
+  (Lv 24–27, 8% combined); mirewood_deep adds Murkmaw/Wickbloom
+  (Lv 25–28, 10% combined) — same pattern as the cliffs
+- Note: `lum_<id>` textures are generated ON DEMAND via
+  `ensureLuminaryTexture` — dump-texture shows Phaser's green missing-texture
+  box until some scene has displayed the species once
 
 ### v0.16 The Doors Answer (step 14 — Chapter 3 beats)
 
@@ -217,7 +234,7 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 274 checks — maps/species/exits are auto-derived;
+npm run engine-test    # 323 checks — maps/species/exits are auto-derived;
                        # status/surge multipliers are checked statistically
 npm run playtest-game  # terminal 1: game with CDP port 9223 (playtest mode:
                        # Phaser loop on setTimeout, immune to rAF throttling)
@@ -253,7 +270,7 @@ Playtest scripting gotchas (don't regress):
 
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
-  ├─ data/starters.js   LUMINARY_SPECIES (23), MOVES, makeLuminary
+  ├─ data/starters.js   LUMINARY_SPECIES (42), MOVES, makeLuminary
   ├─ data/maps.js       11 maps {rows, exits, doors, npcs, encounters}
   │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…};
   │                     door defs may carry awakened:{flag,pages,warp,…})
@@ -288,16 +305,17 @@ v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
 `sanctum_doors_opened`, `echo_answered`, `lyra_sigil_seen` (chapter now
 reaches 3).
 
-## Implemented Luminary (33 of 180+)
+## Implemented Luminary (42 of 180+)
 
 Starter lines ×3 (2 stages), grove lines ×3 (2 stages), road/cave wild
-lines ×6 (2 stages), coast wilds ×5, Mirewood wilds ×4. Dex numbers 1–36
-with gaps reserved for third stages.
+lines ×6 (2 stages), coast wild lines ×5 (2 stages), Mirewood wild lines ×4
+(2 stages). Dex numbers 1–45 with gaps reserved for third stages.
 
 ## Not built yet (do not assume exists)
 
 - Bond gain from shrine rests; status infliction from wild AI tuning
-- Evolutions for coast/Mirewood wilds; third-stage starter evolutions
+- Third-stage starter evolutions (Embralion/Runedeep/Grovemaw — Lv 32–34,
+  named in evolution notes but not defined)
 - Cinderpeaks / third Warden (Solen + Lyra both point there; nothing exists —
   Lyra says the pass is "snowed in", the future gate hook)
 - The other seven doors / the failing eighth (Solen exposition only)
@@ -306,11 +324,11 @@ with gaps reserved for third stages.
 
 ## Next session — plan (in priority order)
 
-1. **Coast/Mirewood evolutions** as the level curve rises (Brinepup,
-   Gullwisp, Saltshell, Driftbloom, Sparkfin, Mossling, Bogstinger,
-   Murkfin, Lanternreed second stages)
-2. **Cinderpeaks opener** (third region): mountain route off the cliffs'
-   high pass or beyond Mirewood, third Warden seat, snow gate via Lyra hook
+1. **Cinderpeaks opener** (third region): mountain route, snow gate via the
+   Lyra hook ("the pass is snowed in"), third Warden seat, new species
+2. **Third-stage starter evolutions** (Embralion Flame/Light 34, Runedeep
+   Tide/Psyche 32, Grovemaw Verdant/Stone 33) — the curve reaches 30+ in
+   the Cinderpeaks
 3. Audio pass (region BGM + battle SFX) or packaging when content settles
 
 ## Dependencies

@@ -606,10 +606,12 @@ const MAPS = {
     encounters: {
       rate: 0.15,
       table: [
-        { speciesId: 'mossling', weight: 28, min: 18, max: 21 },
-        { speciesId: 'bogstinger', weight: 26, min: 18, max: 22 },
-        { speciesId: 'murkfin', weight: 24, min: 19, max: 22 },
-        { speciesId: 'lanternreed', weight: 22, min: 18, max: 21 },
+        { speciesId: 'mossling', weight: 26, min: 18, max: 21 },
+        { speciesId: 'bogstinger', weight: 24, min: 18, max: 22 },
+        { speciesId: 'murkfin', weight: 22, min: 19, max: 22 },
+        { speciesId: 'lanternreed', weight: 20, min: 18, max: 21 },
+        { speciesId: 'mossbruin', weight: 4, min: 25, max: 27 },
+        { speciesId: 'mirehornet', weight: 4, min: 24, max: 26 },
       ],
     },
   },
@@ -693,10 +695,12 @@ const MAPS = {
     encounters: {
       rate: 0.16,
       table: [
-        { speciesId: 'murkfin', weight: 35, min: 19, max: 22 },
-        { speciesId: 'gloombat', weight: 25, min: 19, max: 22 },
-        { speciesId: 'bogstinger', weight: 22, min: 19, max: 22 },
-        { speciesId: 'lanternreed', weight: 18, min: 19, max: 22 },
+        { speciesId: 'murkfin', weight: 32, min: 19, max: 22 },
+        { speciesId: 'gloombat', weight: 23, min: 19, max: 22 },
+        { speciesId: 'bogstinger', weight: 20, min: 19, max: 22 },
+        { speciesId: 'lanternreed', weight: 15, min: 19, max: 22 },
+        { speciesId: 'murkmaw', weight: 6, min: 26, max: 28 },
+        { speciesId: 'wickbloom', weight: 4, min: 25, max: 27 },
       ],
     },
   },
