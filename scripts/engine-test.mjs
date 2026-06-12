@@ -194,6 +194,7 @@ for (const [starter, expected] of [['embrik', 'tidarune'], ['tidalink', 'thorngr
   const party = G.TRAINERS.lyra2.buildParty({ starterId: starter });
   check(`lyra2 counter-picks evolved ${expected} vs ${starter}`, party[2].speciesId === expected && party.length === 3);
 }
+check('chain_stalker fields 3 mons', G.TRAINERS.chain_stalker.buildParty({}).length === 3);
 
 // --- shop stock + NPC battle refs resolve --------------------------------------------
 for (const m of Object.values(G.MAPS)) {

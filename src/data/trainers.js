@@ -71,6 +71,19 @@ const TRAINERS = {
     },
   },
 
+  // --- Mirewood: the Chain sends someone better ---
+  chain_stalker: {
+    id: 'chain_stalker',
+    name: 'Chain Stalker Morn',
+    introText: "The grey cloak folded back. 'The scout was a question. I am the answer.'",
+    winText: 'You drove the Chain Stalker into the mire-dark!',
+    loseText: "Morn caught your collar before you fell. 'Tire faster next time. The Chain dislikes waiting.'",
+    reward: 600,
+    buildParty() {
+      return [makeLuminary('gloomshroud', 20), makeLuminary('murkfin', 20), makeLuminary('mournlight', 21)];
+    },
+  },
+
   // --- Chapter 1 closer: the Hollowed Chain reaches the coast ---
   chain_scout: {
     id: 'chain_scout',

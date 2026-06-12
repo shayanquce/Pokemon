@@ -486,7 +486,10 @@ const MAPS = {
       'CGGGGGGGGGGGGGGGGGGGGPGGGCCWWC', // 15
       'CCCCCCCCCCCCCCCCCCCCCPCCCCCCCC', // 16 <- south exit back to Harborside at (21,16)
     ],
-    exits: [{ x: 21, y: 16, to: 'keldrath_town', toX: 21, toY: 1, facing: 'down' }],
+    exits: [
+      { x: 21, y: 16, to: 'keldrath_town', toX: 21, toY: 1, facing: 'down' },
+      { x: 21, y: 0, to: 'mirewood_marsh', toX: 21, toY: 15, facing: 'up' },
+    ],
     doors: [],
     npcs: [
       {
@@ -510,11 +513,20 @@ const MAPS = {
         name: 'Wayfarer Oren',
         x: 21, y: 1, facing: 'down',
         palette: { h: '#c8c2b4', f: '#caa07a', e: '#20203a', c: '#5e564c', g: '#9a8a66', b: '#241d18' },
-        dialogue: [
-          'Turn back, friend. The high pass is buried — storm after storm, like the sky is guarding something.',
-          "When it clears, the road runs to Mirewood and the second Warden's seat. Until then, even the Chain waits below.",
-        ],
-        repeatDialogue: ['The pass is still buried. The storms will turn when they turn.'],
+        gate: {
+          requiresFlag: 'rival2_won',
+          grantsFlag: 'pass_cleared',
+          asideX: 20, asideY: 1,
+          deniedDialogue: [
+            'Turn back, friend. The high pass is buried — storm after storm, like the sky is guarding something.',
+            'The red-haired one on the road below says she is waiting for someone worth racing. Settle that first; the mountain respects finished business.',
+          ],
+          grantedDialogue: [
+            'The storms turned last night — first time in a season. And here you stand. Hm.',
+            'The pass runs down into Mirewood, {player}. Keep to the lanternreeds, pay the mire its silence, and mind any stranger who smiles too easily.',
+          ],
+        },
+        repeatDialogue: ['The pass holds for now. Mirewood is down and north — follow the reeds that stay lit.'],
       },
     ],
     encounters: {
@@ -527,6 +539,73 @@ const MAPS = {
         { speciesId: 'zephyrlynx', weight: 11, min: 18, max: 20 },
         { speciesId: 'stormtail', weight: 10, min: 18, max: 20 },
         { speciesId: 'gloomshroud', weight: 9, min: 20, max: 22 },
+      ],
+    },
+  },
+  mirewood_marsh: {
+    id: 'mirewood_marsh',
+    name: 'Mirewood — Drowned Eaves',
+    //       012345678901234567890123456789
+    rows: [
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
+      'TGGmmmGGGGTGGGGGGGGGGGGmmmGGGT', // 1
+      'TGGmmmGGGGGGGGmmmmGGGGGmmmGGGT', // 2
+      'TGGmmmGGGGGGGGmmmmGGGGGGGGGGGT', // 3
+      'TGGGGGGGTGGGGGmmmmGGGTGGGGGGGT', // 4
+      'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 5  <- Chain stalker lurks at (8,5)
+      'TGGGGGWWWGGGGGGGGGGGGGWWWGGGGT', // 6
+      'TGGGGWWWWWGGGGSGGGGGGWWWWWGGGT', // 7  <- Save Shrine at (14,7)
+      'TGGGGGWWWGGGGGGGGGGGGGWWWGGGGT', // 8
+      'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 9  <- Bog Hermit at (25,9)
+      'TGGmmmmGGGGTGGGGGGGGGGGGGGGGGT', // 10
+      'TGGmmmmGGGGGGGGGmmmmGGGGTGGGGT', // 11
+      'TGGmmmmGGGGGGGGGmmmmGGGGGGGGGT', // 12
+      'TGGGGGGGGGGGGGGGmmmmGGGGGGGGGT', // 13
+      'TGGGGGGTGGGGGGGGGGGGGGGGTGGGGT', // 14
+      'TGGGGGGGGGGGGGGGGGGGGPGGGGGGGT', // 15
+      'TTTTTTTTTTTTTTTTTTTTTPTTTTTTTT', // 16 <- south exit back to the cliffs at (21,16)
+    ],
+    exits: [{ x: 21, y: 16, to: 'keldrath_cliffs', toX: 21, toY: 1, facing: 'down' }],
+    doors: [],
+    npcs: [
+      {
+        id: 'bog_hermit',
+        name: 'Bog Hermit Sef',
+        x: 25, y: 9, facing: 'left',
+        palette: { h: '#5a6a4a', f: '#caa07a', e: '#20203a', c: '#3a4434', g: '#9a8a66', b: '#241d18' },
+        dialogue: [
+          'Visitors. The reeds lit up an hour before you came — they like you. They did NOT like the last lot.',
+          'Grey cloaks, old coin, smiles like hooks. Asked the way to the drowned sanctum, then went WITHOUT a lantern. The mire will not give them back, and nobody is asking it to.',
+          'The second Warden keeps her seat past the deep eaves, east. The water there remembers the Aethori. Walk like a guest, {player}.',
+        ],
+        repeatDialogue: ['Keep to the lit reeds. The mire counts its visitors, and it is bad at letting go.'],
+        setFlags: { heard_sanctum_rumor: true },
+      },
+      {
+        // Chapter 2 beat: the Chain pushed past the mire's warnings.
+        id: 'chain_stalker',
+        name: 'Grey Cloak',
+        x: 8, y: 5, facing: 'down',
+        palette: { h: '#3a3a44', f: '#cfae96', e: '#4a1c28', c: '#43355e', g: '#8a93a0', b: '#1c1620' },
+        dialogue: [
+          'The scout failed, then. No matter. The Chain is patient the way the mire is patient.',
+          'The drowned sanctum will open for the echo you carry — and you WILL carry it there for us, child. Now, or after you tire.',
+        ],
+        battle: { trainerId: 'chain_stalker', flag: 'chain_stalker_beaten' },
+        postWinDialogue: [
+          'Enough. The mire can have the sanctum road — for now.',
+          'Keep the echo warm, child. The Chain collects on its own schedule.',
+        ],
+        repeatDialogue: ['The Grey Cloak watches the trees and says nothing more.'],
+      },
+    ],
+    encounters: {
+      rate: 0.15,
+      table: [
+        { speciesId: 'mossling', weight: 28, min: 18, max: 21 },
+        { speciesId: 'bogstinger', weight: 26, min: 18, max: 22 },
+        { speciesId: 'murkfin', weight: 24, min: 19, max: 22 },
+        { speciesId: 'lanternreed', weight: 22, min: 18, max: 21 },
       ],
     },
   },

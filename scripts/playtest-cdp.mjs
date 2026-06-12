@@ -446,6 +446,50 @@ check('rematch won, back in world', await eval_(`window.game.scene.isActive('Wor
 check('rival2_won flag set', await eval_(`Save.state.storyFlags.rival2_won === true`));
 check('rematch reward paid', (await eval_(`Save.state.shards`)) >= shardsPreLyra2 + 500, `${shardsPreLyra2} -> ${await eval_(`Save.state.shards`)}`);
 
+// 8c-8. Mirewood: Oren grants the pass; marsh, hermit rumor, Chain stalker.
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'wayfarer_oren')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(300); }
+await sleep(700);
+check('pass cleared by Oren', await eval_(`Save.state.storyFlags.pass_cleared === true`));
+check('Oren stepped aside', !(await eval_(`window.game.scene.getScene('WorldScene').isSolid(21, 1)`)) && (await eval_(`window.game.scene.getScene('WorldScene').isSolid(20, 1)`)));
+
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 21, y: 0, to: 'mirewood_marsh', toX: 21, toY: 15, facing: 'up' }), true)`);
+check('mirewood loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'mirewood_marsh' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('mirewood discovered', await eval_(`Save.state.discoveredLocations.includes('mirewood_marsh')`));
+check('2 marsh NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 2);
+check('marsh shrine present', await eval_(`Boolean(window.game.scene.getScene('WorldScene').shrineTile)`));
+check('mire is an encounter tile', await eval_(`window.game.scene.getScene('WorldScene').tileAt(3, 1) === 'm' && !window.game.scene.getScene('WorldScene').isSolid(3, 1)`));
+
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'right'; w.talkTo(w.npcs.find(n => n.def.id === 'bog_hermit')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+await sleep(400);
+check('sanctum rumor heard', await eval_(`Save.state.storyFlags.heard_sanctum_rumor === true`));
+
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 38), true)`); // fresh lead vs the stalker's Lv 20-21 trio
+const shardsPreStalker = await eval_(`Save.state.shards`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'down'; w.talkTo(w.npcs.find(n => n.def.id === 'chain_stalker')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+check('stalker battle started', await waitFor(`window.game.scene.isActive('BattleScene')`));
+await sleep(500);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(250); }
+for (let round = 0; round < 35; round++) {
+  const scene = await eval_(`window.game.scene.getScenes(true)[0].scene.key`);
+  if (scene !== 'BattleScene') break;
+  const menuOpen = await eval_(`Boolean(window.game.scene.getScene('BattleScene')?.menu)`);
+  await pressZ();
+  await sleep(menuOpen ? 400 : 350);
+  if (menuOpen) { await pressZ(); await sleep(400); }
+  for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+}
+await sleep(1500);
+check('stalker driven off, back in world', await eval_(`window.game.scene.isActive('WorldScene')`));
+check('chain_stalker_beaten flag set', await eval_(`Save.state.storyFlags.chain_stalker_beaten === true`));
+check('stalker reward paid', (await eval_(`Save.state.shards`)) >= shardsPreStalker + 600, `${shardsPreStalker} -> ${await eval_(`Save.state.shards`)}`);
+
 // 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);
 check('back in town after rival win', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'ashfen_town' && window.game.scene.getScene('WorldScene').npcs)`));

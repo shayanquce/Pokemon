@@ -9,7 +9,7 @@
 const TILE = 32;
 
 const SOLID_TILES = new Set(['T', 'W', 'S', 'B', 'R', 'D', 'C']);
-const ENCOUNTER_TILES = new Set(['g', 'e']);
+const ENCOUNTER_TILES = new Set(['g', 'e', 'm']);
 const FACING_DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
 /** Facing -> sprite sheet direction (side frames face right; flipX gives left). */
@@ -101,7 +101,7 @@ class WorldScene extends Phaser.Scene {
     const groundFor = {
       G: 'tile_grass', g: 'tile_grass_tall', F: 'tile_flowers', P: 'tile_path',
       W: 'tile_water', T: 'tile_tree', S: 'tile_grass', R: 'tile_roof', B: 'tile_wall', D: 'tile_door',
-      C: 'tile_cave_wall', c: 'tile_cave_floor', e: 'tile_cave_gravel', s: 'tile_sand',
+      C: 'tile_cave_wall', c: 'tile_cave_floor', e: 'tile_cave_gravel', s: 'tile_sand', m: 'tile_mire',
     };
 
     this.shrineTile = null;
@@ -135,6 +135,7 @@ class WorldScene extends Phaser.Scene {
       keldrath_gate: { tint: [0xdce8f0, 0xcde4ee], frequency: 850, drift: 22 },
       keldrath_town: { tint: [0xdce8f0, 0xefe2a0], frequency: 800, drift: 22 },
       keldrath_cliffs: { tint: [0xdce8f0, 0x9fd0c8], frequency: 600, drift: 30 },
+      mirewood_marsh: { tint: [0x8fd8c8, 0xefe2a0], frequency: 700, drift: 9 },
     };
     const p = presets[this.map.id];
     if (!p) return;
@@ -416,7 +417,8 @@ class WorldScene extends Phaser.Scene {
           return;
         }
         if (ENCOUNTER_TILES.has(this.tileAt(nx, ny))) {
-          this.rustle(nx, ny, this.tileAt(nx, ny) === 'e' ? 0x524a5c : 0x4e7a42);
+          const t = this.tileAt(nx, ny);
+          this.rustle(nx, ny, t === 'e' ? 0x524a5c : t === 'm' ? 0x3e5648 : 0x4e7a42);
           this.maybeEncounter();
         }
         // Key still held? Chain straight into the next step — no stutter.

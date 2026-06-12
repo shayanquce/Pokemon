@@ -1,7 +1,7 @@
 {
   "name": "luminary-game",
   "productName": "Luminary - Echoes of the Forgotten Age",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Luminary: Echoes of the Forgotten Age — a monster-taming RPG built with Electron + Phaser 3",
   "main": "main.js",
   "type": "module",

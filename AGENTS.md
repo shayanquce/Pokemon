@@ -6,9 +6,9 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.12 "Mended & Marked" (PAUSED)
+## Current checkpoint — v0.13 "Drowned Eaves" (PAUSED)
 
-**Build order steps 1–11a are DONE.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–11 are DONE.** Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -26,8 +26,9 @@
 | 10a. Lowlands wild evolutions (v0.10) | ✅ | 6 second stages (dex 27–32, 29 species), Storm Coil + Umbral Rend, rAF-throttling fix in main.js |
 | 10b. Keldrath Cliffs route (v0.11) | ✅ | Chapter 2 route, evolved wild spawns, Lyra rematch (`lyra2`, rival2_won), Wayfarer Oren blocks the high pass |
 | 11a. Healer + status-cure items (v0.12) | ✅ | Dockside Maeve (`healer: true`), Tide Tonic + Brine Salve (`cures`), world + battle cure flows |
-| 11b. Chapter 2 beats + Mirewood opener | ⏭️ **NEXT** | See "Next session" in `docs/PROJECT_STATE.md` |
-| 12–15 | pending | Regions, story acts, audio, packaging… |
+| 11b. Chapter 2 beats + Mirewood opener (v0.13) | ✅ | Oren gate (pass_cleared), mirewood_marsh + mire tile, 4 species (dex 33–36), Chain stalker, sanctum rumor |
+| 12. Deep eaves + drowned sanctum (2nd Warden) | ⏭️ **NEXT** | See "Next session" in `docs/PROJECT_STATE.md` |
+| 13–15 | pending | Mirewood town, regions, audio, packaging… |
 
 ## Exactly where we left off (2026-06-11, session 4, v0.10)
 
@@ -42,20 +43,21 @@ burn/sleep/Shattered/Echoed/Hollowed via move `inflicts`, panel status tags,
 Echo Surge x1.5 once per battle at Bond 10), **v0.9** (Chapter 1 beats:
 `conditionalDialogue` + `showIfFlag` NPC mechanics, Maren post-badge
 counsel, Hollowed Chain scout fight on the gate shore → `chapter` 2) and
-**v0.10** (six Lowlands wild evolutions, dex 27–32; Storm Coil + Umbral
-Rend; **rAF-throttling fix** — see gotchas), **v0.11** (Keldrath Cliffs
-route: evolved wild spawns, `lyra2` rematch → `rival2_won`, Wayfarer Oren
-holding the high pass) and **v0.12** (Dockside Maeve free-heal NPC via
-`healer: true`, Tide Tonic + Brine Salve with `cures` item flow in world
-and battle). Verified end-to-end: save-smoke 6/6, engine-test 226/226,
-playtest 92/92 (twice — the lyra2 lead must stay Lv 38, see gotchas).
+**v0.10** (six Lowlands wild evolutions; rAF-throttling fix), **v0.11**
+(Keldrath Cliffs + `lyra2` rematch), **v0.12** (Maeve healer NPC, Tide
+Tonic + Brine Salve `cures` flow) and **v0.13** (Mirewood opener: Oren
+became a gate NPC → `pass_cleared`; `mirewood_marsh` with the new walkable
+`m` mire encounter tile + marsh Save Shrine; 4 species dex 33–36 incl.
+first Venom; Bog Hermit `heard_sanctum_rumor`; Chain Stalker Morn →
+`chain_stalker_beaten`). Verified end-to-end: save-smoke 6/6, engine-test
+249/249, playtest 108/108.
 
 Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS
-2. Optional live verification: `npm run playtest-game` in one terminal, `npm run playtest` in another — 92 checks (uses and then deletes save slot_3)
-3. Start on **Chapter 2 beats** (the Chain on the pass, Lyra's father's trail), then the **Mirewood opener** (swap Oren to a gate NPC; new mire/bog tiles, 4–6 Verdant/Venom/Shadow species, first town)
-4. Then coast evolutions, audio, packaging
+2. Optional live verification: `npm run playtest-game` in one terminal, `npm run playtest` in another — 108 checks (uses and then deletes save slot_3)
+3. Start on the **deep eaves + drowned sanctum** (`mirewood_deep`): dungeon east of the marsh, second Warden with the Oath, `badge_mirewood`
+4. Then Mirewood town, coast/Mirewood evolutions, audio, packaging
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn
 message flow compatible with the playtest drain loops (they tolerate the

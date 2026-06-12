@@ -129,6 +129,7 @@ const MAP_DISPLAY_NAMES = {
   keldrath_gate: 'Keldrath Gate',
   keldrath_town: 'Keldrath Coast — Harborside',
   keldrath_cliffs: 'Keldrath Cliffs',
+  mirewood_marsh: 'Mirewood — Drowned Eaves',
 };
 
 function prettyMapName(id) {

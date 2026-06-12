@@ -1,10 +1,28 @@
-# Project State — v0.12 "Mended & Marked" checkpoint (2026-06-11)
+# Project State — v0.13 "Drowned Eaves" checkpoint (2026-06-11)
 
-> Paused after the healer + status-cure items (build-order step 11, first
-> half). All automated tests pass: 6 save-smoke, 226 engine checks, 92 live
-> CDP playtest checks.
+> Paused after the Mirewood opener + Chapter 2 beats (build-order step 11
+> complete). All automated tests pass: 6 save-smoke, 249 engine checks,
+> 108 live CDP playtest checks.
 
 ## What runs today
+
+### v0.13 Mirewood opener + Chapter 2 beats (step 11b)
+
+- **Wayfarer Oren is now a gate NPC**: requires `rival2_won` ("the storms
+  turned"), grants `pass_cleared`, steps aside to (20,1); cliffs north gap
+  (21,0) exits to Mirewood
+- **Mirewood — Drowned Eaves** (`mirewood_marsh`): first Mirewood map. New
+  walkable encounter tile **`m` mire** (`tile_mire`, bog water with scum +
+  bubbles; teal rustle/dust). Map has a **Save Shrine** (14,7), water pools,
+  mire beds
+- **4 new species (33 total, dex 33–36)**: Mossling (Verdant/Beast),
+  Bogstinger (Venom/Wind — first Venom, new move Venom Barb), Murkfin
+  (Tide/Shadow), Lanternreed (Verdant/Light), Lv 18–22 in the mire beds
+- **Chapter 2 beats**: Bog Hermit Sef sets `heard_sanctum_rumor` (the Chain
+  went toward the **drowned sanctum** without lanterns); **Chain Stalker
+  Morn** (Gloomshroud 20 / Murkfin 20 / Mournlight 21, 600 shards) sets
+  `chain_stalker_beaten` — the sanctum + second Warden live past the deep
+  eaves, east (future map)
 
 ### v0.12 healer + cure items (step 11a)
 
@@ -145,13 +163,13 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 226 checks — maps/species/exits are auto-derived;
+npm run engine-test    # 249 checks — maps/species/exits are auto-derived;
                        # status/surge multipliers are checked statistically
 npm run playtest-game  # terminal 1: game with CDP port 9223
-npm run playtest       # terminal 2: 92 live checks — Echo Vault rules, gate
-                       # flow, coast town, healer + salve cure, chain-scout
-                       # battle (chapter -> 2, despawn), Maren counsel,
-                       # cliffs + Lyra rematch (uses + deletes slot_3)
+npm run playtest       # terminal 2: 108 live checks — vault, gates (Hale +
+                       # Oren), coast town, healer + salve, chain scout +
+                       # stalker fights, Maren counsel, cliffs rematch,
+                       # Mirewood flags (uses + deletes slot_3)
 node scripts/screenshot-cdp.mjs   # PNG of the running game
 node scripts/cdp-eval.mjs "expr"  # eval JS in the running game, print JSON
 node scripts/cdp-press.mjs ArrowDown 700  # hold a REAL key (drives isDown —
@@ -178,7 +196,7 @@ Playtest scripting gotchas (don't regress):
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
   ├─ data/starters.js   LUMINARY_SPECIES (23), MOVES, makeLuminary
-  ├─ data/maps.js       7 maps {rows, exits, doors, npcs, encounters}
+  ├─ data/maps.js       8 maps {rows, exits, doors, npcs, encounters}
   │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…})
   ├─ data/items.js      ITEMS
   ├─ data/trainers.js   TRAINERS (lyra1, acolyte_vren, acolyte_sila,
@@ -205,27 +223,27 @@ v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
 `ceremony_complete`, `rival1_won`, `acolyte_vren_won`, `acolyte_sila_won`,
 `warden1_won`, `badge_lowlands`, `coast_pass_granted`, `heard_chain_rumor`.
 
-## Implemented Luminary (29 of 180+)
+## Implemented Luminary (33 of 180+)
 
 Starter lines ×3 (2 stages), grove lines ×3 (2 stages), road/cave wild
-lines ×6 (2 stages), coast wilds ×5 (1 stage). Dex numbers 1–32 with gaps
-reserved for third stages.
+lines ×6 (2 stages), coast wilds ×5, Mirewood wilds ×4. Dex numbers 1–36
+with gaps reserved for third stages.
 
 ## Not built yet (do not assume exists)
 
 - Bond gain from shrine rests; status infliction from wild AI tuning
-- Evolutions for the coast wilds; third-stage starter evolutions
-- Mirewood region (Oren holds the pass; map doesn't exist)
-- Building interiors, audio, packaging, full 18×18 type chart
+- Evolutions for coast/Mirewood wilds; third-stage starter evolutions
+- The drowned sanctum + second Warden (Sef points east; map doesn't exist)
+- Mirewood town; building interiors, audio, packaging, full 18×18 type chart
 - Coast shop/noticeboard (Orla mentions a noticeboard; doesn't exist)
 
 ## Next session — plan (in priority order)
 
-1. **Chapter 2 beats**: what the Chain wanted on the pass, Lyra's father's
-   trail; swap Wayfarer Oren to a gate NPC when Mirewood starts
-2. **Mirewood region opener** (second Warden's domain past the high pass):
-   new tiles (mire/bog), 4–6 Verdant/Venom/Shadow species, first town
-3. Coast wild evolutions when the level curve rises
+1. **Deep eaves + drowned sanctum** (`mirewood_deep`): the dungeon route
+   east of the marsh toward the **second Warden** (water-girt sanctum,
+   Warden's Oath again, `badge_mirewood`)
+2. Mirewood town (healer, shop with Brine Salves, story NPCs)
+3. Coast/Mirewood evolutions as the level curve rises
 4. Audio pass (region BGM + battle SFX) or packaging when content settles
 
 ## Dependencies

@@ -179,6 +179,20 @@ function ensureWorldTextures(scene) {
 
   noiseTile(scene, 'tile_path', '#7a6a4e', ['#6a5c42', '#8a7a5c', '#5f5440'], 44);
 
+  // Mire — dark bog water with surface scum and slow bubbles.
+  noiseTile(scene, 'tile_mire', '#2a3c34', ['#223228', '#32463c', '#1c2c24'], 144, {
+    count: 50,
+    post: (ctx, rnd) => {
+      ctx.fillStyle = '#3e5648';
+      for (let i = 0; i < 5; i++) {
+        ctx.fillRect(2 + Math.floor(rnd() * 26), 2 + Math.floor(rnd() * 26), 4 + Math.floor(rnd() * 3), 1);
+      }
+      ctx.fillStyle = '#52705e';
+      ctx.fillRect(8, 8, 2, 2);
+      ctx.fillRect(22, 20, 2, 2);
+    },
+  });
+
   // Coastal sand — pale, with faint shell flecks.
   noiseTile(scene, 'tile_sand', '#c9b487', ['#bca678', '#d6c298', '#b09a6e'], 133, {
     count: 60,
@@ -1034,6 +1048,78 @@ Object.assign(STARTER_PIXELMAPS, {
       '...tt..yy.......',
       '..t...yYy.......',
       '.......yy.......',
+    ],
+  },
+});
+
+// Mirewood wilds.
+Object.assign(STARTER_PIXELMAPS, {
+  mossling: {
+    palette: { b: '#8a7a5a', d: '#6e6048', v: '#4e7a42', L: '#6aa052', k: '#241d10', y: '#d8b88a' },
+    rows: [
+      '...LvLvvLvL.....',
+      '..vLvvvvvvLv....',
+      '..bvvvvvvvvb....',
+      '.bbbbbbbbbbbb...',
+      '.bkbbbbbbbkbb...',
+      '.bbbyybbyybbb...',
+      '.bbbbbbbbbbbb...',
+      '..bbbyyyybbb....',
+      '..bbbbbbbbbb....',
+      '...bb.bb.bb.....',
+      '...dd.dd.dd.....',
+      '................',
+    ],
+  },
+  bogstinger: {
+    palette: { v: '#a05aa0', d: '#7a4480', w: '#cdeee8', k: '#1c1424', y: '#e8c84a', s: '#43355e' },
+    rows: [
+      '.ww........ww...',
+      '..www....www....',
+      '...wwwvvwww.....',
+      '....wvvvvw......',
+      '...vvkvvkvv.....',
+      '...vvvvvvvv.....',
+      '..wvyvvvvyvw....',
+      '.ww.vvvvvv.ww...',
+      '....svvvvs......',
+      '.....svvs.......',
+      '......ss........',
+      '.......s........',
+    ],
+  },
+  murkfin: {
+    palette: { t: '#2c4a5e', d: '#1c3240', s: '#43355e', k: '#0c1420', w: '#9fd8ff', l: '#aef0e8' },
+    rows: [
+      '......ss........',
+      '..t..sss........',
+      '.ttt.ss.tt......',
+      '.tttttttttt.....',
+      'ttkttttttttts...',
+      'ttttttwwttttss..',
+      'tttltttttttttss.',
+      '.tttttttttttts..',
+      '..tttttttttt....',
+      '...tt..ss.......',
+      '..t...sss.......',
+      '.......ss.......',
+    ],
+  },
+  lanternreed: {
+    palette: { v: '#4e7a42', d: '#3a5c32', y: '#efe2a0', Y: '#fff6cc', k: '#1c2e18', n: '#5e4430' },
+    rows: [
+      '......yYy.......',
+      '.....yYYYy......',
+      '.....yYYYy......',
+      '..y...yyy...y...',
+      '.yYy..vv...yYy..',
+      '..y..vvvv...y...',
+      '.....vkkv.......',
+      '..v..vvvv..v....',
+      '..vv.vvvv.vv....',
+      '...vvvvvvvv.....',
+      '....nvvvvn......',
+      '.....n..n.......',
     ],
   },
 });

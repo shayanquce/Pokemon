@@ -127,6 +127,12 @@ const MOVES = {
     power: 58, accuracy: 95, pp: 15, inflicts: { id: 'hollowed', chance: 10 },
     desc: 'Claws of folded dark that tear at the light within. May leave foes Hollowed.',
   },
+  // Mirewood wild moves.
+  venom_barb: {
+    id: 'venom_barb', name: 'Venom Barb', type: 'Venom', category: 'physical',
+    power: 46, accuracy: 100, pp: 25,
+    desc: 'A hooked stinger slick with marsh toxin.',
+  },
   // Signature moves — unlocked at high Bond, powered up at Bond 10 (Echo Surge).
   cindershroud: {
     id: 'cindershroud', name: 'Cindershroud', type: 'Flame', category: 'special',
@@ -398,6 +404,40 @@ const LUMINARY_SPECIES = {
     lore: 'Sparkfin school under thunderheads to drink the charge off the water. A netted Sparkfin will short every lantern on the boat, which is why Keldrath nets are wax-dipped and prayers are short.',
     captureRate: 150, baseExp: 77,
     learnset: [{ id: 'spark_nip', level: 1 }, { id: 'drip_lash', level: 5 }, { id: 'brine_jet', level: 13 }],
+  },
+
+  // --- Mirewood wilds (marsh, Lv 18–22) ---
+  mossling: {
+    id: 'mossling', dexNo: 33, name: 'Mossling', types: ['Verdant', 'Beast'],
+    baseStats: { hp: 70, atk: 58, def: 60, spa: 40, spd: 56, spe: 30 },
+    tagline: 'A sloth so slow the forest moved in.',
+    lore: 'Mossling wake twice a day to change branches and consider this exhausting. The garden on its back is old enough to have opinions, and birds pay rent in seeds.',
+    captureRate: 130, baseExp: 96,
+    learnset: [{ id: 'briar_swipe', level: 1 }, { id: 'rootbrace', level: 1 }, { id: 'thorn_volley', level: 19 }],
+  },
+  bogstinger: {
+    id: 'bogstinger', dexNo: 34, name: 'Bogstinger', types: ['Venom', 'Wind'],
+    baseStats: { hp: 52, atk: 66, def: 44, spa: 50, spd: 46, spe: 74 },
+    tagline: 'The mire hums. That is not the mire.',
+    lore: 'Bogstinger drone in chords to herd prey toward the deep pools. Mirewood folk hang chimes on their porches — not for luck, but so the swarm has something else to argue with.',
+    captureRate: 120, baseExp: 102,
+    learnset: [{ id: 'venom_barb', level: 1 }, { id: 'gust_flick', level: 1 }, { id: 'zephyr_slice', level: 20 }],
+  },
+  murkfin: {
+    id: 'murkfin', dexNo: 35, name: 'Murkfin', types: ['Tide', 'Shadow'],
+    baseStats: { hp: 58, atk: 62, def: 50, spa: 58, spd: 48, spe: 60 },
+    tagline: 'The ripple you saw second. Not first.',
+    lore: 'Murkfin swim in the dark water UNDER the water. Lantern light slides off them like rain off wax, which is why the mire ferry charges double after dusk.',
+    captureRate: 110, baseExp: 104,
+    learnset: [{ id: 'drip_lash', level: 1 }, { id: 'gloom_fang', level: 1 }, { id: 'brine_jet', level: 21 }],
+  },
+  lanternreed: {
+    id: 'lanternreed', dexNo: 36, name: 'Lanternreed', types: ['Verdant', 'Light'],
+    baseStats: { hp: 54, atk: 36, def: 52, spa: 72, spd: 62, spe: 46 },
+    tagline: 'A reed that lights the safe path. Usually.',
+    lore: 'Lanternreed glow brighter when travelers keep to the firm ground — and dim, gently, over the pools. The Mirewood says they are kind. The Mirewood also counts its visitors.',
+    captureRate: 110, baseExp: 100,
+    learnset: [{ id: 'leaf_dart', level: 1 }, { id: 'glimmer_dust', level: 1 }, { id: 'glowpulse', level: 20 }],
   },
 
   // --- Hollow Cave wild ---
