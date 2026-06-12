@@ -283,6 +283,20 @@ class WorldScene extends Phaser.Scene {
           this.stepAside(npc, gate.asideX, gate.asideY);
           this.toast('The way east stands open.', true);
         }
+        if (def.healer) {
+          for (const mon of Save.state.party) {
+            mon.currentHp = mon.stats.hp;
+            mon.status = null;
+            for (const mv of mon.moves) mv.pp = mv.maxPp;
+          }
+          this.refreshHud();
+          const sparkle = this.add.particles(this.player.x, this.player.y - 24, 'spark', {
+            speed: { min: 20, max: 60 }, lifespan: 600, scale: { start: 1.3, end: 0 }, tint: [0x7ec97e, 0xd4af37], emitting: false,
+          });
+          sparkle.explode(16);
+          this.time.delayedCall(800, () => sparkle.destroy());
+          this.toast('Your party has been fully rested.', true);
+        }
         if (battlePending) {
           await Save.autoSave(this, `dialogue:${def.id}`);
           this.scene.start('BattleScene', { trainer: buildTrainer(def.battle.trainerId), flag: def.battle.flag });
@@ -670,18 +684,27 @@ class WorldScene extends Phaser.Scene {
         const picker = new PartyPanel(this, {
           mode: 'select',
           title: `USE ${item.name.toUpperCase()} ON…`,
-          selectable: (mon) => mon.currentHp > 0 && mon.currentHp < mon.stats.hp,
+          selectable: (mon) =>
+            item.cures ? Boolean(mon.status) : mon.currentHp > 0 && mon.currentHp < mon.stats.hp,
           onCancel: () => {
             picker.destroy();
             this.openItems();
           },
           onSelect: async (mon) => {
-            mon.currentHp = Math.min(mon.stats.hp, mon.currentHp + item.heal);
+            let text;
+            if (item.cures) {
+              const cured = STATUSES[mon.status.id].name.toLowerCase();
+              mon.status = null;
+              text = `${mon.nickname ?? mon.name} is no longer ${cured}.`;
+            } else {
+              mon.currentHp = Math.min(mon.stats.hp, mon.currentHp + item.heal);
+              text = `${mon.nickname ?? mon.name} recovered with the ${item.name}.`;
+            }
             Save.state.inventory[item.id]--;
             picker.destroy();
             this.refreshHud();
             this.uiLock = false;
-            this.toast(`${mon.nickname ?? mon.name} recovered with the ${item.name}.`, true);
+            this.toast(text, true);
             await Save.autoSave(this, `item-use:${item.id}`);
           },
         });

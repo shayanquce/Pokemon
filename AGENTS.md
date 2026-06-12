@@ -6,9 +6,9 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.11 "The Cliff Road" (PAUSED)
+## Current checkpoint — v0.12 "Mended & Marked" (PAUSED)
 
-**Build order steps 1–10 are DONE.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–11a are DONE.** Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -25,8 +25,9 @@
 | 9b. Chapter 1 story beats (v0.9) | ✅ | Maren post-badge counsel (`conditionalDialogue`), Chain scout (`showIfFlag`), chapter → 2 |
 | 10a. Lowlands wild evolutions (v0.10) | ✅ | 6 second stages (dex 27–32, 29 species), Storm Coil + Umbral Rend, rAF-throttling fix in main.js |
 | 10b. Keldrath Cliffs route (v0.11) | ✅ | Chapter 2 route, evolved wild spawns, Lyra rematch (`lyra2`, rival2_won), Wayfarer Oren blocks the high pass |
-| 11. Healer + status items, Chapter 2 beats | ⏭️ **NEXT** | See "Next session" in `docs/PROJECT_STATE.md` |
-| 12–15 | pending | Mirewood region, story acts, audio, packaging… |
+| 11a. Healer + status-cure items (v0.12) | ✅ | Dockside Maeve (`healer: true`), Tide Tonic + Brine Salve (`cures`), world + battle cure flows |
+| 11b. Chapter 2 beats + Mirewood opener | ⏭️ **NEXT** | See "Next session" in `docs/PROJECT_STATE.md` |
+| 12–15 | pending | Regions, story acts, audio, packaging… |
 
 ## Exactly where we left off (2026-06-11, session 4, v0.10)
 
@@ -42,18 +43,19 @@ Echo Surge x1.5 once per battle at Bond 10), **v0.9** (Chapter 1 beats:
 `conditionalDialogue` + `showIfFlag` NPC mechanics, Maren post-badge
 counsel, Hollowed Chain scout fight on the gate shore → `chapter` 2) and
 **v0.10** (six Lowlands wild evolutions, dex 27–32; Storm Coil + Umbral
-Rend; **rAF-throttling fix** — see gotchas) and **v0.11** (Keldrath Cliffs
+Rend; **rAF-throttling fix** — see gotchas), **v0.11** (Keldrath Cliffs
 route: evolved wild spawns, `lyra2` rematch → `rival2_won`, Wayfarer Oren
-holding the high pass for the future Mirewood region). Verified end-to-end:
-save-smoke 6/6, engine-test 224/224, playtest 91/91.
+holding the high pass) and **v0.12** (Dockside Maeve free-heal NPC via
+`healer: true`, Tide Tonic + Brine Salve with `cures` item flow in world
+and battle). Verified end-to-end: save-smoke 6/6, engine-test 226/226,
+playtest 92/92 (twice — the lyra2 lead must stay Lv 38, see gotchas).
 
 Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS
-2. Optional live verification: `npm run playtest-game` in one terminal, `npm run playtest` in another — 91 checks (uses and then deletes save slot_3)
-3. Start on the **healer NPC** (Keldrath Harborside docks) + **status-curing items** (new ITEMS entries + shop stock; ItemsPanel already lists by `heal`, extend for `cures`)
-4. Then Chapter 2 beats (the Chain on the pass, Lyra's father's trail), then the Mirewood opener (swap Oren to a gate NPC)
-5. Then coast evolutions, audio, packaging
+2. Optional live verification: `npm run playtest-game` in one terminal, `npm run playtest` in another — 92 checks (uses and then deletes save slot_3)
+3. Start on **Chapter 2 beats** (the Chain on the pass, Lyra's father's trail), then the **Mirewood opener** (swap Oren to a gate NPC; new mire/bog tiles, 4–6 Verdant/Venom/Shadow species, first town)
+4. Then coast evolutions, audio, packaging
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn
 message flow compatible with the playtest drain loops (they tolerate the
@@ -61,6 +63,9 @@ status-proc messages; verified twice). NPC collision uses `npc.x/npc.y`
 (runtime copy), not `def.x/def.y` — gate NPCs move. The vault enforces ≥1
 party member AND ≥1 conscious one. Statuses live on `mon.status =
 { id, turns }` (already in the save schema; shrine/blackout clear them).
+Playtest trainer leads are tuned: Lv 20 (lyra1), 25 (warden/scout),
+**38 (lyra2** — at 30 her evolved counter-pick made the win a coin flip;
+that flake actually happened, don't lower these).
 **If the game ever freezes mid-battle (busy=true, tweens never fire):** the
 window was occluded and Chromium throttled rAF — main.js now sets
 `backgroundThrottling: false` + `disable-renderer-backgrounding` +

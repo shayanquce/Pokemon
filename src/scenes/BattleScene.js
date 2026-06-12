@@ -262,15 +262,28 @@ class BattleScene extends Phaser.Scene {
       onUse: async (item) => {
         this.itemsPanel.destroy();
         this.itemsPanel = null;
-        if (this.playerMon.currentHp >= this.playerMon.stats.hp) {
-          await this.say(`${this.playerMon.nickname ?? this.playerMon.name} is already at full health!`);
+        const name = this.playerMon.nickname ?? this.playerMon.name;
+        if (item.cures && !this.playerMon.status) {
+          await this.say(`${name} has no condition to cure!`);
+          this.openCommandMenu();
+          return;
+        }
+        if (item.heal && this.playerMon.currentHp >= this.playerMon.stats.hp) {
+          await this.say(`${name} is already at full health!`);
           this.openCommandMenu();
           return;
         }
         Save.state.inventory[item.id]--;
         await this.say(`${Save.state.playerName} used the ${item.name}!`);
-        await this.tweenHp(this.playerPanel, Math.min(this.playerMon.stats.hp, this.playerMon.currentHp + item.heal));
-        await this.say(`${this.playerMon.nickname ?? this.playerMon.name} recovered HP!`);
+        if (item.cures) {
+          const cured = STATUSES[this.playerMon.status.id].name.toLowerCase();
+          this.playerMon.status = null;
+          this.redrawPanel(this.playerPanel);
+          await this.say(`${name} is no longer ${cured}!`);
+        } else {
+          await this.tweenHp(this.playerPanel, Math.min(this.playerMon.stats.hp, this.playerMon.currentHp + item.heal));
+          await this.say(`${name} recovered HP!`);
+        }
         // Using an item gives the wild a free move.
         await this.useMove('wild', this.wildMove());
         if (this.playerMon.currentHp <= 0) return this.handleFaint();

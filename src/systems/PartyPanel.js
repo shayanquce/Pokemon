@@ -226,7 +226,7 @@ class ItemsPanel {
 
     const inv = Save.state.inventory ?? {};
     this.entries = Object.entries(inv)
-      .filter(([id, count]) => count > 0 && ITEMS[id] && (!usableOnly || ITEMS[id].heal))
+      .filter(([id, count]) => count > 0 && ITEMS[id] && (!usableOnly || ITEMS[id].heal || ITEMS[id].cures))
       .map(([id, count]) => ({ def: ITEMS[id], count }));
 
     const h = Math.max(120, 96 + this.entries.length * 34);

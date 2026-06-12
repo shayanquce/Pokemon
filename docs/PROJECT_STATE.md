@@ -1,10 +1,23 @@
-# Project State — v0.11 "The Cliff Road" checkpoint (2026-06-11)
+# Project State — v0.12 "Mended & Marked" checkpoint (2026-06-11)
 
-> Paused after the Keldrath Cliffs route (build-order step 10 complete).
-> All automated tests pass: 6 save-smoke, 224 engine checks, 91 live CDP
-> playtest checks.
+> Paused after the healer + status-cure items (build-order step 11, first
+> half). All automated tests pass: 6 save-smoke, 226 engine checks, 92 live
+> CDP playtest checks.
 
 ## What runs today
+
+### v0.12 healer + cure items (step 11a)
+
+- **Dockside Maeve** (keldrath_town (10,11), `healer: true` on the NPC def):
+  talking to her fully heals the party — HP, status, PP — free, with a
+  sparkle + toast. Any future NPC can be a healer by adding the flag
+- **Two new items**: Tide Tonic (heal 80) and Brine Salve (`cures: true` —
+  removes any one status). Both in Bram's stock (300 / 160 shards).
+  `cures` items work from the pause menu (target picker only lights up
+  afflicted party members) and in battle (consumes the turn, like heals)
+- **Playtest hardening**: the lyra2 rematch lead is Lv 38 — at 30 her
+  evolved counter-pick (super-effective ~30/turn + Lumenmoth sleep procs)
+  made the scripted win a coin flip (a real observed flake, not theory)
 
 ### v0.11 Keldrath Cliffs (step 10b)
 
@@ -132,13 +145,13 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 224 checks — maps/species/exits are auto-derived;
+npm run engine-test    # 226 checks — maps/species/exits are auto-derived;
                        # status/surge multipliers are checked statistically
 npm run playtest-game  # terminal 1: game with CDP port 9223
-npm run playtest       # terminal 2: 91 live checks — Echo Vault rules, gate
-                       # flow, coast town, chain-scout battle (chapter -> 2,
-                       # despawn), Maren counsel, cliffs + Lyra rematch
-                       # (uses + deletes slot_3)
+npm run playtest       # terminal 2: 92 live checks — Echo Vault rules, gate
+                       # flow, coast town, healer + salve cure, chain-scout
+                       # battle (chapter -> 2, despawn), Maren counsel,
+                       # cliffs + Lyra rematch (uses + deletes slot_3)
 node scripts/screenshot-cdp.mjs   # PNG of the running game
 node scripts/cdp-eval.mjs "expr"  # eval JS in the running game, print JSON
 node scripts/cdp-press.mjs ArrowDown 700  # hold a REAL key (drives isDown —
@@ -200,23 +213,20 @@ reserved for third stages.
 
 ## Not built yet (do not assume exists)
 
-- Status-curing items; status infliction from wild AI tuning beyond move data
-- Bond gain from shrine rests
+- Bond gain from shrine rests; status infliction from wild AI tuning
 - Evolutions for the coast wilds; third-stage starter evolutions
-- Keldrath cliff road north (Pim mentions it; map doesn't exist)
+- Mirewood region (Oren holds the pass; map doesn't exist)
 - Building interiors, audio, packaging, full 18×18 type chart
-- Healer NPC (blackout/shrine are the only full heals)
 - Coast shop/noticeboard (Orla mentions a noticeboard; doesn't exist)
 
 ## Next session — plan (in priority order)
 
-1. **Healer NPC** (Keldrath Harborside fits — a free rest by the docks) and
-   **status-curing items** in Bram's/a coast shop
-2. **Chapter 2 beats**: what the Chain wanted on the pass, Lyra's father's
+1. **Chapter 2 beats**: what the Chain wanted on the pass, Lyra's father's
    trail; swap Wayfarer Oren to a gate NPC when Mirewood starts
-3. **Mirewood region opener** (second Warden's domain past the high pass)
-4. Coast wild evolutions when the level curve rises
-5. Audio pass (region BGM + battle SFX) or packaging when content settles
+2. **Mirewood region opener** (second Warden's domain past the high pass):
+   new tiles (mire/bog), 4–6 Verdant/Venom/Shadow species, first town
+3. Coast wild evolutions when the level curve rises
+4. Audio pass (region BGM + battle SFX) or packaging when content settles
 
 ## Dependencies
 

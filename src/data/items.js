@@ -12,4 +12,12 @@ const ITEMS = {
     id: 'ember_tonic', name: 'Ember Tonic', heal: 40,
     desc: 'Warm hearth-brew. Restores 40 HP to one Luminary.',
   },
+  brine_salve: {
+    id: 'brine_salve', name: 'Brine Salve', cures: true,
+    desc: 'Stinging coastal remedy. Cures any one status condition.',
+  },
+  tide_tonic: {
+    id: 'tide_tonic', name: 'Tide Tonic', heal: 80,
+    desc: 'Cold deep-water draught. Restores 80 HP to one Luminary.',
+  },
 };

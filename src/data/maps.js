@@ -146,6 +146,8 @@ const MAPS = {
         shop: [
           { itemId: 'capture_orb', price: 200 },
           { itemId: 'ember_tonic', price: 150 },
+          { itemId: 'tide_tonic', price: 300 },
+          { itemId: 'brine_salve', price: 160 },
         ],
       },
       {
@@ -433,6 +435,19 @@ const MAPS = {
           'Said her name like a challenge. Lyra? Lyra. If you know her, my advice is: train.',
         ],
         repeatDialogue: ['The cliff road north is past the dunes. The cook still will not talk about it.'],
+      },
+      {
+        // Free full heal — Keldrath's answer to the missing healer house.
+        id: 'dockside_maeve',
+        name: 'Maeve',
+        x: 10, y: 11, facing: 'right',
+        healer: true,
+        palette: { h: '#6a8a5a', f: '#e0bc94', e: '#20203a', c: '#8a5a7a', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          "Sit. You look like the cliffs won. I mend Luminary faster than the shrine, and I don't ask the sea's permission.",
+          'There — rested, mended, and not a shard owed. Keldrath looks after its walkers.',
+        ],
+        repeatDialogue: ['Back on my bench already? Good. Better here than the bottom of the cliffs.'],
       },
       {
         id: 'shell_nina',

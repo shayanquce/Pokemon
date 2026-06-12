@@ -339,7 +339,7 @@ await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 29, y: 9, to:
 check('keldrath town loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'keldrath_town' && window.game.scene.getScene('WorldScene').npcs)`));
 await sleep(500);
 check('keldrath town discovered', await eval_(`Save.state.discoveredLocations.includes('keldrath_town')`));
-check('3 coast NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 3);
+check('4 coast NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 4);
 await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'dockmaster_orla')); return true; })()`);
 await sleep(300);
 for (let i = 0; i < 5; i++) { await pressZ(); await sleep(300); }
@@ -361,6 +361,28 @@ for (let i = 0; i < 6; i++) {
 }
 await sleep(800);
 check('escaped coast battle', await eval_(`window.game.scene.isActive('WorldScene')`));
+
+// 8c-5b. Maeve's free heal and the Brine Salve status cure.
+await eval_(`(Save.state.party[0].currentHp = 5, Save.state.party[0].status = { id: 'burn', turns: -1 }, true)`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'right'; w.talkTo(w.npcs.find(n => n.def.id === 'dockside_maeve')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(250); }
+await sleep(500);
+check('Maeve fully healed the party', await eval_(`Save.state.party[0].currentHp === Save.state.party[0].stats.hp && Save.state.party[0].status === null`));
+check('uiLock released after healer', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
+await eval_(`(Save.state.inventory.brine_salve = (Save.state.inventory.brine_salve ?? 0) + 1, Save.state.party[0].status = { id: 'shattered', turns: -1 }, true)`);
+await eval_(`(window.game.scene.getScene('WorldScene').openItems(), true)`);
+await sleep(300);
+await eval_(`(window.game.scene.getScene('WorldScene').input.keyboard.emit('keydown-DOWN'), true)`);
+await sleep(150);
+await pressZ(); // choose Brine Salve
+await sleep(300);
+await pressZ(); // target the afflicted lead
+await sleep(600);
+check('brine salve cured the status', (await eval_(`Save.state.party[0].status`)) === null);
+check('salve consumed', (await eval_(`Save.state.inventory.brine_salve`)) === 0);
+check('uiLock released after salve', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
 
 // 8c-6. Chapter 1 closer: the rumor summons a Hollowed Chain scout to the gate shore.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'keldrath_gate', toX: 28, toY: 9, facing: 'left' }), true)`);
@@ -400,7 +422,9 @@ await sleep(500);
 check('cliffs discovered', await eval_(`Save.state.discoveredLocations.includes('keldrath_cliffs')`));
 check('2 cliff NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 2);
 
-await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 30), true)`); // deterministic rematch win
+// Deterministic rematch win: at Lv 30 the evolved counter-pick (super-
+// effective ~30/turn) makes this a coin flip — 38 puts it out of reach.
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 38), true)`);
 const shardsPreLyra2 = await eval_(`Save.state.shards`);
 await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'lyra_cliffs')); return true; })()`);
 await sleep(300);
