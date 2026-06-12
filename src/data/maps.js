@@ -556,7 +556,7 @@ const MAPS = {
       'TGGGGGWWWGGGGGGGGGGGGGWWWGGGGT', // 6
       'TGGGGWWWWWGGGGSGGGGGGWWWWWGGGT', // 7  <- Save Shrine at (14,7)
       'TGGGGGWWWGGGGGGGGGGGGGWWWGGGGT', // 8
-      'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 9  <- Bog Hermit at (25,9)
+      'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGG', // 9  <- Bog Hermit at (25,9); east exit to the sanctum at (29,9)
       'TGGmmmmGGGGTGGGGGGGGGGGGGGGGGT', // 10
       'TGGmmmmGGGGGGGGGmmmmGGGGTGGGGT', // 11
       'TGGmmmmGGGGGGGGGmmmmGGGGGGGGGT', // 12
@@ -565,7 +565,10 @@ const MAPS = {
       'TGGGGGGGGGGGGGGGGGGGGPGGGGGGGT', // 15
       'TTTTTTTTTTTTTTTTTTTTTPTTTTTTTT', // 16 <- south exit back to the cliffs at (21,16)
     ],
-    exits: [{ x: 21, y: 16, to: 'keldrath_cliffs', toX: 21, toY: 1, facing: 'down' }],
+    exits: [
+      { x: 21, y: 16, to: 'keldrath_cliffs', toX: 21, toY: 1, facing: 'down' },
+      { x: 29, y: 9, to: 'mirewood_deep', toX: 1, toY: 9, facing: 'right' },
+    ],
     doors: [],
     npcs: [
       {
@@ -606,6 +609,74 @@ const MAPS = {
         { speciesId: 'bogstinger', weight: 26, min: 18, max: 22 },
         { speciesId: 'murkfin', weight: 24, min: 19, max: 22 },
         { speciesId: 'lanternreed', weight: 22, min: 18, max: 21 },
+      ],
+    },
+  },
+  mirewood_deep: {
+    id: 'mirewood_deep',
+    name: 'The Drowned Sanctum',
+    //       012345678901234567890123456789
+    rows: [
+      'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW', // 0
+      'WWCCCCCCCCCCCcccccCCCCCCCCCWWW', // 1  <- Warden's water-hall
+      'WWCCCCCCCCCCCcccccCCCCCCCCCWWW', // 2  <- Warden Mira at (15,2)
+      'WWCCCCCCCCCCCcccccCCCCCCCCCWWW', // 3
+      'WWCCCCCCCCCCCCCcCCCCCCCCCCCWWW', // 4  <- neck (15,4)
+      'WWCCeeeeccccccccccccccceeeCWWW', // 5
+      'WWCCeeeecccccccccccccccCCeCWWW', // 6  <- Keeper Ilse at (10,6)
+      'WWCCccccccccccccccccccccceCWWW', // 7
+      'WWCCcCCCCCCCCCCCCCCCCCCCCcCWWW', // 8
+      'CccccCCCCCCCCCCCCCCCCCCCCcCWWW', // 9  <- west mouth back to the marsh at (0,9)
+      'WWCCcccccccccccCccccccccccCWWW', // 10
+      'WWCCCCCCCCcCCCCCCCCcCCCCCCCWWW', // 11
+      'WWCCeeeeccccccccccccceeeeCCWWW', // 12
+      'WWCCeeeeccccccccccccceeeeCCWWW', // 13
+      'WWCCCCCCCCCCCCCCCCCCCCCCCCCWWW', // 14
+      'WWWCCCCCCCCCCCCCCCCCCCCCCCWWWW', // 15
+      'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW', // 16
+    ],
+    exits: [{ x: 0, y: 9, to: 'mirewood_marsh', toX: 28, toY: 9, facing: 'left' }],
+    doors: [],
+    npcs: [
+      {
+        id: 'sanctum_keeper',
+        name: 'Keeper Ilse',
+        x: 10, y: 6, facing: 'down',
+        palette: { h: '#3a5a6e', f: '#d8a878', e: '#20203a', c: '#2c4a5e', g: '#9fd8ff', b: '#241d18' },
+        dialogue: [
+          'Stop there. Grey cloaks came through a week ago — the water took two before the rest turned back.',
+          'The Warden holds the deep hall, and the sanctum doors behind her have not opened in a hundred years. Earn your way past me first.',
+        ],
+        battle: { trainerId: 'sanctum_keeper', flag: 'sanctum_keeper_won' },
+        postWinDialogue: ['Firm enough. The Warden waits up the neck of stone — speak softly. The water carries everything to her.'],
+        repeatDialogue: ['The Warden is up the neck. Mind the gravel beds — the dark fish nest there.'],
+      },
+      {
+        id: 'warden_mira',
+        name: 'Warden Mira',
+        x: 15, y: 2, facing: 'down',
+        palette: { h: '#2c4a5e', f: '#caa07a', e: '#20203a', c: '#43657a', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          'So you are the one the reeds kept lighting up for. And that hum about you — the sanctum hears it too, {player}.',
+          'I am Mira, Warden of the Mirewood. Behind me stand doors that answer only to the Aethori dead — and lately, the Hollowed Chain digs for another way in.',
+          'My Oath stands between them and the deep. Show me it can stand behind YOU instead.',
+        ],
+        battle: { trainerId: 'warden_mira', flag: 'warden2_won' },
+        postWinDialogue: [
+          'The Oath broke clean. The mire has chosen its guest.',
+          'Take the Mirewood Sigil. And hear me, Echo-bearer: when the sanctum doors finally answer that hum of yours, make certain the Chain is not standing behind you.',
+          'Rest at the marsh shrine. The third Warden keeps the Cinderpeaks — when the next road is cut.',
+        ],
+        repeatDialogue: ['The Sigil is yours, guest of the mire. The sanctum doors keep their silence — for now.'],
+      },
+    ],
+    encounters: {
+      rate: 0.16,
+      table: [
+        { speciesId: 'murkfin', weight: 35, min: 19, max: 22 },
+        { speciesId: 'gloombat', weight: 25, min: 19, max: 22 },
+        { speciesId: 'bogstinger', weight: 22, min: 19, max: 22 },
+        { speciesId: 'lanternreed', weight: 18, min: 19, max: 22 },
       ],
     },
   },

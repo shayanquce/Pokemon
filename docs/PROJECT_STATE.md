@@ -1,10 +1,23 @@
-# Project State — v0.13 "Drowned Eaves" checkpoint (2026-06-11)
+# Project State — v0.14 "The Second Sigil" checkpoint (2026-06-11)
 
-> Paused after the Mirewood opener + Chapter 2 beats (build-order step 11
-> complete). All automated tests pass: 6 save-smoke, 249 engine checks,
-> 108 live CDP playtest checks.
+> Paused after the Drowned Sanctum + Warden Mira (build-order step 12).
+> All automated tests pass: 6 save-smoke, 262 engine checks, 116 live CDP
+> playtest checks.
 
 ## What runs today
+
+### v0.14 The Drowned Sanctum (step 12)
+
+- **The Drowned Sanctum** (`mirewood_deep`): second dungeon, east of the
+  marsh (new exit at marsh (29,9)). A water-ringed Aethori ruin built from
+  cave tiles inside a `W` moat; gravel beds hold Lv 19–22 wilds (Murkfin,
+  Gloombat, Bogstinger, Lanternreed at 16%)
+- **Keeper Ilse** (optional gauntlet fight, Lanternreed 21 + Bogstinger 22,
+  250 shards, `sanctum_keeper_won`)
+- **Warden Mira** (15,2): Murkfin 22 / Lanternreed 23 / Mournlight 25 with
+  the **Warden's Oath**, 900 shards, sets `warden2_won` + `badge_mirewood`.
+  Aftermath seeds Chapter 3: the sanctum doors answer only the Echo, the
+  Chain digs for another way in, the third Warden keeps the Cinderpeaks
 
 ### v0.13 Mirewood opener + Chapter 2 beats (step 11b)
 
@@ -163,13 +176,13 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 249 checks — maps/species/exits are auto-derived;
+npm run engine-test    # 262 checks — maps/species/exits are auto-derived;
                        # status/surge multipliers are checked statistically
 npm run playtest-game  # terminal 1: game with CDP port 9223
-npm run playtest       # terminal 2: 108 live checks — vault, gates (Hale +
-                       # Oren), coast town, healer + salve, chain scout +
-                       # stalker fights, Maren counsel, cliffs rematch,
-                       # Mirewood flags (uses + deletes slot_3)
+npm run playtest       # terminal 2: 116 live checks — vault, both gates,
+                       # coast town, healer + salve, scout/stalker fights,
+                       # Maren counsel, cliffs rematch, Mirewood flags,
+                       # Warden Mira (badge_mirewood) (uses + deletes slot_3)
 node scripts/screenshot-cdp.mjs   # PNG of the running game
 node scripts/cdp-eval.mjs "expr"  # eval JS in the running game, print JSON
 node scripts/cdp-press.mjs ArrowDown 700  # hold a REAL key (drives isDown —
@@ -196,11 +209,13 @@ Playtest scripting gotchas (don't regress):
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
   ├─ data/starters.js   LUMINARY_SPECIES (23), MOVES, makeLuminary
-  ├─ data/maps.js       8 maps {rows, exits, doors, npcs, encounters}
+  ├─ data/maps.js       9 maps {rows, exits, doors, npcs, encounters}
   │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…})
   ├─ data/items.js      ITEMS
-  ├─ data/trainers.js   TRAINERS (lyra1, acolyte_vren, acolyte_sila,
-  │                     warden_thane w/ wardenOath+setFlags) + buildTrainer
+  ├─ data/trainers.js   TRAINERS (lyra1, lyra2, acolyte_vren, acolyte_sila,
+  │                     warden_thane, chain_scout, chain_stalker,
+  │                     sanctum_keeper, warden_mira — all w/ wardenOath/setFlags
+  │                     where applicable) + buildTrainer
   ├─ systems/PlaceholderArt.js  ALL generated art: epxScale + shadeGrid +
   │                     gridTexture (outline) pipeline, CHAR_BODY/CHAR_LEGS
   │                     walk frames, charPalette shading, tiles (2 water
@@ -221,7 +236,9 @@ Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
 
 v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
 `ceremony_complete`, `rival1_won`, `acolyte_vren_won`, `acolyte_sila_won`,
-`warden1_won`, `badge_lowlands`, `coast_pass_granted`, `heard_chain_rumor`.
+`warden1_won`, `badge_lowlands`, `coast_pass_granted`, `heard_chain_rumor`,
+`rival2_won`, `chain_scout_beaten`, `pass_cleared`, `heard_sanctum_rumor`,
+`chain_stalker_beaten`, `sanctum_keeper_won`, `warden2_won`, `badge_mirewood`.
 
 ## Implemented Luminary (33 of 180+)
 
@@ -233,18 +250,20 @@ with gaps reserved for third stages.
 
 - Bond gain from shrine rests; status infliction from wild AI tuning
 - Evolutions for coast/Mirewood wilds; third-stage starter evolutions
-- The drowned sanctum + second Warden (Sef points east; map doesn't exist)
+- The sanctum DOORS (Mira guards them; opening them is a Chapter 3+ beat)
+- Cinderpeaks / third Warden (Mira mentions them; nothing exists)
 - Mirewood town; building interiors, audio, packaging, full 18×18 type chart
 - Coast shop/noticeboard (Orla mentions a noticeboard; doesn't exist)
 
 ## Next session — plan (in priority order)
 
-1. **Deep eaves + drowned sanctum** (`mirewood_deep`): the dungeon route
-   east of the marsh toward the **second Warden** (water-girt sanctum,
-   Warden's Oath again, `badge_mirewood`)
-2. Mirewood town (healer, shop with Brine Salves, story NPCs)
+1. **Mirewood town** (healer, shop stocking Brine Salves/Tide Tonics,
+   story NPCs reacting to `badge_mirewood`)
+2. **Chapter 3 beats**: the sanctum doors + the Echo (Maren or Mira
+   conditionalDialogue on `badge_mirewood`), Lyra reacting to the second Sigil
 3. Coast/Mirewood evolutions as the level curve rises
-4. Audio pass (region BGM + battle SFX) or packaging when content settles
+4. Cinderpeaks opener (third region) when the story calls for it
+5. Audio pass (region BGM + battle SFX) or packaging when content settles
 
 ## Dependencies
 

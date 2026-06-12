@@ -195,6 +195,8 @@ for (const [starter, expected] of [['embrik', 'tidarune'], ['tidalink', 'thorngr
   check(`lyra2 counter-picks evolved ${expected} vs ${starter}`, party[2].speciesId === expected && party.length === 3);
 }
 check('chain_stalker fields 3 mons', G.TRAINERS.chain_stalker.buildParty({}).length === 3);
+check('warden_mira fields 3 mons with the Oath', G.TRAINERS.warden_mira.buildParty({}).length === 3 && G.TRAINERS.warden_mira.wardenOath === true);
+check('warden_mira grants the mirewood badge', G.TRAINERS.warden_mira.setFlags.badge_mirewood === true);
 
 // --- shop stock + NPC battle refs resolve --------------------------------------------
 for (const m of Object.values(G.MAPS)) {

@@ -490,6 +490,36 @@ check('stalker driven off, back in world', await eval_(`window.game.scene.isActi
 check('chain_stalker_beaten flag set', await eval_(`Save.state.storyFlags.chain_stalker_beaten === true`));
 check('stalker reward paid', (await eval_(`Save.state.shards`)) >= shardsPreStalker + 600, `${shardsPreStalker} -> ${await eval_(`Save.state.shards`)}`);
 
+// 8c-9. The Drowned Sanctum: Warden Mira and the second Sigil.
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 29, y: 9, to: 'mirewood_deep', toX: 1, toY: 9, facing: 'right' }), true)`);
+check('drowned sanctum loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'mirewood_deep' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('sanctum discovered', await eval_(`Save.state.discoveredLocations.includes('mirewood_deep')`));
+check('2 sanctum NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 2);
+
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 40), true)`); // fresh lead vs Mira's Lv 22-25 Oath trio
+const shardsPreMira = await eval_(`Save.state.shards`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'warden_mira')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 8; i++) { await pressZ(); await sleep(250); }
+check('Mira battle started via dialogue', await waitFor(`window.game.scene.isActive('BattleScene')`));
+await sleep(500);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+for (let round = 0; round < 40; round++) {
+  const scene = await eval_(`window.game.scene.getScenes(true)[0].scene.key`);
+  if (scene !== 'BattleScene') break;
+  const menuOpen = await eval_(`Boolean(window.game.scene.getScene('BattleScene')?.menu)`);
+  await pressZ();
+  await sleep(menuOpen ? 400 : 350);
+  if (menuOpen) { await pressZ(); await sleep(400); }
+  for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+}
+await sleep(1500);
+check('Mira defeated, back in world', await eval_(`window.game.scene.isActive('WorldScene')`));
+check('warden2_won flag set', await eval_(`Save.state.storyFlags.warden2_won === true`));
+check('badge_mirewood flag set', await eval_(`Save.state.storyFlags.badge_mirewood === true`));
+check('Mira reward paid', (await eval_(`Save.state.shards`)) >= shardsPreMira + 900, `${shardsPreMira} -> ${await eval_(`Save.state.shards`)}`);
+
 // 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);
 check('back in town after rival win', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'ashfen_town' && window.game.scene.getScene('WorldScene').npcs)`));

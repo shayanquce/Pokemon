@@ -136,6 +136,7 @@ class WorldScene extends Phaser.Scene {
       keldrath_town: { tint: [0xdce8f0, 0xefe2a0], frequency: 800, drift: 22 },
       keldrath_cliffs: { tint: [0xdce8f0, 0x9fd0c8], frequency: 600, drift: 30 },
       mirewood_marsh: { tint: [0x8fd8c8, 0xefe2a0], frequency: 700, drift: 9 },
+      mirewood_deep: { tint: [0x9fd8ff, 0x43657a], frequency: 750, drift: 6 },
     };
     const p = presets[this.map.id];
     if (!p) return;

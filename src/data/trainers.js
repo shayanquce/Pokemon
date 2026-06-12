@@ -71,6 +71,32 @@ const TRAINERS = {
     },
   },
 
+  // --- The drowned sanctum: keeper + the second Warden ---
+  sanctum_keeper: {
+    id: 'sanctum_keeper',
+    name: 'Keeper Ilse',
+    introText: "Ilse raised a dripping lantern. 'The sanctum hears every footstep. Let it hear a fight.'",
+    winText: 'You defeated Keeper Ilse!',
+    loseText: "Ilse steadied you on the wet stone. 'The water keeps what falters. Come back firmer.'",
+    reward: 250,
+    buildParty() {
+      return [makeLuminary('lanternreed', 21), makeLuminary('bogstinger', 22)];
+    },
+  },
+  warden_mira: {
+    id: 'warden_mira',
+    name: 'Warden Mira',
+    introText: "Mira's voice carried like a tide-bell. 'The Mirewood drowned its conquerors, {player}. Show me you came as a guest.'",
+    winText: 'You defeated Warden Mira and earned the MIREWOOD SIGIL!',
+    loseText: "Mira drew you from the water with one arm. 'The Oath holds. Return when the mire knows your name.'",
+    reward: 900,
+    wardenOath: true,
+    setFlags: { badge_mirewood: true },
+    buildParty() {
+      return [makeLuminary('murkfin', 22), makeLuminary('lanternreed', 23), makeLuminary('mournlight', 25)];
+    },
+  },
+
   // --- Mirewood: the Chain sends someone better ---
   chain_stalker: {
     id: 'chain_stalker',
