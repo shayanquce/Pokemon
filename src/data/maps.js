@@ -384,7 +384,7 @@ const MAPS = {
     name: 'Keldrath Coast — Harborside',
     //       012345678901234567890123456789
     rows: [
-      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
+      'TTTTTTTTTTTTTTTTTTTTTPTTTTTTTT', // 0  <- north exit to the cliff road at (21,0)
       'TGGGGGRRRRGGGGGGGRRRRGGGsssWWT', // 1
       'TGGGGGRRRRGGGGGGGRRRRGGssssWWT', // 2
       'TGGGGGBBDBGGGGGGGBDBBGGsssWWWT', // 3  <- doors at (8,3) and (18,3)
@@ -402,7 +402,10 @@ const MAPS = {
       'TGGGGGGGGGGGGGGGGGGGGGGsssWWWT', // 15
       'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 16
     ],
-    exits: [{ x: 0, y: 9, to: 'keldrath_gate', toX: 28, toY: 9, facing: 'left' }],
+    exits: [
+      { x: 0, y: 9, to: 'keldrath_gate', toX: 28, toY: 9, facing: 'left' },
+      { x: 21, y: 0, to: 'keldrath_cliffs', toX: 21, toY: 15, facing: 'up' },
+    ],
     doors: [
       { x: 8, y: 3, text: 'The harbormaster\'s office. A slate reads: "No berths. No exceptions. Stop asking, Pim."' },
       { x: 18, y: 3, text: 'A chandlery smelling of tar and oranges. The shutters are drawn against the wind.' },
@@ -444,6 +447,73 @@ const MAPS = {
       },
     ],
     encounters: null,
+  },
+  keldrath_cliffs: {
+    id: 'keldrath_cliffs',
+    name: 'Keldrath Cliffs',
+    //       012345678901234567890123456789
+    rows: [
+      'CCCCCCCCCCCCCCCCCCCCCPCCCCCCCC', // 0  <- north gap (future region; wayfarer blocks at (21,1))
+      'CGGGGGGGGGCGGGGGGGGGGPGGGCCWWC', // 1
+      'CGggggGGGGGGGGggggGGGPGGGCWWWC', // 2
+      'CGggggGGGGGGGGggggGGGPGGGCWWWC', // 3
+      'CGggggGGGGCGGGggggGGGPGGGGCWWC', // 4
+      'CGGGGGGGGGGGGGGGGGGGGPGGGGCWWC', // 5
+      'CCGGGGGGCCCGGGGGGGGGGPGGGGGCWC', // 6
+      'CGGFGGGGGGGGGGGGGGGGGPGGGGGCWC', // 7
+      'CGGGGGGGGGGGGGGGGGGGGPGGGGGCWC', // 8  <- Lyra waits at (20,8)
+      'CGGGGGGGGGCGGGGGGGGGGPGGGGGCWC', // 9
+      'CGggggGGGGGGGGGGggggGPGGGGGCWC', // 10
+      'CGggggGGGGGGGGGGggggGPGGGGCWWC', // 11
+      'CGggggGGGGCGGGGGggggGPGGGGCWWC', // 12
+      'CGGGGGGGGGGGGGGGGGGGGPGGGCWWWC', // 13
+      'CGGGGGGCGGGGGGGGGGGGGPGGGCWWWC', // 14
+      'CGGGGGGGGGGGGGGGGGGGGPGGGCCWWC', // 15
+      'CCCCCCCCCCCCCCCCCCCCCPCCCCCCCC', // 16 <- south exit back to Harborside at (21,16)
+    ],
+    exits: [{ x: 21, y: 16, to: 'keldrath_town', toX: 21, toY: 1, facing: 'down' }],
+    doors: [],
+    npcs: [
+      {
+        id: 'lyra_cliffs',
+        name: 'Lyra',
+        x: 20, y: 8, facing: 'down',
+        palette: { h: '#a03a4a', f: '#e8c39a', e: '#20203a', c: '#2a4a3a', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          'Knew it. Sigil on your belt, sea in your boots — and STILL slower than me up a cliff.',
+          "Father climbed this road once. The Chain was waiting at the top. So before either of us goes higher — show me you've grown, {player}.",
+        ],
+        battle: { trainerId: 'lyra2', flag: 'rival2_won' },
+        postWinDialogue: [
+          'Hah. There it is. That fire the ceremony saw first.',
+          "The wayfarer says the high pass is shut until the storms turn. When it opens, the second Warden — and whatever the Chain left up there — is mine first. Race you.",
+        ],
+        repeatDialogue: ['Train in the cliff grass. The wilds up here have grown into themselves — so should we.'],
+      },
+      {
+        id: 'wayfarer_oren',
+        name: 'Wayfarer Oren',
+        x: 21, y: 1, facing: 'down',
+        palette: { h: '#c8c2b4', f: '#caa07a', e: '#20203a', c: '#5e564c', g: '#9a8a66', b: '#241d18' },
+        dialogue: [
+          'Turn back, friend. The high pass is buried — storm after storm, like the sky is guarding something.',
+          "When it clears, the road runs to Mirewood and the second Warden's seat. Until then, even the Chain waits below.",
+        ],
+        repeatDialogue: ['The pass is still buried. The storms will turn when they turn.'],
+      },
+    ],
+    encounters: {
+      rate: 0.15,
+      table: [
+        { speciesId: 'voltail', weight: 20, min: 13, max: 16 },
+        { speciesId: 'zephyrkit', weight: 20, min: 13, max: 16 },
+        { speciesId: 'gullwisp', weight: 18, min: 13, max: 17 },
+        { speciesId: 'sparkfin', weight: 12, min: 14, max: 17 },
+        { speciesId: 'zephyrlynx', weight: 11, min: 18, max: 20 },
+        { speciesId: 'stormtail', weight: 10, min: 18, max: 20 },
+        { speciesId: 'gloomshroud', weight: 9, min: 20, max: 22 },
+      ],
+    },
   },
 };
 

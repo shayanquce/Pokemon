@@ -55,6 +55,22 @@ const TRAINERS = {
     },
   },
 
+  // --- Keldrath cliffs: the rematch she promised ---
+  lyra2: {
+    id: 'lyra2',
+    name: 'Rival Lyra',
+    introText: "Lyra grinned over the wind. 'The coast taught me things, {player}. Keep up!'",
+    winText: 'You defeated Rival Lyra — again!',
+    loseText: "Lyra hauled you back from the cliff edge. 'Sloppy. The Chain won't be this gentle.'",
+    reward: 500,
+    buildParty(state) {
+      // Her counter-pick has evolved alongside her.
+      const counter = { embrik: 'tidarune', tidalink: 'thorngrove', thornpaw: 'embrath' };
+      const starterId = state.starterId ?? state.dex?.caught?.[0] ?? 'embrik';
+      return [makeLuminary('lumenmoth', 16), makeLuminary('brinepup', 15), makeLuminary(counter[starterId] ?? 'tidarune', 18)];
+    },
+  },
+
   // --- Chapter 1 closer: the Hollowed Chain reaches the coast ---
   chain_scout: {
     id: 'chain_scout',

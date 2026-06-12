@@ -128,6 +128,7 @@ const MAP_DISPLAY_NAMES = {
   hollow_cave: 'Hollow Cave',
   keldrath_gate: 'Keldrath Gate',
   keldrath_town: 'Keldrath Coast — Harborside',
+  keldrath_cliffs: 'Keldrath Cliffs',
 };
 
 function prettyMapName(id) {

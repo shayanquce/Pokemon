@@ -391,6 +391,37 @@ check('scout reward paid', (await eval_(`Save.state.shards`)) >= shardsPreScout 
 await sleep(500);
 check('scout gone after the rout', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 1);
 
+// 8c-7. Keldrath Cliffs: Chapter 2 route + the Lyra rematch.
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 29, y: 9, to: 'keldrath_town', toX: 1, toY: 9, facing: 'right' }), true)`);
+await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'keldrath_town' && window.game.scene.getScene('WorldScene').npcs)`);
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 21, y: 0, to: 'keldrath_cliffs', toX: 21, toY: 15, facing: 'up' }), true)`);
+check('keldrath cliffs loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'keldrath_cliffs' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('cliffs discovered', await eval_(`Save.state.discoveredLocations.includes('keldrath_cliffs')`));
+check('2 cliff NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 2);
+
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 30), true)`); // deterministic rematch win
+const shardsPreLyra2 = await eval_(`Save.state.shards`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'lyra_cliffs')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+check('rematch battle started', await waitFor(`window.game.scene.isActive('BattleScene')`));
+await sleep(500);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(250); }
+for (let round = 0; round < 35; round++) {
+  const scene = await eval_(`window.game.scene.getScenes(true)[0].scene.key`);
+  if (scene !== 'BattleScene') break;
+  const menuOpen = await eval_(`Boolean(window.game.scene.getScene('BattleScene')?.menu)`);
+  await pressZ();
+  await sleep(menuOpen ? 400 : 350);
+  if (menuOpen) { await pressZ(); await sleep(400); }
+  for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+}
+await sleep(1500);
+check('rematch won, back in world', await eval_(`window.game.scene.isActive('WorldScene')`));
+check('rival2_won flag set', await eval_(`Save.state.storyFlags.rival2_won === true`));
+check('rematch reward paid', (await eval_(`Save.state.shards`)) >= shardsPreLyra2 + 500, `${shardsPreLyra2} -> ${await eval_(`Save.state.shards`)}`);
+
 // 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);
 check('back in town after rival win', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'ashfen_town' && window.game.scene.getScene('WorldScene').npcs)`));

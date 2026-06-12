@@ -6,10 +6,9 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.10 "Grown Wild" (PAUSED)
+## Current checkpoint — v0.11 "The Cliff Road" (PAUSED)
 
-**Build order steps 1–9 are DONE plus the Lowlands wild evolutions.**
-Do not rebuild them unless fixing bugs.
+**Build order steps 1–10 are DONE.** Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -25,8 +24,9 @@ Do not rebuild them unless fixing bugs.
 | 9a. Status conditions + Echo Surge (v0.8) | ✅ | burn/sleep/Shattered/Echoed/Hollowed, move `inflicts`, Bond-10 surge |
 | 9b. Chapter 1 story beats (v0.9) | ✅ | Maren post-badge counsel (`conditionalDialogue`), Chain scout (`showIfFlag`), chapter → 2 |
 | 10a. Lowlands wild evolutions (v0.10) | ✅ | 6 second stages (dex 27–32, 29 species), Storm Coil + Umbral Rend, rAF-throttling fix in main.js |
-| 10b. Keldrath cliffs route | ⏭️ **NEXT** | See "Next session" in `docs/PROJECT_STATE.md` |
-| 11–15 | pending | Regions, story acts, audio, packaging… |
+| 10b. Keldrath Cliffs route (v0.11) | ✅ | Chapter 2 route, evolved wild spawns, Lyra rematch (`lyra2`, rival2_won), Wayfarer Oren blocks the high pass |
+| 11. Healer + status items, Chapter 2 beats | ⏭️ **NEXT** | See "Next session" in `docs/PROJECT_STATE.md` |
+| 12–15 | pending | Mirewood region, story acts, audio, packaging… |
 
 ## Exactly where we left off (2026-06-11, session 4, v0.10)
 
@@ -42,15 +42,17 @@ Echo Surge x1.5 once per battle at Bond 10), **v0.9** (Chapter 1 beats:
 `conditionalDialogue` + `showIfFlag` NPC mechanics, Maren post-badge
 counsel, Hollowed Chain scout fight on the gate shore → `chapter` 2) and
 **v0.10** (six Lowlands wild evolutions, dex 27–32; Storm Coil + Umbral
-Rend; **rAF-throttling fix** — see gotchas). Verified end-to-end:
-save-smoke 6/6, engine-test 208/208, playtest 84/84.
+Rend; **rAF-throttling fix** — see gotchas) and **v0.11** (Keldrath Cliffs
+route: evolved wild spawns, `lyra2` rematch → `rival2_won`, Wayfarer Oren
+holding the high pass for the future Mirewood region). Verified end-to-end:
+save-smoke 6/6, engine-test 224/224, playtest 91/91.
 
 Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS
-2. Optional live verification: `npm run playtest-game` in one terminal, `npm run playtest` in another — 84 checks (uses and then deletes save slot_3)
-3. Start on the **`keldrath_cliffs`** route north (Chapter 2, Lyra rematch — Pim's dialogue seeds it; evolved wilds Lv 14–18 fit the encounter table)
-4. Then healer NPC / status-cure items, Chapter 2 beats
+2. Optional live verification: `npm run playtest-game` in one terminal, `npm run playtest` in another — 91 checks (uses and then deletes save slot_3)
+3. Start on the **healer NPC** (Keldrath Harborside docks) + **status-curing items** (new ITEMS entries + shop stock; ItemsPanel already lists by `heal`, extend for `cures`)
+4. Then Chapter 2 beats (the Chain on the pass, Lyra's father's trail), then the Mirewood opener (swap Oren to a gate NPC)
 5. Then coast evolutions, audio, packaging
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn

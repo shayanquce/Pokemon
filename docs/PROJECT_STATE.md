@@ -1,10 +1,25 @@
-# Project State — v0.10 "Grown Wild" checkpoint (2026-06-11)
+# Project State — v0.11 "The Cliff Road" checkpoint (2026-06-11)
 
-> Paused after wild evolutions (build-order step 10, first half). All
-> automated tests pass: 6 save-smoke, 208 engine checks, 84 live CDP
+> Paused after the Keldrath Cliffs route (build-order step 10 complete).
+> All automated tests pass: 6 save-smoke, 224 engine checks, 91 live CDP
 > playtest checks.
 
 ## What runs today
+
+### v0.11 Keldrath Cliffs (step 10b)
+
+- **Keldrath Cliffs** (`keldrath_cliffs`): Chapter 2 route north of
+  Harborside (new exit at town (21,0)). Rock-walled switchback with the sea
+  below the east cliffs; encounter grass holds Lv 13–17 wilds plus **rare
+  evolved spawns** (Zephyrlynx/Stormtail 18–20, Gloomshroud 20–22, ~30%
+  combined)
+- **Lyra rematch** (`lyra2`, at (20,8)): Lumenmoth 16 + Brinepup 15 + her
+  evolved counter-pick at 18 (Tidarune/Thorngrove/Embrath vs your starter).
+  500 shards, sets `rival2_won`; her dialogue advances the Chapter 2 thread
+  (her father climbed this road; the Chain was waiting)
+- **Wayfarer Oren** blocks the north gap at (21,1) — the high pass to
+  Mirewood/second Warden is "buried until the storms turn" (next region
+  hook; he is a plain dialogue NPC, swap to a gate NPC when the region lands)
 
 ### v0.10 wild evolutions (step 10a)
 
@@ -117,12 +132,12 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 208 checks — maps/species/exits are auto-derived;
+npm run engine-test    # 224 checks — maps/species/exits are auto-derived;
                        # status/surge multipliers are checked statistically
 npm run playtest-game  # terminal 1: game with CDP port 9223
-npm run playtest       # terminal 2: 84 live checks — v0.7 set plus Echo Vault
-                       # rules, gate flow, coast town, chain-scout battle
-                       # (chapter -> 2, despawn), Maren post-badge counsel
+npm run playtest       # terminal 2: 91 live checks — Echo Vault rules, gate
+                       # flow, coast town, chain-scout battle (chapter -> 2,
+                       # despawn), Maren counsel, cliffs + Lyra rematch
                        # (uses + deletes slot_3)
 node scripts/screenshot-cdp.mjs   # PNG of the running game
 node scripts/cdp-eval.mjs "expr"  # eval JS in the running game, print JSON
@@ -150,7 +165,7 @@ Playtest scripting gotchas (don't regress):
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
   ├─ data/starters.js   LUMINARY_SPECIES (23), MOVES, makeLuminary
-  ├─ data/maps.js       6 maps {rows, exits, doors, npcs, encounters}
+  ├─ data/maps.js       7 maps {rows, exits, doors, npcs, encounters}
   │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…})
   ├─ data/items.js      ITEMS
   ├─ data/trainers.js   TRAINERS (lyra1, acolyte_vren, acolyte_sila,
@@ -195,12 +210,12 @@ reserved for third stages.
 
 ## Next session — plan (in priority order)
 
-1. **Keldrath cliff road** north (`keldrath_cliffs`): Chapter 2 route toward
-   the second Warden, Lyra rematch on the way (Pim's dialogue seeds it) —
-   evolved wilds (Lv 14–18) make good encounters there
-2. Healer NPC in Ashfen Town or Keldrath (free rest); status-curing items
-3. Chapter 2 beats: what the Chain wanted, Lyra's father's trail
-4. Coast wild evolutions when the next region raises the level curve
+1. **Healer NPC** (Keldrath Harborside fits — a free rest by the docks) and
+   **status-curing items** in Bram's/a coast shop
+2. **Chapter 2 beats**: what the Chain wanted on the pass, Lyra's father's
+   trail; swap Wayfarer Oren to a gate NPC when Mirewood starts
+3. **Mirewood region opener** (second Warden's domain past the high pass)
+4. Coast wild evolutions when the level curve rises
 5. Audio pass (region BGM + battle SFX) or packaging when content settles
 
 ## Dependencies

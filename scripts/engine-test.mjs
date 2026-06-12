@@ -190,6 +190,10 @@ check('warden_thane grants the badge flag', G.TRAINERS.warden_thane.setFlags.bad
 check('acolyte parties valid', G.TRAINERS.acolyte_vren.buildParty({}).length === 2 && G.TRAINERS.acolyte_sila.buildParty({}).length === 2);
 check('chain_scout fields 2 mons', G.TRAINERS.chain_scout.buildParty({}).length === 2);
 check('chain_scout advances the chapter', G.TRAINERS.chain_scout.setFlags.chapter === 2);
+for (const [starter, expected] of [['embrik', 'tidarune'], ['tidalink', 'thorngrove'], ['thornpaw', 'embrath']]) {
+  const party = G.TRAINERS.lyra2.buildParty({ starterId: starter });
+  check(`lyra2 counter-picks evolved ${expected} vs ${starter}`, party[2].speciesId === expected && party.length === 3);
+}
 
 // --- shop stock + NPC battle refs resolve --------------------------------------------
 for (const m of Object.values(G.MAPS)) {
