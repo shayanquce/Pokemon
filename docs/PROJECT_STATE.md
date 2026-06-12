@@ -1,10 +1,27 @@
-# Project State — v0.9 "The Chain Surfaces" checkpoint (2026-06-11)
+# Project State — v0.10 "Grown Wild" checkpoint (2026-06-11)
 
-> Paused after build-order step 9 complete: status conditions, Echo Surge,
-> and the Chapter 1 story beats. All automated tests pass: 6 save-smoke,
-> 180 engine checks, 84 live CDP playtest checks.
+> Paused after wild evolutions (build-order step 10, first half). All
+> automated tests pass: 6 save-smoke, 208 engine checks, 84 live CDP
+> playtest checks.
 
 ## What runs today
+
+### v0.10 wild evolutions (step 10a)
+
+- **Six Lowlands second stages (29 species total, dex 27–32)**: Voltail →
+  **Stormtail** (Volt/Storm, 18), Mirewisp → **Mournlight** (Spirit/Light,
+  19), Bristleboar → **Bristlehulk** (Beast/Stone, 18), Pebblump →
+  **Cragmaw** (Stone, 20), Zephyrkit → **Zephyrlynx** (Wind, 18), Gloombat →
+  **Gloomshroud** (Shadow/Wind, 20) — full stats, lore, pixel maps
+- **Two new moves**: Storm Coil (Volt special 58) and Umbral Rend (Shadow
+  physical 58, 10% Hollowed), in the second stages' learnsets
+- **Engine-loop freeze fix** (`main.js`): `backgroundThrottling: false` +
+  `disable-renderer-backgrounding` / `disable-background-timer-throttling` /
+  `disable-features=CalculateNativeWinOcclusion`. Without these, Chromium
+  throttles rAF to ZERO when the window is hidden/occluded, freezing Phaser
+  tweens mid-await — battles softlock and the CDP playtest stalls. If a
+  playtest ever hangs with `busy=true` and full HP bars, check occlusion
+  first, not the battle code
 
 ### v0.9 Chapter 1 beats (step 9b)
 
@@ -100,7 +117,7 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 180 checks — maps/species/exits are auto-derived;
+npm run engine-test    # 208 checks — maps/species/exits are auto-derived;
                        # status/surge multipliers are checked statistically
 npm run playtest-game  # terminal 1: game with CDP port 9223
 npm run playtest       # terminal 2: 84 live checks — v0.7 set plus Echo Vault
@@ -160,17 +177,17 @@ v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
 `ceremony_complete`, `rival1_won`, `acolyte_vren_won`, `acolyte_sila_won`,
 `warden1_won`, `badge_lowlands`, `coast_pass_granted`, `heard_chain_rumor`.
 
-## Implemented Luminary (23 of 180+)
+## Implemented Luminary (29 of 180+)
 
-Starter lines ×3 (2 stages), grove lines ×3 (2 stages), road wilds ×5,
-Gloombat (cave), coast wilds ×5. Dex numbers 1–26 with gaps reserved for
-third stages.
+Starter lines ×3 (2 stages), grove lines ×3 (2 stages), road/cave wild
+lines ×6 (2 stages), coast wilds ×5 (1 stage). Dex numbers 1–32 with gaps
+reserved for third stages.
 
 ## Not built yet (do not assume exists)
 
 - Status-curing items; status infliction from wild AI tuning beyond move data
 - Bond gain from shrine rests
-- Evolutions for road/cave/coast wilds; third-stage starter evolutions
+- Evolutions for the coast wilds; third-stage starter evolutions
 - Keldrath cliff road north (Pim mentions it; map doesn't exist)
 - Building interiors, audio, packaging, full 18×18 type chart
 - Healer NPC (blackout/shrine are the only full heals)
@@ -178,12 +195,12 @@ third stages.
 
 ## Next session — plan (in priority order)
 
-1. **Evolutions** for road/cave/coast wilds (Voltail, Bristleboar, Gloombat,
-   Brinepup… — design stats + pixel maps)
-2. **Keldrath cliff road** north (`keldrath_cliffs`): Chapter 2 route toward
-   the second Warden, Lyra rematch on the way (Pim's dialogue seeds it)
-3. Healer NPC in Ashfen Town or Keldrath (free rest); status-curing items
-4. Chapter 2 beats: what the Chain wanted, Lyra's father's trail
+1. **Keldrath cliff road** north (`keldrath_cliffs`): Chapter 2 route toward
+   the second Warden, Lyra rematch on the way (Pim's dialogue seeds it) —
+   evolved wilds (Lv 14–18) make good encounters there
+2. Healer NPC in Ashfen Town or Keldrath (free rest); status-curing items
+3. Chapter 2 beats: what the Chain wanted, Lyra's father's trail
+4. Coast wild evolutions when the next region raises the level curve
 5. Audio pass (region BGM + battle SFX) or packaging when content settles
 
 ## Dependencies

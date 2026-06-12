@@ -24,6 +24,14 @@ import Store from 'electron-store';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Keep the game loop alive when the window is hidden or covered by another
+// window. Without these, Chromium throttles requestAnimationFrame to zero,
+// which freezes Phaser tweens/scene transitions mid-await (and breaks the
+// automated CDP playtest whenever the window is occluded).
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
+
 const SLOT_IDS = ['slot_1', 'slot_2', 'slot_3'];
 const BACKUP_KEYS = ['backup_1', 'backup_2', 'backup_3'];
 const SAVE_SCHEMA_VERSION = 1;
@@ -248,6 +256,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
+      backgroundThrottling: false,
     },
   });
 

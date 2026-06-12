@@ -6,10 +6,10 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.9 "The Chain Surfaces" (PAUSED)
+## Current checkpoint — v0.10 "Grown Wild" (PAUSED)
 
-**Build order steps 1–9 are DONE (graphics overhaul, status systems, and
-Chapter 1 story beats included).** Do not rebuild them unless fixing bugs.
+**Build order steps 1–9 are DONE plus the Lowlands wild evolutions.**
+Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -24,10 +24,11 @@ Chapter 1 story beats included).** Do not rebuild them unless fixing bugs.
 | 8. Echo Vault UI + Keldrath opener (v0.7) | ✅ | VaultPanel at shrines, keldrath_gate + gate-NPC mechanic, keldrath_town, 5 coast species (23 total) |
 | 9a. Status conditions + Echo Surge (v0.8) | ✅ | burn/sleep/Shattered/Echoed/Hollowed, move `inflicts`, Bond-10 surge |
 | 9b. Chapter 1 story beats (v0.9) | ✅ | Maren post-badge counsel (`conditionalDialogue`), Chain scout (`showIfFlag`), chapter → 2 |
-| 10. Wild evolutions + Keldrath cliffs | ⏭️ **NEXT** | See "Next session" in `docs/PROJECT_STATE.md` |
-| 11–15 | pending | Cliff road, regions, story acts… |
+| 10a. Lowlands wild evolutions (v0.10) | ✅ | 6 second stages (dex 27–32, 29 species), Storm Coil + Umbral Rend, rAF-throttling fix in main.js |
+| 10b. Keldrath cliffs route | ⏭️ **NEXT** | See "Next session" in `docs/PROJECT_STATE.md` |
+| 11–15 | pending | Regions, story acts, audio, packaging… |
 
-## Exactly where we left off (2026-06-11, session 4, v0.9)
+## Exactly where we left off (2026-06-11, session 4, v0.10)
 
 This session shipped **v0.6** (presentation overhaul: hi-res walk-cycle
 characters, EPX+shaded Luminary sprites — all `lum_` call sites display at
@@ -37,18 +38,20 @@ ambient life, battle animations, flavor text via `pick()`), **v0.7**
 `keldrath_gate`/`keldrath_town` maps, sand tile `s`, data-driven gate-NPC
 mechanic, 5 new coast species, dex 22–26), **v0.8** (status conditions
 burn/sleep/Shattered/Echoed/Hollowed via move `inflicts`, panel status tags,
-Echo Surge x1.5 once per battle at Bond 10) and **v0.9** (Chapter 1 beats:
+Echo Surge x1.5 once per battle at Bond 10), **v0.9** (Chapter 1 beats:
 `conditionalDialogue` + `showIfFlag` NPC mechanics, Maren post-badge
-counsel, Hollowed Chain scout fight on the gate shore → `chapter` 2).
-Verified end-to-end: save-smoke 6/6, engine-test 180/180, playtest 84/84.
+counsel, Hollowed Chain scout fight on the gate shore → `chapter` 2) and
+**v0.10** (six Lowlands wild evolutions, dex 27–32; Storm Coil + Umbral
+Rend; **rAF-throttling fix** — see gotchas). Verified end-to-end:
+save-smoke 6/6, engine-test 208/208, playtest 84/84.
 
 Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS
 2. Optional live verification: `npm run playtest-game` in one terminal, `npm run playtest` in another — 84 checks (uses and then deletes save slot_3)
-3. Start on **wild evolutions** (road/cave/coast: Voltail, Bristleboar, Zephyrkit, Gloombat, Brinepup… — stats + pixel maps + dex numbers; reuse the `evolution: { toId, to, level }` schema)
-4. Then the **`keldrath_cliffs`** route north (Chapter 2, Lyra rematch — Pim's dialogue seeds it)
-5. Then healer NPC / status-cure items, audio, packaging
+3. Start on the **`keldrath_cliffs`** route north (Chapter 2, Lyra rematch — Pim's dialogue seeds it; evolved wilds Lv 14–18 fit the encounter table)
+4. Then healer NPC / status-cure items, Chapter 2 beats
+5. Then coast evolutions, audio, packaging
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn
 message flow compatible with the playtest drain loops (they tolerate the
@@ -56,6 +59,11 @@ status-proc messages; verified twice). NPC collision uses `npc.x/npc.y`
 (runtime copy), not `def.x/def.y` — gate NPCs move. The vault enforces ≥1
 party member AND ≥1 conscious one. Statuses live on `mon.status =
 { id, turns }` (already in the save schema; shrine/blackout clear them).
+**If the game ever freezes mid-battle (busy=true, tweens never fire):** the
+window was occluded and Chromium throttled rAF — main.js now sets
+`backgroundThrottling: false` + `disable-renderer-backgrounding` +
+`disable-background-timer-throttling` + `disable-features=
+CalculateNativeWinOcclusion`; do NOT remove those switches.
 
 **Playtest scripting gotchas** (see PROJECT_STATE.md "Verified tests"): wrap
 waitFor expressions in `Boolean(...)` (Phaser objects break CDP serialization);

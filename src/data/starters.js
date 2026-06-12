@@ -116,6 +116,17 @@ const MOVES = {
     power: 45, accuracy: 100, pp: 25, inflicts: { id: 'hollowed', chance: 15 },
     desc: 'A bite from somewhere the light is not. May leave foes Hollowed.',
   },
+  // Evolved-wild moves (learned by the Lowlands second stages).
+  storm_coil: {
+    id: 'storm_coil', name: 'Storm Coil', type: 'Volt', category: 'special',
+    power: 58, accuracy: 95, pp: 15,
+    desc: 'A whip-crack of gathered stormcharge.',
+  },
+  umbral_rend: {
+    id: 'umbral_rend', name: 'Umbral Rend', type: 'Shadow', category: 'physical',
+    power: 58, accuracy: 95, pp: 15, inflicts: { id: 'hollowed', chance: 10 },
+    desc: 'Claws of folded dark that tear at the light within. May leave foes Hollowed.',
+  },
   // Signature moves — unlocked at high Bond, powered up at Bond 10 (Echo Surge).
   cindershroud: {
     id: 'cindershroud', name: 'Cindershroud', type: 'Flame', category: 'special',
@@ -254,6 +265,7 @@ const LUMINARY_SPECIES = {
   voltail: {
     id: 'voltail', dexNo: 16, name: 'Voltail', types: ['Volt'],
     baseStats: { hp: 44, atk: 50, def: 38, spa: 52, spd: 40, spe: 66 },
+    evolution: { toId: 'stormtail', to: 'Stormtail', level: 18 },
     tagline: 'A storm-squirrel with a lightning-rod tail.',
     lore: 'Voltail climb the tallest tree on the road before a storm and dare it to strike. The scorch-marks down their tails are kept like trophies, compared at length, and exaggerated.',
     captureRate: 180, baseExp: 62,
@@ -262,6 +274,7 @@ const LUMINARY_SPECIES = {
   mirewisp: {
     id: 'mirewisp', dexNo: 17, name: 'Mirewisp', types: ['Spirit'],
     baseStats: { hp: 40, atk: 30, def: 42, spa: 58, spd: 56, spe: 48 },
+    evolution: { toId: 'mournlight', to: 'Mournlight', level: 19 },
     tagline: 'A lantern that went looking for its keeper.',
     lore: 'Mirewisp gather where travelers last lost their way, burning softly over the safe path. Whether they are guiding you or collecting you is a subject Ashfen does not discuss after dark.',
     captureRate: 150, baseExp: 68,
@@ -270,6 +283,7 @@ const LUMINARY_SPECIES = {
   bristleboar: {
     id: 'bristleboar', dexNo: 18, name: 'Bristleboar', types: ['Beast'],
     baseStats: { hp: 62, atk: 60, def: 50, spa: 28, spd: 38, spe: 44 },
+    evolution: { toId: 'bristlehulk', to: 'Bristlehulk', level: 18 },
     tagline: 'A wall of quills with opinions about fences.',
     lore: 'Bristleboar plough the road-banks for roots and consider every fence a personal insult. Farmers along the North Road rebuild in spring and have learned to plant extra.',
     captureRate: 160, baseExp: 70,
@@ -278,6 +292,7 @@ const LUMINARY_SPECIES = {
   pebblump: {
     id: 'pebblump', dexNo: 19, name: 'Pebblump', types: ['Stone'],
     baseStats: { hp: 56, atk: 48, def: 68, spa: 26, spd: 48, spe: 22 },
+    evolution: { toId: 'cragmaw', to: 'Cragmaw', level: 20 },
     tagline: 'A boulder that blinks if you stare long enough.',
     lore: 'Pebblump sleep for years in the road-cut and wake mid-rockslide, mildly apologetic. Carters leave the biggest stones alone on principle.',
     captureRate: 170, baseExp: 66,
@@ -286,10 +301,61 @@ const LUMINARY_SPECIES = {
   zephyrkit: {
     id: 'zephyrkit', dexNo: 20, name: 'Zephyrkit', types: ['Wind'],
     baseStats: { hp: 42, atk: 44, def: 36, spa: 48, spd: 42, spe: 70 },
+    evolution: { toId: 'zephyrlynx', to: 'Zephyrlynx', level: 18 },
     tagline: 'A cat made mostly of running away.',
     lore: 'Zephyrkit outrun everything, including their own meals, which they then have to track back down. The fastest ones learn to stop showing off. Eventually.',
     captureRate: 180, baseExp: 60,
     learnset: [{ id: 'zephyr_slice', level: 1 }, { id: 'scrabble', level: 1 }, { id: 'gust_flick', level: 5 }],
+  },
+
+  // --- Lowlands second stages (road/cave wilds, evolved Lv 18–20) ---
+  stormtail: {
+    id: 'stormtail', dexNo: 27, name: 'Stormtail', types: ['Volt', 'Storm'],
+    baseStats: { hp: 58, atk: 64, def: 50, spa: 72, spd: 54, spe: 84 },
+    tagline: 'The tree finally struck back. It kept the lightning.',
+    lore: 'A Voltail that survives enough storms stops borrowing the sky and starts carrying it. Stormtail trail their own weather — small, personal, and extremely smug about it.',
+    captureRate: 90, baseExp: 138,
+    learnset: [{ id: 'spark_nip', level: 1 }, { id: 'scrabble', level: 1 }, { id: 'zephyr_slice', level: 11 }, { id: 'storm_coil', level: 20 }],
+  },
+  mournlight: {
+    id: 'mournlight', dexNo: 28, name: 'Mournlight', types: ['Spirit', 'Light'],
+    baseStats: { hp: 54, atk: 38, def: 56, spa: 78, spd: 74, spe: 58 },
+    tagline: 'It found its keeper. It stayed anyway.',
+    lore: 'When a Mirewisp finally guides its last traveler home, it does not go out — it grows kind. A Mournlight burns steady over crossroads, and the lost arrive without remembering being found.',
+    captureRate: 80, baseExp: 142,
+    learnset: [{ id: 'wisp_flare', level: 1 }, { id: 'glimmer_dust', level: 5 }, { id: 'glowpulse', level: 14 }],
+  },
+  bristlehulk: {
+    id: 'bristlehulk', dexNo: 29, name: 'Bristlehulk', types: ['Beast', 'Stone'],
+    baseStats: { hp: 84, atk: 78, def: 68, spa: 32, spd: 48, spe: 40 },
+    tagline: 'The fence builders gave up. The fence builders moved.',
+    lore: 'Bristlehulk quills harden into slate and its shoulders learn the weight of hillsides. It ploughs new stream-beds when bored, which the farmers have decided to call "irrigation".',
+    captureRate: 80, baseExp: 146,
+    learnset: [{ id: 'gnaw', level: 1 }, { id: 'hoof_rush', level: 6 }, { id: 'stone_guard', level: 10 }, { id: 'pebble_toss', level: 18 }],
+  },
+  cragmaw: {
+    id: 'cragmaw', dexNo: 30, name: 'Cragmaw', types: ['Stone'],
+    baseStats: { hp: 76, atk: 66, def: 92, spa: 30, spd: 62, spe: 26 },
+    tagline: 'The rockslide woke up first this time.',
+    lore: 'A Pebblump that sleeps a decade too long wakes as the hillside. Cragmaw apologize for nothing anymore — the road bends around them now, by mutual agreement.',
+    captureRate: 70, baseExp: 148,
+    learnset: [{ id: 'pebble_toss', level: 1 }, { id: 'stone_guard', level: 1 }, { id: 'hoof_rush', level: 21 }],
+  },
+  zephyrlynx: {
+    id: 'zephyrlynx', dexNo: 31, name: 'Zephyrlynx', types: ['Wind'],
+    baseStats: { hp: 56, atk: 60, def: 48, spa: 64, spd: 56, spe: 92 },
+    tagline: 'It stopped showing off. Now it just vanishes.',
+    lore: 'Zephyrlynx hunt at the speed of rumor. Travelers on the North Road feel a breeze, count their rations, and find one polite bite taken from the best apple.',
+    captureRate: 80, baseExp: 140,
+    learnset: [{ id: 'zephyr_slice', level: 1 }, { id: 'scrabble', level: 1 }, { id: 'gust_flick', level: 5 }, { id: 'storm_coil', level: 22 }],
+  },
+  gloomshroud: {
+    id: 'gloomshroud', dexNo: 32, name: 'Gloomshroud', types: ['Shadow', 'Wind'],
+    baseStats: { hp: 62, atk: 74, def: 52, spa: 60, spd: 54, spe: 80 },
+    tagline: 'The cave exhales, and it has wings.',
+    lore: 'Gloomshroud drape the gallery ceilings like a second dark. Miners say a colony once dimmed the Warden\'s own lantern — and that Thane paid the fruit tax like everyone else.',
+    captureRate: 70, baseExp: 150,
+    learnset: [{ id: 'gloom_fang', level: 1 }, { id: 'gust_flick', level: 1 }, { id: 'zephyr_slice', level: 12 }, { id: 'umbral_rend', level: 21 }],
   },
 
   // --- Keldrath Coast wilds (gate + shore, Lv 8–12) ---
@@ -338,6 +404,7 @@ const LUMINARY_SPECIES = {
   gloombat: {
     id: 'gloombat', dexNo: 21, name: 'Gloombat', types: ['Shadow', 'Wind'],
     baseStats: { hp: 46, atk: 52, def: 38, spa: 44, spd: 40, spe: 62 },
+    evolution: { toId: 'gloomshroud', to: 'Gloomshroud', level: 20 },
     tagline: 'It hangs where the cave forgets the sun.',
     lore: 'Gloombat drink the dark itself, and a colony can dim a torch from across the gallery. Miners pay them in fruit to leave one lantern alone.',
     captureRate: 150, baseExp: 72,
