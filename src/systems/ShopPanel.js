@@ -6,7 +6,7 @@
  * caught (gold), seen (parchment) or ??? (dim).
  */
 class ShopPanel {
-  constructor(scene, { stock, onClose, depth = 130 }) {
+  constructor(scene, { stock, onClose, depth = 130, title = "BRAM'S WARES" }) {
     this.scene = scene;
     this.depth = depth;
     this.stock = stock;
@@ -17,7 +17,7 @@ class ShopPanel {
     this.objs = [
       scene.add.rectangle(W / 2, scene.scale.height / 2, W, scene.scale.height, 0x000000, 0.6).setDepth(depth),
       drawPanel(scene, W / 2 - 260, 110, 520, h).setDepth(depth + 1),
-      scene.add.text(W / 2, 138, "BRAM'S WARES", titleStyle(20, UI.colors.gold, { letterSpacing: 3 })).setOrigin(0.5).setDepth(depth + 2),
+      scene.add.text(W / 2, 138, title, titleStyle(20, UI.colors.gold, { letterSpacing: 3 })).setOrigin(0.5).setDepth(depth + 2),
       scene.add.text(W / 2, 110 + h - 22, 'Z — buy one     X — leave', textStyle(12, UI.colors.dim)).setOrigin(0.5).setDepth(depth + 2),
     ];
     this.shardText = scene.add.text(W / 2 + 230, 138, '', textStyle(14, UI.colors.gold)).setOrigin(1, 0.5).setDepth(depth + 2);

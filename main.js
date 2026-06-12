@@ -273,7 +273,13 @@ function createWindow() {
     if (input.type === 'keyDown' && input.key === 'F12') win.webContents.toggleDevTools();
   });
 
-  win.loadFile(path.join(__dirname, 'src', 'index.html'));
+  // Playtest mode (CDP port present): tell the renderer so Phaser can run its
+  // loop on setTimeout. rAF in an unfocused/occluded window can be throttled
+  // to 1fps by newer Chromium even with the occlusion flags disabled, which
+  // stalls every tween the playtest waits on. setTimeout is exempt because of
+  // backgroundThrottling: false above.
+  const playtest = process.argv.some((a) => a.startsWith('--remote-debugging-port'));
+  win.loadFile(path.join(__dirname, 'src', 'index.html'), playtest ? { query: { playtest: '1' } } : undefined);
   return win;
 }
 

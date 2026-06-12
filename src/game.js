@@ -13,8 +13,13 @@ window.addEventListener('load', () => {
   window.GameSettings = { musicVolume: 7, sfxVolume: 7, textSpeed: 'normal' };
   window.LuminaryNative.settings.get().then((s) => Object.assign(window.GameSettings, s));
 
+  // Playtest mode: drive the game loop with setTimeout instead of rAF so an
+  // unfocused/occluded window cannot throttle tweens (see main.js).
+  const playtest = new URLSearchParams(location.search).has('playtest');
+
   window.game = new Phaser.Game({
     type: Phaser.AUTO,
+    fps: playtest ? { forceSetTimeOut: true, target: 60 } : undefined,
     parent: 'game-root',
     width: GAME_WIDTH,
     height: GAME_HEIGHT,

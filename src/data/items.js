@@ -20,4 +20,8 @@ const ITEMS = {
     id: 'tide_tonic', name: 'Tide Tonic', heal: 80,
     desc: 'Cold deep-water draught. Restores 80 HP to one Luminary.',
   },
+  lantern_dew: {
+    id: 'lantern_dew', name: 'Lantern Dew', heal: 120,
+    desc: 'Glowing nectar tapped from a lanternreed. Restores 120 HP.',
+  },
 };

@@ -1,10 +1,31 @@
-# Project State — v0.14 "The Second Sigil" checkpoint (2026-06-11)
+# Project State — v0.15 "Reedlight" checkpoint (2026-06-12)
 
-> Paused after the Drowned Sanctum + Warden Mira (build-order step 12).
-> All automated tests pass: 6 save-smoke, 262 engine checks, 116 live CDP
+> Paused after Mirewood town (build-order step 13).
+> All automated tests pass: 6 save-smoke, 271 engine checks, 124 live CDP
 > playtest checks.
 
 ## What runs today
+
+### v0.15 Reedlight Village (step 13)
+
+- **Mirewood — Reedlight Village** (`mirewood_town`): town north of the
+  marsh (new exit at marsh (14,0)). Stilt-houses, reed pools, mire accents,
+  its own Save Shrine (12,8). No encounters
+- **Reedkeeper Tamsin** (7,8, `healer: true`): free full heal, mirrors Maeve
+- **Peatmonger Hobb** (8,6): shop — capture orb 200, tide tonic 300, brine
+  salve 160, **Lantern Dew 500** (new item, heal 120)
+- **Elder Wren** (16,6): sanctum lore; `conditionalDialogue` on
+  `badge_mirewood` (stateKey `postBadge`) tells the Echo-bearer the doors
+  want a VOICE, not a key — the Chapter 3 hook
+- **Tilly** (20,12): reed-light flavor (the whole marsh lit gold)
+- **ShopPanel title is now per-merchant** (`title` option; WorldScene passes
+  `<NAME>'S WARES`)
+- **Playtest-mode game loop fix** (`main.js` + `src/game.js`): when launched
+  with `--remote-debugging-port`, index.html gets `?playtest=1` and Phaser
+  runs `fps: { forceSetTimeOut: true }`. Newer Chromium throttles rAF to
+  **1fps** in an unfocused/occluded window even with the v0.10 occlusion
+  flags — every tween crawled and playtest waits timed out. setTimeout is
+  exempt thanks to `backgroundThrottling: false`. Normal play still uses rAF
 
 ### v0.14 The Drowned Sanctum (step 12)
 
@@ -176,13 +197,16 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 262 checks — maps/species/exits are auto-derived;
+npm run engine-test    # 271 checks — maps/species/exits are auto-derived;
                        # status/surge multipliers are checked statistically
-npm run playtest-game  # terminal 1: game with CDP port 9223
-npm run playtest       # terminal 2: 116 live checks — vault, both gates,
+npm run playtest-game  # terminal 1: game with CDP port 9223 (playtest mode:
+                       # Phaser loop on setTimeout, immune to rAF throttling)
+npm run playtest       # terminal 2: 124 live checks — vault, both gates,
                        # coast town, healer + salve, scout/stalker fights,
                        # Maren counsel, cliffs rematch, Mirewood flags,
-                       # Warden Mira (badge_mirewood) (uses + deletes slot_3)
+                       # Warden Mira (badge_mirewood), Reedlight Village
+                       # (Tamsin heal, Hobb shop, Wren counsel)
+                       # (uses + deletes slot_3)
 node scripts/screenshot-cdp.mjs   # PNG of the running game
 node scripts/cdp-eval.mjs "expr"  # eval JS in the running game, print JSON
 node scripts/cdp-press.mjs ArrowDown 700  # hold a REAL key (drives isDown —
@@ -209,7 +233,7 @@ Playtest scripting gotchas (don't regress):
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
   ├─ data/starters.js   LUMINARY_SPECIES (23), MOVES, makeLuminary
-  ├─ data/maps.js       9 maps {rows, exits, doors, npcs, encounters}
+  ├─ data/maps.js       10 maps {rows, exits, doors, npcs, encounters}
   │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…})
   ├─ data/items.js      ITEMS
   ├─ data/trainers.js   TRAINERS (lyra1, lyra2, acolyte_vren, acolyte_sila,
@@ -250,20 +274,19 @@ with gaps reserved for third stages.
 
 - Bond gain from shrine rests; status infliction from wild AI tuning
 - Evolutions for coast/Mirewood wilds; third-stage starter evolutions
-- The sanctum DOORS (Mira guards them; opening them is a Chapter 3+ beat)
+- The sanctum DOORS (Mira guards them; Wren says they want the Echo's voice —
+  opening them is the Chapter 3 beat, not yet implemented)
 - Cinderpeaks / third Warden (Mira mentions them; nothing exists)
-- Mirewood town; building interiors, audio, packaging, full 18×18 type chart
+- Building interiors, audio, packaging, full 18×18 type chart
 - Coast shop/noticeboard (Orla mentions a noticeboard; doesn't exist)
 
 ## Next session — plan (in priority order)
 
-1. **Mirewood town** (healer, shop stocking Brine Salves/Tide Tonics,
-   story NPCs reacting to `badge_mirewood`)
-2. **Chapter 3 beats**: the sanctum doors + the Echo (Maren or Mira
-   conditionalDialogue on `badge_mirewood`), Lyra reacting to the second Sigil
-3. Coast/Mirewood evolutions as the level curve rises
-4. Cinderpeaks opener (third region) when the story calls for it
-5. Audio pass (region BGM + battle SFX) or packaging when content settles
+1. **Chapter 3 beats**: the sanctum doors + the Echo (Wren's postBadge
+   counsel set this up), Lyra reacting to the second Sigil, chapter → 3
+2. Coast/Mirewood evolutions as the level curve rises
+3. Cinderpeaks opener (third region) when the story calls for it
+4. Audio pass (region BGM + battle SFX) or packaging when content settles
 
 ## Dependencies
 

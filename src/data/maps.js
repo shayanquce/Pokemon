@@ -547,7 +547,7 @@ const MAPS = {
     name: 'Mirewood — Drowned Eaves',
     //       012345678901234567890123456789
     rows: [
-      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
+      'TTTTTTTTTTTTTTPTTTTTTTTTTTTTTT', // 0  <- north exit to Reedlight Village at (14,0)
       'TGGmmmGGGGTGGGGGGGGGGGGmmmGGGT', // 1
       'TGGmmmGGGGGGGGmmmmGGGGGmmmGGGT', // 2
       'TGGmmmGGGGGGGGmmmmGGGGGGGGGGGT', // 3
@@ -568,6 +568,7 @@ const MAPS = {
     exits: [
       { x: 21, y: 16, to: 'keldrath_cliffs', toX: 21, toY: 1, facing: 'down' },
       { x: 29, y: 9, to: 'mirewood_deep', toX: 1, toY: 9, facing: 'right' },
+      { x: 14, y: 0, to: 'mirewood_town', toX: 14, toY: 15, facing: 'up' },
     ],
     doors: [],
     npcs: [
@@ -679,6 +680,104 @@ const MAPS = {
         { speciesId: 'lanternreed', weight: 18, min: 19, max: 22 },
       ],
     },
+  },
+
+  mirewood_town: {
+    id: 'mirewood_town',
+    name: 'Mirewood — Reedlight Village',
+    //       012345678901234567890123456789
+    rows: [
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
+      'TGGmmGGGRRRRGGGGGGGRRRRGGmmGGT', // 1  <- stilt-house roofs
+      'TGGmmGGGRRRRGGGGGGGRRRRGGmmGGT', // 2
+      'TGGGGGGGBBDBGGGGGGGBDBBGGGGGGT', // 3  <- doors at (10,3) and (20,3)
+      'TGGGGGGGGGPGGGGGGGGGPGGGGGGGGT', // 4
+      'TFGGGGGGGGPPPPPPPPPPPGGGGGFGGT', // 5
+      'TGGGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 6
+      'TGGWWGGGGGGGGGPGGGGGGGGGWWGGGT', // 7  <- reed pools
+      'TGWWWWGGGGGGSGPGGGGGGGGWWWWGGT', // 8  <- Save Shrine at (12,8)
+      'TGGWWGGGGGGGGGPGGGGGGGGGWWGGGT', // 9
+      'TGGGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 10
+      'TGGGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 11
+      'TGGmmGGGGGGGGGPGGGGGGGGmmGGGGT', // 12
+      'TGGmmGGGGGGGGGPGGGGGGGGmmGGGGT', // 13
+      'TGGGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 14
+      'TGGGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 15
+      'TTTTTTTTTTTTTTPTTTTTTTTTTTTTTT', // 16 <- south exit to the marsh at (14,16)
+    ],
+    exits: [{ x: 14, y: 16, to: 'mirewood_marsh', toX: 14, toY: 1, facing: 'down' }],
+    doors: [
+      { x: 10, y: 3, text: "Hobb's storehouse. Stacked crates of reed-wax candles hum faintly in the dark." },
+      { x: 20, y: 3, text: 'The Reedlight Lodge. A carved sign reads: "The mire keeps what the mire is given."' },
+    ],
+    npcs: [
+      {
+        // Free full heal — the village answer to Dockside Maeve.
+        id: 'reedkeeper_tamsin',
+        name: 'Reedkeeper Tamsin',
+        x: 7, y: 8, facing: 'right',
+        healer: true,
+        palette: { h: '#7a9a5a', f: '#e0bc94', e: '#20203a', c: '#4a6a3a', g: '#9fd8ff', b: '#241d18' },
+        dialogue: [
+          'Off the road and into the light, walker. The reeds tend whoever sits among them — that is the whole of the deal.',
+          'There. Warm, mended, and owing the mire nothing. Mind it stays that way.',
+        ],
+        repeatDialogue: ['Sit among the reeds whenever the deep eaves chew on you. They never tire of mending.'],
+      },
+      {
+        id: 'peatmonger_hobb',
+        name: 'Hobb',
+        x: 8, y: 6, facing: 'down',
+        palette: { h: '#5a4a32', f: '#caa07a', e: '#20203a', c: '#6a5a3a', g: '#9a8a66', b: '#241d18' },
+        dialogue: [
+          'Salves, tonics, dew off the lanternreeds themselves — Hobb trades it all, and never asks where your shards have been.',
+          'The dew is dear, aye. So is walking out of the deep eaves on your own legs. Your choice, walker.',
+        ],
+        repeatDialogue: ['Back for more dew? The reeds only weep so fast, friend.'],
+        shop: [
+          { itemId: 'capture_orb', price: 200 },
+          { itemId: 'tide_tonic', price: 300 },
+          { itemId: 'brine_salve', price: 160 },
+          { itemId: 'lantern_dew', price: 500 },
+        ],
+      },
+      {
+        id: 'elder_wren',
+        name: 'Elder Wren',
+        x: 16, y: 6, facing: 'down',
+        palette: { h: '#c8c2b4', f: '#d8b08a', e: '#20203a', c: '#3a5a4a', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          'A new face in Reedlight. The mire told us you were coming — it counts its visitors, you know.',
+          'Warden Mira keeps the drowned sanctum east of here. A hundred years that water has held its breath. Lately it has started listening again.',
+        ],
+        repeatDialogue: ['The sanctum water is listening again. Old folk notice such things; young folk survive them.'],
+        // Once the Mirewood Sigil is won, Wren speaks to the Echo directly.
+        conditionalDialogue: [
+          {
+            flag: 'badge_mirewood',
+            stateKey: 'postBadge',
+            pages: [
+              'The Mirewood Sigil. So the Oath broke for you, and the mire called you guest. Then hear what the reeds have hummed all season, Echo-bearer.',
+              'The sanctum doors do not want a key. They want a VOICE — the one Solen carried, the one humming behind your heartbeat this very moment.',
+              'When you stand before them, let the Echo answer. And make certain no grey cloak stands close enough to listen.',
+            ],
+            repeat: ['Let the Echo answer the doors, child. And count the shadows behind you before you do.'],
+          },
+        ],
+      },
+      {
+        id: 'reed_tilly',
+        name: 'Tilly',
+        x: 20, y: 12, facing: 'left',
+        palette: { h: '#e8a84a', f: '#e8c39a', e: '#20203a', c: '#7ba0c9', g: '#8a93a0', b: '#241d18' },
+        dialogue: [
+          'The reeds light up when Luminary swim under them! Blue for Murkfin, gold for Lanternreed — I keep a chart!',
+          'Last night the WHOLE marsh lit gold at once. Gran says that has not happened since before she was born. I drew it on two pages!',
+        ],
+        repeatDialogue: ['Still gold, still glowing! Page three of my chart, if you want to see!'],
+      },
+    ],
+    encounters: null,
   },
 };
 

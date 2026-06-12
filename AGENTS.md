@@ -6,9 +6,9 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.14 "The Second Sigil" (PAUSED)
+## Current checkpoint — v0.15 "Reedlight" (PAUSED)
 
-**Build order steps 1–12 are DONE.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–13 are DONE.** Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -28,30 +28,32 @@
 | 11a. Healer + status-cure items (v0.12) | ✅ | Dockside Maeve (`healer: true`), Tide Tonic + Brine Salve (`cures`), world + battle cure flows |
 | 11b. Chapter 2 beats + Mirewood opener (v0.13) | ✅ | Oren gate (pass_cleared), mirewood_marsh + mire tile, 4 species (dex 33–36), Chain stalker, sanctum rumor |
 | 12. Deep eaves + drowned sanctum (v0.14) | ✅ | `mirewood_deep` dungeon, Keeper Ilse, Warden Mira (badge_mirewood), Chapter 3 seeds |
-| 13–15 | ⏭️ **NEXT** | Mirewood town, coast/Mirewood evolutions, audio, packaging… |
+| 13. Mirewood town (v0.15) | ✅ | `mirewood_town` Reedlight Village: Tamsin (healer), Hobb shop + Lantern Dew, Elder Wren postBadge counsel, per-merchant shop titles, playtest-mode setTimeout loop |
+| 14–16 | ⏭️ **NEXT** | Chapter 3 beats (sanctum doors + the Echo), coast/Mirewood evolutions, audio, packaging… |
 
-## Exactly where we left off (2026-06-11, session 5, v0.14)
+## Exactly where we left off (2026-06-12, session 6, v0.15)
 
-Steps 1–12 are all complete. Most recent: **v0.14 "The Second Sigil"**
-— `mirewood_deep` dungeon (water-ringed Aethori ruin east of the marsh);
-Keeper Ilse (optional gauntlet, `sanctum_keeper_won`); Warden Mira with the
-Warden's Oath (Murkfin 22 / Lanternreed 23 / Mournlight 25, `badge_mirewood`,
-Chapter 3 seeds). **v0.13** (Oren gate NPC → `pass_cleared`; `mirewood_marsh`
-mire tile `m` + marsh shrine; 4 Mirewood species dex 33–36; Chain Stalker Morn
-→ `chain_stalker_beaten`; sanctum rumor). Earlier: v0.12 healer/cure-item flow;
-v0.11 Cliffs + Lyra rematch; v0.10 six Lowlands evolutions + rAF-throttle fix;
-v0.9 conditionalDialogue + showIfFlag; v0.8 statuses + Echo Surge; v0.7 Vault +
-gate NPCs + coast opener; v0.6 EPX sprites, walk cycles, ambient life.
+Steps 1–13 are all complete. Most recent: **v0.15 "Reedlight"** —
+`mirewood_town` north of the marsh (exit (14,0)): Reedkeeper Tamsin
+(`healer: true`), Peatmonger Hobb's shop (orb / tide tonic / brine salve /
+**Lantern Dew**, new heal-120 item), Elder Wren whose `conditionalDialogue`
+on `badge_mirewood` reveals the sanctum doors want the Echo's VOICE (the
+Chapter 3 hook), kid Tilly, village Save Shrine. ShopPanel takes a `title`
+option (WorldScene passes the merchant's name). **Playtest-mode loop fix**:
+`--remote-debugging-port` → `?playtest=1` → Phaser `forceSetTimeOut` (newer
+Chromium throttles rAF to 1fps in unfocused windows; the v0.10 flags no
+longer suffice). Earlier: v0.14 sanctum + Warden Mira; v0.13 Mirewood opener;
+v0.12 healer/cure items; v0.11 Cliffs + Lyra rematch; v0.10 Lowlands
+evolutions; v0.9 story beats; v0.8 statuses + Echo Surge; v0.7 Vault + gates.
 
-Verified end-to-end: save-smoke 6/6, engine-test 262/262, playtest 116/116.
+Verified end-to-end: save-smoke 6/6, engine-test 271/271, playtest 124/124.
 
 Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS
-2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2) — 116 checks (uses/deletes slot_3)
-3. Start on **Mirewood town** (healer, shop, story NPCs reacting to `badge_mirewood`)
-4. Then Chapter 3 beats: sanctum doors + the Echo; Lyra reacts to second Sigil
-5. Coast/Mirewood evolutions, Cinderpeaks opener, audio
+2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2) — 124 checks (uses/deletes slot_3)
+3. Start on **Chapter 3 beats**: sanctum doors + the Echo (Wren's counsel set this up), Lyra reacts to the second Sigil, chapter → 3
+4. Coast/Mirewood evolutions, Cinderpeaks opener, audio
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn
 message flow compatible with the playtest drain loops (they tolerate the

@@ -319,6 +319,7 @@ class WorldScene extends Phaser.Scene {
     this.uiLock = true;
     this.shopPanel = new ShopPanel(this, {
       stock: def.shop,
+      title: `${def.name.toUpperCase()}'S WARES`,
       onClose: async () => {
         this.shopPanel.destroy();
         this.shopPanel = null;

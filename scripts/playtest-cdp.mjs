@@ -520,6 +520,52 @@ check('warden2_won flag set', await eval_(`Save.state.storyFlags.warden2_won ===
 check('badge_mirewood flag set', await eval_(`Save.state.storyFlags.badge_mirewood === true`));
 check('Mira reward paid', (await eval_(`Save.state.shards`)) >= shardsPreMira + 900, `${shardsPreMira} -> ${await eval_(`Save.state.shards`)}`);
 
+// 8c-10. Reedlight Village: healer, shop, and Wren's post-badge counsel.
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 14, y: 0, to: 'mirewood_town', toX: 14, toY: 15, facing: 'up' }), true)`);
+check('reedlight village loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'mirewood_town' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('village discovered', await eval_(`Save.state.discoveredLocations.includes('mirewood_town')`));
+check('4 village NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 4);
+check('village shrine present', await eval_(`Boolean(window.game.scene.getScene('WorldScene').shrineTile)`));
+
+// Tamsin's free heal mirrors Maeve's.
+await eval_(`(Save.state.party[0].currentHp = 5, Save.state.party[0].status = { id: 'sleep', turns: 2 }, true)`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'right'; w.talkTo(w.npcs.find(n => n.def.id === 'reedkeeper_tamsin')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(250); }
+await sleep(500);
+check('Tamsin fully healed the party', await eval_(`Save.state.party[0].currentHp === Save.state.party[0].stats.hp && Save.state.party[0].status === null`));
+check('uiLock released after Tamsin', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
+// Hobb's shop sells Lantern Dew.
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'down'; w.talkTo(w.npcs.find(n => n.def.id === 'peatmonger_hobb')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 8; i++) {
+  if (await eval_(`Boolean(window.game.scene.getScene('WorldScene').shopPanel)`)) break;
+  await pressZ();
+  await sleep(300);
+}
+check('Hobb shop opened', await eval_(`Boolean(window.game.scene.getScene('WorldScene').shopPanel)`));
+const dewPreShop = await eval_(`Save.state.inventory.lantern_dew ?? 0`);
+const shardsPreHobb = await eval_(`Save.state.shards`);
+// Move down to Lantern Dew (orb / tide tonic / brine salve / lantern dew) and buy one.
+for (let i = 0; i < 3; i++) { await eval_(`(window.game.scene.getScene('WorldScene').input.keyboard.emit('keydown-DOWN'), true)`); await sleep(150); }
+await pressZ();
+await sleep(400);
+check('lantern dew purchased', (await eval_(`Save.state.inventory.lantern_dew ?? 0`)) === dewPreShop + 1);
+check('dew shards spent', (await eval_(`Save.state.shards`)) === shardsPreHobb - 500, `${shardsPreHobb} -> ${await eval_(`Save.state.shards`)}`);
+await eval_(`(window.game.scene.getScene('WorldScene').input.keyboard.emit('keydown-X'), true)`);
+await sleep(500);
+check('Hobb shop closed, UI unlocked', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
+// Elder Wren reacts to the Mirewood Sigil (conditionalDialogue).
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'down'; w.talkTo(w.npcs.find(n => n.def.id === 'elder_wren')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+await sleep(400);
+check('Wren post-badge counsel recorded', await eval_(`Save.state.npcStates.elder_wren?.postBadge === true`));
+check('uiLock released after Wren', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
 // 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);
 check('back in town after rival win', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'ashfen_town' && window.game.scene.getScene('WorldScene').npcs)`));
