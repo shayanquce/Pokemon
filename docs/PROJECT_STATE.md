@@ -1,10 +1,30 @@
-# Project State — v0.15 "Reedlight" checkpoint (2026-06-12)
+# Project State — v0.16 "The Doors Answer" checkpoint (2026-06-12)
 
-> Paused after Mirewood town (build-order step 13).
-> All automated tests pass: 6 save-smoke, 271 engine checks, 124 live CDP
+> Paused after the Chapter 3 beats (build-order step 14).
+> All automated tests pass: 6 save-smoke, 274 engine checks, 133 live CDP
 > playtest checks.
 
 ## What runs today
+
+### v0.16 The Doors Answer (step 14 — Chapter 3 beats)
+
+- **Awakened-door mechanic** (data-driven, reusable): a door def may carry
+  `awakened: { flag, pages, repeat, setFlags, warp }` — once
+  `storyFlags[flag]` is set, interacting plays `pages` once (then `repeat`,
+  seen-state in `npcStates[door.id].opened`), applies `setFlags`, auto-saves,
+  and optionally warps through the door (`WorldScene.openDoor`)
+- **The Sanctum Doors** (`mirewood_deep` (15,1), new solid tile **`A`**
+  `tile_sanctum_door` — black stone, gold seam, rune pricks): sealed flavor
+  until `badge_mirewood`, then the Echo answers — sets
+  `sanctum_doors_opened` + **`chapter: 3`** and warps inside. Warden Mira
+  moved to (14,2) so the door approach (15,2) is walkable
+- **The Inner Hall** (`sanctum_inner`): pillared water-hall with the First
+  Shrine (14,2). **Echo of Solen** (14,5): Chapter 3 exposition — Solen died
+  sealing one of EIGHT doors, the Chain knows the eighth is failing, the
+  next Sigil is in the Cinderpeaks; sets `echo_answered`
+- **Lyra in Reedlight** (mirewood_town (16,10), `showIfFlag:
+  badge_mirewood`): reacts to the second Sigil, names the Cinderpeaks race;
+  sets `lyra_sigil_seen`
 
 ### v0.15 Reedlight Village (step 13)
 
@@ -197,15 +217,16 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 271 checks — maps/species/exits are auto-derived;
+npm run engine-test    # 274 checks — maps/species/exits are auto-derived;
                        # status/surge multipliers are checked statistically
 npm run playtest-game  # terminal 1: game with CDP port 9223 (playtest mode:
                        # Phaser loop on setTimeout, immune to rAF throttling)
-npm run playtest       # terminal 2: 124 live checks — vault, both gates,
+npm run playtest       # terminal 2: 133 live checks — vault, both gates,
                        # coast town, healer + salve, scout/stalker fights,
                        # Maren counsel, cliffs rematch, Mirewood flags,
-                       # Warden Mira (badge_mirewood), Reedlight Village
-                       # (Tamsin heal, Hobb shop, Wren counsel)
+                       # Warden Mira (badge_mirewood), sanctum doors ->
+                       # inner hall -> Solen (chapter 3), Reedlight Village
+                       # (Tamsin heal, Hobb shop, Wren counsel, Lyra)
                        # (uses + deletes slot_3)
 node scripts/screenshot-cdp.mjs   # PNG of the running game
 node scripts/cdp-eval.mjs "expr"  # eval JS in the running game, print JSON
@@ -233,8 +254,9 @@ Playtest scripting gotchas (don't regress):
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
   ├─ data/starters.js   LUMINARY_SPECIES (23), MOVES, makeLuminary
-  ├─ data/maps.js       10 maps {rows, exits, doors, npcs, encounters}
-  │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…})
+  ├─ data/maps.js       11 maps {rows, exits, doors, npcs, encounters}
+  │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…};
+  │                     door defs may carry awakened:{flag,pages,warp,…})
   ├─ data/items.js      ITEMS
   ├─ data/trainers.js   TRAINERS (lyra1, lyra2, acolyte_vren, acolyte_sila,
   │                     warden_thane, chain_scout, chain_stalker,
@@ -262,7 +284,9 @@ v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
 `ceremony_complete`, `rival1_won`, `acolyte_vren_won`, `acolyte_sila_won`,
 `warden1_won`, `badge_lowlands`, `coast_pass_granted`, `heard_chain_rumor`,
 `rival2_won`, `chain_scout_beaten`, `pass_cleared`, `heard_sanctum_rumor`,
-`chain_stalker_beaten`, `sanctum_keeper_won`, `warden2_won`, `badge_mirewood`.
+`chain_stalker_beaten`, `sanctum_keeper_won`, `warden2_won`, `badge_mirewood`,
+`sanctum_doors_opened`, `echo_answered`, `lyra_sigil_seen` (chapter now
+reaches 3).
 
 ## Implemented Luminary (33 of 180+)
 
@@ -274,19 +298,20 @@ with gaps reserved for third stages.
 
 - Bond gain from shrine rests; status infliction from wild AI tuning
 - Evolutions for coast/Mirewood wilds; third-stage starter evolutions
-- The sanctum DOORS (Mira guards them; Wren says they want the Echo's voice —
-  opening them is the Chapter 3 beat, not yet implemented)
-- Cinderpeaks / third Warden (Mira mentions them; nothing exists)
+- Cinderpeaks / third Warden (Solen + Lyra both point there; nothing exists —
+  Lyra says the pass is "snowed in", the future gate hook)
+- The other seven doors / the failing eighth (Solen exposition only)
 - Building interiors, audio, packaging, full 18×18 type chart
 - Coast shop/noticeboard (Orla mentions a noticeboard; doesn't exist)
 
 ## Next session — plan (in priority order)
 
-1. **Chapter 3 beats**: the sanctum doors + the Echo (Wren's postBadge
-   counsel set this up), Lyra reacting to the second Sigil, chapter → 3
-2. Coast/Mirewood evolutions as the level curve rises
-3. Cinderpeaks opener (third region) when the story calls for it
-4. Audio pass (region BGM + battle SFX) or packaging when content settles
+1. **Coast/Mirewood evolutions** as the level curve rises (Brinepup,
+   Gullwisp, Saltshell, Driftbloom, Sparkfin, Mossling, Bogstinger,
+   Murkfin, Lanternreed second stages)
+2. **Cinderpeaks opener** (third region): mountain route off the cliffs'
+   high pass or beyond Mirewood, third Warden seat, snow gate via Lyra hook
+3. Audio pass (region BGM + battle SFX) or packaging when content settles
 
 ## Dependencies
 

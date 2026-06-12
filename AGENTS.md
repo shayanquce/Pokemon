@@ -6,9 +6,9 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.15 "Reedlight" (PAUSED)
+## Current checkpoint — v0.16 "The Doors Answer" (PAUSED)
 
-**Build order steps 1–13 are DONE.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–14 are DONE.** Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -29,31 +29,33 @@
 | 11b. Chapter 2 beats + Mirewood opener (v0.13) | ✅ | Oren gate (pass_cleared), mirewood_marsh + mire tile, 4 species (dex 33–36), Chain stalker, sanctum rumor |
 | 12. Deep eaves + drowned sanctum (v0.14) | ✅ | `mirewood_deep` dungeon, Keeper Ilse, Warden Mira (badge_mirewood), Chapter 3 seeds |
 | 13. Mirewood town (v0.15) | ✅ | `mirewood_town` Reedlight Village: Tamsin (healer), Hobb shop + Lantern Dew, Elder Wren postBadge counsel, per-merchant shop titles, playtest-mode setTimeout loop |
-| 14–16 | ⏭️ **NEXT** | Chapter 3 beats (sanctum doors + the Echo), coast/Mirewood evolutions, audio, packaging… |
+| 14. Chapter 3 beats (v0.16) | ✅ | Awakened-door mechanic, Sanctum Doors (`A` tile) → `sanctum_inner` hall, Echo of Solen (eight doors, Cinderpeaks), Lyra in Reedlight, chapter → 3 |
+| 15–17 | ⏭️ **NEXT** | Coast/Mirewood evolutions, Cinderpeaks opener, audio, packaging… |
 
-## Exactly where we left off (2026-06-12, session 6, v0.15)
+## Exactly where we left off (2026-06-12, session 6, v0.16)
 
-Steps 1–13 are all complete. Most recent: **v0.15 "Reedlight"** —
-`mirewood_town` north of the marsh (exit (14,0)): Reedkeeper Tamsin
-(`healer: true`), Peatmonger Hobb's shop (orb / tide tonic / brine salve /
-**Lantern Dew**, new heal-120 item), Elder Wren whose `conditionalDialogue`
-on `badge_mirewood` reveals the sanctum doors want the Echo's VOICE (the
-Chapter 3 hook), kid Tilly, village Save Shrine. ShopPanel takes a `title`
-option (WorldScene passes the merchant's name). **Playtest-mode loop fix**:
-`--remote-debugging-port` → `?playtest=1` → Phaser `forceSetTimeOut` (newer
-Chromium throttles rAF to 1fps in unfocused windows; the v0.10 flags no
-longer suffice). Earlier: v0.14 sanctum + Warden Mira; v0.13 Mirewood opener;
-v0.12 healer/cure items; v0.11 Cliffs + Lyra rematch; v0.10 Lowlands
-evolutions; v0.9 story beats; v0.8 statuses + Echo Surge; v0.7 Vault + gates.
+Steps 1–14 are all complete. Most recent: **v0.16 "The Doors Answer"** —
+data-driven **awakened doors** (`awakened: { flag, pages, repeat, setFlags,
+warp }` on a door def; `WorldScene.openDoor`, seen-state in
+`npcStates[door.id].opened`). The Sanctum Doors (`mirewood_deep` (15,1),
+solid tile `A` / `tile_sanctum_door`; Mira moved to (14,2)) open on
+`badge_mirewood`: set `sanctum_doors_opened` + `chapter: 3` and warp into
+**`sanctum_inner`** (First Shrine, pillared hall). **Echo of Solen** there:
+he died sealing one of EIGHT doors, the Chain knows the eighth is failing,
+next Sigil in the **Cinderpeaks**; sets `echo_answered`. **Lyra appears in
+Reedlight** (`showIfFlag: badge_mirewood`), names the Cinderpeaks race, sets
+`lyra_sigil_seen` (the snowed-in pass is the next gate hook). v0.15 brought
+Reedlight Village (Tamsin healer, Hobb shop, Lantern Dew, Elder Wren) and
+the playtest-mode setTimeout loop fix (`?playtest=1` → `forceSetTimeOut`).
 
-Verified end-to-end: save-smoke 6/6, engine-test 271/271, playtest 124/124.
+Verified end-to-end: save-smoke 6/6, engine-test 274/274, playtest 133/133.
 
 Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS
-2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2) — 124 checks (uses/deletes slot_3)
-3. Start on **Chapter 3 beats**: sanctum doors + the Echo (Wren's counsel set this up), Lyra reacts to the second Sigil, chapter → 3
-4. Coast/Mirewood evolutions, Cinderpeaks opener, audio
+2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2) — 133 checks (uses/deletes slot_3)
+3. Start on **coast/Mirewood evolutions** (9 species need second stages as the curve rises)
+4. Then the **Cinderpeaks opener** (third region, third Warden, snow-gate via the Lyra hook), audio
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn
 message flow compatible with the playtest drain loops (they tolerate the

@@ -520,12 +520,30 @@ check('warden2_won flag set', await eval_(`Save.state.storyFlags.warden2_won ===
 check('badge_mirewood flag set', await eval_(`Save.state.storyFlags.badge_mirewood === true`));
 check('Mira reward paid', (await eval_(`Save.state.shards`)) >= shardsPreMira + 900, `${shardsPreMira} -> ${await eval_(`Save.state.shards`)}`);
 
+// 8c-9b. Chapter 3 turn: the sanctum doors answer the Echo, then Solen speaks.
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.tileX = 15; w.tileY = 2; w.facing = 'up'; w.interact(); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 8; i++) { await pressZ(); await sleep(250); }
+check('sanctum doors opened', await waitFor(`Save.state.storyFlags.sanctum_doors_opened === true`));
+check('chapter advanced to 3', (await eval_(`Save.state.storyFlags.chapter`)) === 3);
+check('inner hall loaded through the doors', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'sanctum_inner' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('inner hall discovered', await eval_(`Save.state.discoveredLocations.includes('sanctum_inner')`));
+check('First Shrine present in the hall', await eval_(`Boolean(window.game.scene.getScene('WorldScene').shrineTile)`));
+
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'echo_solen')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 10; i++) { await pressZ(); await sleep(250); }
+await sleep(400);
+check('the Echo answered (Solen heard)', await eval_(`Save.state.storyFlags.echo_answered === true`));
+check('uiLock released after Solen', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
 // 8c-10. Reedlight Village: healer, shop, and Wren's post-badge counsel.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 14, y: 0, to: 'mirewood_town', toX: 14, toY: 15, facing: 'up' }), true)`);
 check('reedlight village loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'mirewood_town' && window.game.scene.getScene('WorldScene').npcs)`));
 await sleep(500);
 check('village discovered', await eval_(`Save.state.discoveredLocations.includes('mirewood_town')`));
-check('4 village NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 4);
+check('5 village NPCs spawned (Lyra shows after the Sigil)', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 5);
 check('village shrine present', await eval_(`Boolean(window.game.scene.getScene('WorldScene').shrineTile)`));
 
 // Tamsin's free heal mirrors Maeve's.
@@ -565,6 +583,14 @@ for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
 await sleep(400);
 check('Wren post-badge counsel recorded', await eval_(`Save.state.npcStates.elder_wren?.postBadge === true`));
 check('uiLock released after Wren', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
+// Lyra reacts to the second Sigil and names the Cinderpeaks race.
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'right'; w.talkTo(w.npcs.find(n => n.def.id === 'lyra_reedlight')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+await sleep(400);
+check('Lyra saw the second Sigil', await eval_(`Save.state.storyFlags.lyra_sigil_seen === true`));
+check('uiLock released after Lyra', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
 
 // 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);

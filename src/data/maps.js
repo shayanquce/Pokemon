@@ -619,8 +619,8 @@ const MAPS = {
     //       012345678901234567890123456789
     rows: [
       'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW', // 0
-      'WWCCCCCCCCCCCcccccCCCCCCCCCWWW', // 1  <- Warden's water-hall
-      'WWCCCCCCCCCCCcccccCCCCCCCCCWWW', // 2  <- Warden Mira at (15,2)
+      'WWCCCCCCCCCCCccAccCCCCCCCCCWWW', // 1  <- the sanctum doors at (15,1)
+      'WWCCCCCCCCCCCcccccCCCCCCCCCWWW', // 2  <- Warden Mira at (14,2)
       'WWCCCCCCCCCCCcccccCCCCCCCCCWWW', // 3
       'WWCCCCCCCCCCCCCcCCCCCCCCCCCWWW', // 4  <- neck (15,4)
       'WWCCeeeeccccccccccccccceeeCWWW', // 5
@@ -637,7 +637,26 @@ const MAPS = {
       'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW', // 16
     ],
     exits: [{ x: 0, y: 9, to: 'mirewood_marsh', toX: 28, toY: 9, facing: 'left' }],
-    doors: [],
+    doors: [
+      {
+        // Chapter 3 turn: once the Mirewood Sigil is won, the doors answer
+        // the Echo and carry the player into the inner sanctum.
+        id: 'sanctum_doors',
+        x: 15, y: 1,
+        text: 'Doors of black stone, older than the mire. A hundred years of silence presses back against your palm.',
+        awakened: {
+          flag: 'badge_mirewood',
+          pages: [
+            'You lay a palm on the black stone. Behind your heartbeat the Echo rises — not a hum now. A VOICE.',
+            'It sings one long note in a language the water drowned a hundred years ago. The runes answer first. Then the gold seam splits, floor to lintel.',
+            'The Doors of the Drowned Sanctum remember Solen — and they open for the Echo he left behind.',
+          ],
+          repeat: ["The doors drift apart at the Echo's low hum, gold light spilling up from the deep."],
+          setFlags: { sanctum_doors_opened: true, chapter: 3 },
+          warp: { to: 'sanctum_inner', toX: 14, toY: 13, facing: 'up' },
+        },
+      },
+    ],
     npcs: [
       {
         id: 'sanctum_keeper',
@@ -655,7 +674,7 @@ const MAPS = {
       {
         id: 'warden_mira',
         name: 'Warden Mira',
-        x: 15, y: 2, facing: 'down',
+        x: 14, y: 2, facing: 'down',
         palette: { h: '#2c4a5e', f: '#caa07a', e: '#20203a', c: '#43657a', g: '#d4af37', b: '#241d18' },
         dialogue: [
           'So you are the one the reeds kept lighting up for. And that hum about you — the sanctum hears it too, {player}.',
@@ -680,6 +699,52 @@ const MAPS = {
         { speciesId: 'lanternreed', weight: 18, min: 19, max: 22 },
       ],
     },
+  },
+
+  sanctum_inner: {
+    id: 'sanctum_inner',
+    name: 'The Drowned Sanctum — Inner Hall',
+    //       012345678901234567890123456789
+    rows: [
+      'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW', // 0
+      'WWWWWWWCCCCCCCCCCCCCCCCWWWWWWW', // 1
+      'WWWWWWWCccccccScccccccCWWWWWWW', // 2  <- the First Shrine at (14,2)
+      'WWWWWWWCccccccccccccccCWWWWWWW', // 3
+      'WWWWWWWCccccccccccccccCWWWWWWW', // 4
+      'WWWWWWWCccCccccccccCccCWWWWWWW', // 5  <- pillars; Echo of Solen at (14,5)
+      'WWWWWWWCccccccccccccccCWWWWWWW', // 6
+      'WWWWWWWCccccccccccccccCWWWWWWW', // 7
+      'WWWWWWWCccccccccccccccCWWWWWWW', // 8
+      'WWWWWWWCccccccccccccccCWWWWWWW', // 9
+      'WWWWWWWCccCccccccccCccCWWWWWWW', // 10 <- pillars
+      'WWWWWWWCccccccccccccccCWWWWWWW', // 11
+      'WWWWWWWCccccccccccccccCWWWWWWW', // 12
+      'WWWWWWWCccccccccccccccCWWWWWWW', // 13 <- entry landing at (14,13)
+      'WWWWWWWCCCCCCCcCCCCCCCCWWWWWWW', // 14 <- threshold gap at (14,14)
+      'WWWWWWWWWWWWWWcWWWWWWWWWWWWWWW', // 15 <- exit back through the doors at (14,15)
+      'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW', // 16
+    ],
+    exits: [{ x: 14, y: 15, to: 'mirewood_deep', toX: 15, toY: 2, facing: 'down' }],
+    doors: [],
+    npcs: [
+      {
+        // Chapter 3 opens here: the Echo's first keeper, kept by the water.
+        id: 'echo_solen',
+        name: 'Echo of Solen',
+        x: 14, y: 5, facing: 'down',
+        palette: { h: '#e8dca0', f: '#d8cfae', e: '#2a3a5e', c: '#7a93c0', g: '#f4e09a', b: '#3a4a6e' },
+        dialogue: [
+          'Light gathers between the pillars and takes the shape of a man — young, road-worn, smiling like an old apology.',
+          '"So my Echo chose you. Good. It always did have better judgment than I did."',
+          '"Hear what the water kept, keeper. I did not die sealing a god away. I died sealing a DOOR — one of eight. And the Hollowed Chain has learned the eighth is failing."',
+          '"Three Sigils more. The mountain Warden holds the next — the Cinderpeaks, where the first fire still argues with the dark. Carry my Echo up before the Chain cuts its own road."',
+          '"And keeper — when the Chain offers to carry it FOR you, and it will offer... remember that hollowed hands hold nothing. They only close."',
+        ],
+        repeatDialogue: ['"The Cinderpeaks, keeper. The Echo knows the way up — listen between heartbeats."'],
+        setFlags: { echo_answered: true },
+      },
+    ],
+    encounters: null,
   },
 
   mirewood_town: {
@@ -764,6 +829,21 @@ const MAPS = {
             repeat: ['Let the Echo answer the doors, child. And count the shadows behind you before you do.'],
           },
         ],
+      },
+      {
+        // Chapter 3: Lyra catches up after the second Sigil and names the race.
+        id: 'lyra_reedlight',
+        name: 'Lyra',
+        x: 16, y: 10, facing: 'left',
+        showIfFlag: 'badge_mirewood',
+        palette: { h: '#a03a4a', f: '#e8c39a', e: '#20203a', c: '#2a4a3a', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          'TWO Sigils?! I take ONE boat around the headland and you... ugh. Fine. Recount: you are ahead. Noted and despised.',
+          "The lodge is buzzing — they say the drowned doors opened for someone. Father spent half his life knocking on stones like those, {player}. Whatever answered you in there... I want to hear all of it.",
+          'After the Cinderpeaks. Third Sigil, mountain Warden, first one up owns the bragging rights for BOTH regions. Deal? Deal. Now go rest — you look like the mire chewed on you and apologized after.',
+        ],
+        repeatDialogue: ['Cinderpeaks next, rival. I am only still here because the mountain pass is snowed in — for now.'],
+        setFlags: { lyra_sigil_seen: true },
       },
       {
         id: 'reed_tilly',

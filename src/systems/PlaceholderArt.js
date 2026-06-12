@@ -297,6 +297,39 @@ function ensureWorldTextures(scene) {
     c.refresh();
   }
 
+  // The Drowned Sanctum doors — black Aethori stone split by a gold seam,
+  // rune-pricked, faintly lit from below.
+  if (!scene.textures.exists('tile_sanctum_door')) {
+    const c = scene.textures.createCanvas('tile_sanctum_door', 32, 32);
+    const ctx = c.context;
+    ctx.fillStyle = '#16161f';
+    ctx.fillRect(0, 0, 32, 32);
+    ctx.fillStyle = '#23232f';
+    ctx.fillRect(3, 2, 26, 30);
+    ctx.fillStyle = '#1b1b26';
+    ctx.fillRect(5, 4, 22, 28);
+    // Gold seam down the middle, brightening toward the floor.
+    ctx.fillStyle = '#8a6f23';
+    ctx.fillRect(15, 4, 2, 28);
+    ctx.fillStyle = '#d4af37';
+    ctx.fillRect(15, 18, 2, 14);
+    ctx.fillStyle = '#f4e09a';
+    ctx.fillRect(15, 28, 2, 4);
+    // Rune pricks on each leaf.
+    ctx.fillStyle = '#9fd8ff';
+    ctx.fillRect(9, 9, 2, 2);
+    ctx.fillRect(21, 9, 2, 2);
+    ctx.fillRect(8, 16, 2, 2);
+    ctx.fillRect(22, 16, 2, 2);
+    ctx.fillStyle = '#d4af37';
+    ctx.fillRect(10, 23, 2, 2);
+    ctx.fillRect(20, 23, 2, 2);
+    // Lintel.
+    ctx.fillStyle = '#3a3a4c';
+    ctx.fillRect(0, 0, 32, 3);
+    c.refresh();
+  }
+
   noiseTile(scene, 'tile_cave_wall', '#2c2c38', ['#222230', '#363646', '#1c1c28'], 99, {
     count: 40,
     post: (ctx) => {

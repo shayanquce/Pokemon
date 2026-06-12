@@ -8,7 +8,7 @@
 
 const TILE = 32;
 
-const SOLID_TILES = new Set(['T', 'W', 'S', 'B', 'R', 'D', 'C']);
+const SOLID_TILES = new Set(['T', 'W', 'S', 'B', 'R', 'D', 'C', 'A']);
 const ENCOUNTER_TILES = new Set(['g', 'e', 'm']);
 const FACING_DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
@@ -102,6 +102,7 @@ class WorldScene extends Phaser.Scene {
       G: 'tile_grass', g: 'tile_grass_tall', F: 'tile_flowers', P: 'tile_path',
       W: 'tile_water', T: 'tile_tree', S: 'tile_grass', R: 'tile_roof', B: 'tile_wall', D: 'tile_door',
       C: 'tile_cave_wall', c: 'tile_cave_floor', e: 'tile_cave_gravel', s: 'tile_sand', m: 'tile_mire',
+      A: 'tile_sanctum_door',
     };
 
     this.shrineTile = null;
@@ -498,13 +499,41 @@ class WorldScene extends Phaser.Scene {
     }
     const door = this.doorAt(tx, ty);
     if (door) {
-      this.uiLock = true;
-      new DialogueBox(this, { pages: [door.text], onDone: () => (this.uiLock = false) });
+      this.openDoor(door);
       return;
     }
     if (this.shrineTile && tx === this.shrineTile.x && ty === this.shrineTile.y) {
       this.openShrine();
     }
+  }
+
+  /**
+   * Door interaction. Plain doors show their flavor text. A door with
+   * `awakened: { flag, pages, repeat, setFlags, warp, }` comes alive once
+   * storyFlags[flag] is set: pages play once (then `repeat` on later visits,
+   * tracked in npcStates[door.id].opened), setFlags apply, and the optional
+   * warp carries the player through the door.
+   */
+  openDoor(door) {
+    this.uiLock = true;
+    const awk = door.awakened;
+    if (!awk || !Save.state.storyFlags[awk.flag]) {
+      new DialogueBox(this, { pages: [door.text], onDone: () => (this.uiLock = false) });
+      return;
+    }
+    const states = Save.state.npcStates;
+    const seen = door.id && states[door.id]?.opened;
+    const pages = seen && awk.repeat ? awk.repeat : awk.pages;
+    new DialogueBox(this, {
+      pages,
+      onDone: async () => {
+        if (awk.setFlags) Object.assign(Save.state.storyFlags, awk.setFlags);
+        if (door.id) states[door.id] = { ...(states[door.id] ?? {}), opened: true };
+        this.uiLock = false;
+        await Save.autoSave(this, `door:${door.id ?? `${door.x},${door.y}`}`);
+        if (awk.warp) this.warpTo(awk.warp);
+      },
+    });
   }
 
   openShrine() {
