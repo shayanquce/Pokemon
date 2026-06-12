@@ -150,6 +150,20 @@ const TRAINERS = {
     },
   },
 
+  // --- Chapter 3 closer: the Chain finally makes its real offer ---
+  chain_envoy: {
+    id: 'chain_envoy',
+    name: 'Chain Envoy Vael',
+    introText: "Vael spread empty hands. 'No pick, no hook, no haggling. Refuse, and we simply stop ASKING.'",
+    winText: 'You refused the Hollowed Chain — and made it stick!',
+    loseText: "Vael steadied you almost gently. 'Sleep on it, keeper. The offer survives the night. You may not enjoy what doesn't.'",
+    reward: 1000,
+    setFlags: { chapter: 4 },
+    buildParty() {
+      return [makeLuminary('mournlight', 31), makeLuminary('gloomshroud', 32), makeLuminary('murkmaw', 33)];
+    },
+  },
+
   // --- Cinderpeaks ascent: the Chain digs for another way in ---
   chain_digger: {
     id: 'chain_digger',

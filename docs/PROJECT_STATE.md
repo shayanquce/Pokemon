@@ -1,11 +1,27 @@
-# Project State — v0.19 "The Third Sigil" checkpoint (2026-06-12)
+# Project State — v0.20 "What the Fire Keeps" checkpoint (2026-06-12)
 
-> Paused after the forge-hall + Warden Korr (build-order step 17).
-> All automated tests pass: 6 save-smoke, 361 engine checks, 167 live CDP
-> playtest checks (163 when the capture-orb RNG misses — the in-battle
+> Paused after the third-stage starters + Chapter 3 closer (step 18).
+> All automated tests pass: 6 save-smoke, 383 engine checks, 176 live CDP
+> playtest checks (172 when the capture-orb RNG misses — the in-battle
 > switch section only runs with a caught second mon).
 
 ## What runs today
+
+### v0.20 Third stages + the Chain's offer (step 18)
+
+- **Starter third stages (50 species, dex 3/6/9)**: Embrath → **Embralion**
+  (Flame/Light, 34), Tidarune → **Runedeep** (Tide/Psyche, 32), Thorngrove
+  → **Grovemaw** (Verdant/Stone, 33) — full stats, lore, pixel maps; their
+  learnsets pull in the high moves (Magma Lash / Dawn Lance / Riptide Maw /
+  Pebble Toss / Hoof Rush) at 32–37
+- **Chain Envoy Vael** (`chain_envoy`, ascent (16,8), `showIfFlag:
+  badge_cinderpeaks`, `hiddenIfFlag: chain_envoy_beaten`): the Chain's
+  "real offer" — hand over the Echo freely so hollowed hands can open the
+  eighth door "gently". Refusing = battle (Mournlight 31 / Gloomshroud 32 /
+  Murkmaw 33, 1000 shards). Winning sets `chain_envoy_beaten` and
+  **`chapter: 4`**; his postWin: "what comes next will not have a face"
+- Playtest: envoy fight + a live `evolve()` check (Embrath 33 → Embralion
+  via grantExp at the engine boundary)
 
 ### v0.19 The Forge-Hall (step 17)
 
@@ -285,17 +301,18 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 361 checks — maps/species/exits are auto-derived;
+npm run engine-test    # 383 checks — maps/species/exits are auto-derived;
                        # status/surge multipliers are checked statistically
 npm run playtest-game  # terminal 1: game with CDP port 9223 (playtest mode:
                        # Phaser loop on setTimeout, immune to rAF throttling)
-npm run playtest       # terminal 2: 167 live checks (163 if capture RNG
+npm run playtest       # terminal 2: 176 live checks (172 if capture RNG
                        # misses) — vault, all four gates, coast town,
-                       # healer + salve, scout/stalker/digger fights, Maren
-                       # counsel, cliffs + forge Lyra rematches, Wardens
-                       # Mira + Korr, sanctum doors -> inner hall -> Solen
-                       # (chapter 3), Reedlight Village, Cinderpeaks ascent
-                       # + forge-hall (uses + deletes slot_3)
+                       # healer + salve, scout/stalker/digger/envoy fights,
+                       # Maren counsel, cliffs + forge Lyra rematches,
+                       # Wardens Mira + Korr, sanctum doors -> inner hall ->
+                       # Solen (ch 3), envoy refusal (ch 4), Reedlight,
+                       # Cinderpeaks ascent + forge-hall, third-stage
+                       # evolution (uses + deletes slot_3)
 node scripts/screenshot-cdp.mjs   # PNG of the running game
 node scripts/cdp-eval.mjs "expr"  # eval JS in the running game, print JSON
 node scripts/cdp-press.mjs ArrowDown 700  # hold a REAL key (drives isDown —
@@ -321,7 +338,7 @@ Playtest scripting gotchas (don't regress):
 
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
-  ├─ data/starters.js   LUMINARY_SPECIES (47), MOVES, makeLuminary
+  ├─ data/starters.js   LUMINARY_SPECIES (50), MOVES, makeLuminary
   ├─ data/maps.js       13 maps {rows, exits, doors, npcs, encounters}
   │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…};
   │                     door defs may carry awakened:{flag,pages,warp,…})
@@ -355,38 +372,38 @@ v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
 `chain_stalker_beaten`, `sanctum_keeper_won`, `warden2_won`, `badge_mirewood`,
 `sanctum_doors_opened`, `echo_answered`, `lyra_sigil_seen`,
 `peak_pass_granted`, `chain_digger_beaten`, `forge_road_cleared`,
-`rival3_won`, `forge_acolyte_won`, `warden3_won`, `badge_cinderpeaks`
-(chapter now reaches 3).
+`rival3_won`, `forge_acolyte_won`, `warden3_won`, `badge_cinderpeaks`,
+`chain_envoy_beaten` (chapter now reaches 4).
 
-## Implemented Luminary (47 of 180+)
+## Implemented Luminary (50 of 180+)
 
-Starter lines ×3 (2 stages), grove lines ×3 (2 stages), road/cave wild
-lines ×6 (2 stages), coast wild lines ×5 (2 stages), Mirewood wild lines ×4
-(2 stages), Cinderpeaks wilds ×4 (single-stage so far) + Cindralisk.
-Dex numbers 1–50 with gaps reserved for third stages.
+Starter lines ×3 (**3 stages, complete**), grove lines ×3 (2 stages),
+road/cave wild lines ×6 (2 stages), coast wild lines ×5 (2 stages),
+Mirewood wild lines ×4 (2 stages), Cinderpeaks wilds ×4 (single-stage so
+far) + Cindralisk. Dex numbers 1–50; remaining gaps are wild third stages.
 
 ## Not built yet (do not assume exists)
 
 - Bond gain from shrine rests; status infliction from wild AI tuning
-- Third-stage starter evolutions (Embralion/Runedeep/Grovemaw — Lv 32–34,
-  named in evolution notes but not defined)
-- The fourth Warden / far slopes (Korr's aftermath hook; nothing exists)
-- The Chain's "real offer" (Lyra3 + Korr both foreshadow it — the Chapter
-  3 closer / Chapter 4 turn, not yet implemented)
+- The fourth Warden / far slopes ("what comes next will not have a face" —
+  Chapter 4 opens there; nothing exists)
 - The other seven doors / the failing eighth (Solen exposition only)
 - Building interiors, audio, packaging, full 18×18 type chart
 - Coast shop/noticeboard (Orla mentions a noticeboard; doesn't exist)
+- Chapter-4 reactions from Maren/Wren/Lyra (conditionalDialogue on
+  `chain_envoy_beaten` would be cheap and is not done)
 
 ## Next session — plan (in priority order)
 
-1. **Third-stage starter evolutions** (Embralion Flame/Light 34, Runedeep
-   Tide/Psyche 32, Grovemaw Verdant/Stone 33) — the curve reaches 30+ in
-   the Cinderpeaks, so these are due now
-2. **Chapter 3 closer**: the Chain's "real offer" beat (a Chain envoy after
-   `badge_cinderpeaks`, chapter → 4, Maren/Wren conditionalDialogue)
-3. **Fourth region opener** (the far slopes past the peaks) when the story
-   calls for it
-4. Audio pass (region BGM + battle SFX) or packaging when content settles
+1. **Fourth region opener — the far slopes** (Chapter 4): descent route
+   east/north of the peaks, new species, the faceless thing the envoy
+   promised as the story spine
+2. **Chapter-4 reaction pass**: Maren/Wren/Lyra conditionalDialogue on
+   `chain_envoy_beaten`; Lyra should react to the race result too
+3. **Audio pass** (region BGM + battle SFX via WebAudio synth — no
+   external assets) or **packaging** (electron-builder) when content
+   settles
+4. Wild third stages / Cinderpeaks second stages as the curve rises
 
 ## Dependencies
 

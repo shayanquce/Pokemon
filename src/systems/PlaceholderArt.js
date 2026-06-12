@@ -1418,6 +1418,61 @@ Object.assign(STARTER_PIXELMAPS, {
   },
 });
 
+// Starter third stages (Lv 32-34).
+Object.assign(STARTER_PIXELMAPS, {
+  embralion: {
+    palette: { f: '#d86a2e', o: '#f4a23a', y: '#f4e09a', w: '#fff6cc', k: '#241008', d: '#a84a1c' },
+    rows: [
+      '..y..oo..oo..y..',
+      '.yo.oooooooo.oy.',
+      '..ooofffffooo...',
+      '..offkffkfffo...',
+      '.oofffffffffoo..',
+      '.yofffwwfffoy...',
+      '..offwwwwffo....',
+      '..fffffffffff...',
+      '.offfffffffffo..',
+      '..ff.ffff.ff.y..',
+      '..dd..dd..dd....',
+      '.ddd..dd..ddd...',
+    ],
+  },
+  runedeep: {
+    palette: { t: '#3f6f9e', d: '#2c5276', g: '#9fd8ff', w: '#cde4ee', k: '#10202e', l: '#aef0e8' },
+    rows: [
+      '......ttt.......',
+      '....ttttttt.....',
+      '...ttgttgttt....',
+      '..tttttttttt....',
+      '..tkttttttkt....',
+      '.ttttgllgtttt...',
+      '.ttgttttttgtt...',
+      '.tttttwwttttt...',
+      '..ttgttttgtt....',
+      '..tttttttttt....',
+      '...ttt..ttt.....',
+      '....tt...tt.....',
+    ],
+  },
+  grovemaw: {
+    palette: { v: '#4e7a42', L: '#6aa052', s: '#8a8478', d: '#3a5c32', k: '#1c2e18', n: '#5e4430' },
+    rows: [
+      '..LvLLvvLLvL....',
+      '.vLvvvvvvvvLv...',
+      '.svvvvvvvvvvs...',
+      'ssvvvvvvvvvvss..',
+      'sskvvvvvvkvss...',
+      'ssssvvvvvsssss..',
+      '.ssvvnnnvvsss...',
+      '.sssnnnnnssss...',
+      '.ssssssssssss...',
+      '..sss.ss.sss....',
+      '..nnn.nn.nnn....',
+      '.nnnn.nn.nnnn...',
+    ],
+  },
+});
+
 // The forge Warden's ace (and rare forge spawn).
 Object.assign(STARTER_PIXELMAPS, {
   cindralisk: {

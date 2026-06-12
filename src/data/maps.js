@@ -934,6 +934,27 @@ const MAPS = {
         repeatDialogue: ['The Grey Cloak studies the rock face and pointedly ignores you.'],
       },
       {
+        // Chapter 3 closer: after the third Sigil the Chain stops digging
+        // and starts asking. Beating Vael advances the chapter to 4.
+        id: 'chain_envoy',
+        name: 'Pale Cloak',
+        x: 16, y: 8, facing: 'left',
+        showIfFlag: 'badge_cinderpeaks',
+        hiddenIfFlag: 'chain_envoy_beaten',
+        palette: { h: '#d8d2c4', f: '#cfae96', e: '#4a1c28', c: '#8a8498', g: '#d4af37', b: '#1c1620' },
+        dialogue: [
+          'Three Sigils. The scout asked, the stalker insisted, the digger dug — and you outlasted them all. So the Chain sends me, with its only honest face.',
+          'Give us the Echo, keeper. Freely. Carried by hands that no longer argue, it opens the eighth door GENTLY — no flood, no fire, no drowned towns. Your hands will argue. Hollowed hands never do.',
+          'Solen refused, and died holding a door shut. We are offering to open it properly. Last chance to say yes, child.',
+        ],
+        battle: { trainerId: 'chain_envoy', flag: 'chain_envoy_beaten' },
+        postWinDialogue: [
+          'So. The answer is the same answer Solen gave. Noted, keeper — truly noted.',
+          'Then the Chain stops asking. What comes for the eighth door next will not have a face at all. Enjoy the mountain. The far slopes are lovely this time of year.',
+        ],
+        repeatDialogue: ['The snow has already filled the Pale Cloak\'s footprints.'],
+      },
+      {
         // Gate to the forge-hall: the mountain settles once the digger stops.
         id: 'forge_acolyte_edda',
         name: 'Forge Acolyte Edda',

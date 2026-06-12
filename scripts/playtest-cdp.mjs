@@ -722,6 +722,48 @@ check('warden3_won flag set', await eval_(`Save.state.storyFlags.warden3_won ===
 check('badge_cinderpeaks flag set', await eval_(`Save.state.storyFlags.badge_cinderpeaks === true`));
 check('Korr reward paid', (await eval_(`Save.state.shards`)) >= shardsPreKorr + 1200, `${shardsPreKorr} -> ${await eval_(`Save.state.shards`)}`);
 
+// 8c-13. Chapter 3 closer: the third Sigil summons the Chain's envoy.
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 14, y: 16, to: 'cinderpeaks_ascent', toX: 14, toY: 1, facing: 'down' }), true)`);
+check('back on the ascent', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'cinderpeaks_ascent' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('envoy appears after the third Sigil', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 3);
+
+// Fresh Lv 80 Storm Coil lead (see the digger note) for the envoy trio.
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 80), Save.state.party[0].moves = [{ id: 'storm_coil', pp: 30, maxPp: 30 }], true)`);
+const shardsPreEnvoy = await eval_(`Save.state.shards`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'right'; w.talkTo(w.npcs.find(n => n.def.id === 'chain_envoy')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 8; i++) { await pressZ(); await sleep(250); }
+check('envoy battle started', await waitFor(`window.game.scene.isActive('BattleScene')`));
+await sleep(500);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(250); }
+for (let round = 0; round < 35; round++) {
+  const scene = await eval_(`window.game.scene.getScenes(true)[0].scene.key`);
+  if (scene !== 'BattleScene') break;
+  const menuOpen = await eval_(`Boolean(window.game.scene.getScene('BattleScene')?.menu)`);
+  await pressZ();
+  await sleep(menuOpen ? 400 : 350);
+  if (menuOpen) { await pressZ(); await sleep(400); }
+  for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+}
+await sleep(1500);
+check('envoy refused, back in world', await eval_(`window.game.scene.isActive('WorldScene')`));
+check('chain_envoy_beaten flag set', await eval_(`Save.state.storyFlags.chain_envoy_beaten === true`));
+check('chapter advanced to 4', (await eval_(`Save.state.storyFlags.chapter`)) === 4);
+check('envoy reward paid', (await eval_(`Save.state.shards`)) >= shardsPreEnvoy + 1000, `${shardsPreEnvoy} -> ${await eval_(`Save.state.shards`)}`);
+await sleep(500);
+check('envoy gone after the refusal', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 2);
+
+// 8c-14. Third-stage starter evolution: a Lv 33 Embrath grows into Embralion.
+const evoOk = await eval_(`(() => {
+  const mon = makeLuminary('embrath', 33);
+  grantExp(mon, expToNext(33) + 1);
+  if (!evolutionFor(mon)) return 'no-evolution-at-34';
+  const to = evolve(mon);
+  return mon.speciesId === 'embralion' && to.name === 'Embralion' ? true : 'wrong-target:' + mon.speciesId;
+})()`);
+check('Embrath evolves into Embralion at 34', evoOk === true, String(evoOk));
+
 // 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);
 check('back in town after rival win', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'ashfen_town' && window.game.scene.getScene('WorldScene').npcs)`));
