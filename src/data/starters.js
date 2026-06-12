@@ -154,6 +154,17 @@ const MOVES = {
     power: 60, accuracy: 95, pp: 15,
     desc: 'A spear of first light, patient and exact.',
   },
+  // Cinderpeaks wild moves.
+  frost_bite: {
+    id: 'frost_bite', name: 'Frost Bite', type: 'Frost', category: 'physical',
+    power: 48, accuracy: 100, pp: 25, inflicts: { id: 'sleep', chance: 10 },
+    desc: 'A numbing bite of mountain cold. May lull foes into a frozen sleep.',
+  },
+  snow_flurry: {
+    id: 'snow_flurry', name: 'Snow Flurry', type: 'Frost', category: 'special',
+    power: 46, accuracy: 100, pp: 25,
+    desc: 'A whirl of razor-fine ice crystals.',
+  },
   // Signature moves — unlocked at high Bond, powered up at Bond 10 (Echo Surge).
   cindershroud: {
     id: 'cindershroud', name: 'Cindershroud', type: 'Flame', category: 'special',
@@ -544,6 +555,40 @@ const LUMINARY_SPECIES = {
     lore: 'When a Lanternreed has guided enough travelers, it blooms into a Wickbloom, and a stretch of mire simply stops being dangerous. The night the whole marsh lit gold, every reed was bowing to one.',
     captureRate: 55, baseExp: 160,
     learnset: [{ id: 'leaf_dart', level: 1 }, { id: 'glimmer_dust', level: 1 }, { id: 'glowpulse', level: 20 }, { id: 'dawn_lance', level: 26 }],
+  },
+
+  // --- Cinderpeaks wilds (snow ascent, Lv 24-28) ---
+  drifthare: {
+    id: 'drifthare', dexNo: 46, name: 'Drifthare', types: ['Frost', 'Beast'],
+    baseStats: { hp: 58, atk: 64, def: 50, spa: 42, spd: 50, spe: 80 },
+    tagline: 'You see its tracks. The tracks are a decoy.',
+    lore: 'Drifthare dig false trails all winter for the joy of watching hunters follow them in circles. The mountain folk no longer track them. The mountain folk leave carrots and apologies.',
+    captureRate: 150, baseExp: 108,
+    learnset: [{ id: 'frost_bite', level: 1 }, { id: 'scrabble', level: 1 }, { id: 'snow_flurry', level: 22 }],
+  },
+  emberhoof: {
+    id: 'emberhoof', dexNo: 47, name: 'Emberhoof', types: ['Flame', 'Beast'],
+    baseStats: { hp: 66, atk: 72, def: 56, spa: 48, spd: 48, spe: 62 },
+    tagline: 'It climbs the ice on hooves of banked coal.',
+    lore: 'Emberhoof graze the cinder fields where fire still seeps from the mountain, and carry it down the ice on smoldering hooves. Their trails stay melted till morning — the only honest roads up.',
+    captureRate: 140, baseExp: 112,
+    learnset: [{ id: 'cinder_snap', level: 1 }, { id: 'hoof_rush', level: 1 }, { id: 'flame_burst', level: 23 }],
+  },
+  slatewing: {
+    id: 'slatewing', dexNo: 48, name: 'Slatewing', types: ['Stone', 'Wind'],
+    baseStats: { hp: 60, atk: 68, def: 74, spa: 44, spd: 52, spe: 58 },
+    tagline: 'The cliff sheds feathers. The feathers come back.',
+    lore: 'Slatewing roost flat against the crags, indistinguishable from the rock until the rock dives. Climbers on the high road learn to greet every ledge politely, just in case.',
+    captureRate: 130, baseExp: 114,
+    learnset: [{ id: 'pebble_toss', level: 1 }, { id: 'gust_flick', level: 1 }, { id: 'zephyr_slice', level: 22 }],
+  },
+  snowveil: {
+    id: 'snowveil', dexNo: 49, name: 'Snowveil', types: ['Frost', 'Spirit'],
+    baseStats: { hp: 52, atk: 38, def: 50, spa: 76, spd: 66, spe: 64 },
+    tagline: 'The blizzard has a quiet middle. It is not empty.',
+    lore: 'Snowveil drift at the heart of whiteouts, keeping a circle of still air for whatever shelters inside it. Mountain guides call that circle "the guest room" and never, ever whistle in it.',
+    captureRate: 120, baseExp: 118,
+    learnset: [{ id: 'snow_flurry', level: 1 }, { id: 'wisp_flare', level: 1 }, { id: 'glowpulse', level: 23 }],
   },
 
   // --- Hollow Cave wild ---

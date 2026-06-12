@@ -9,7 +9,7 @@
 const TILE = 32;
 
 const SOLID_TILES = new Set(['T', 'W', 'S', 'B', 'R', 'D', 'C', 'A']);
-const ENCOUNTER_TILES = new Set(['g', 'e', 'm']);
+const ENCOUNTER_TILES = new Set(['g', 'e', 'm', 'h']);
 const FACING_DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
 /** Facing -> sprite sheet direction (side frames face right; flipX gives left). */
@@ -102,7 +102,7 @@ class WorldScene extends Phaser.Scene {
       G: 'tile_grass', g: 'tile_grass_tall', F: 'tile_flowers', P: 'tile_path',
       W: 'tile_water', T: 'tile_tree', S: 'tile_grass', R: 'tile_roof', B: 'tile_wall', D: 'tile_door',
       C: 'tile_cave_wall', c: 'tile_cave_floor', e: 'tile_cave_gravel', s: 'tile_sand', m: 'tile_mire',
-      A: 'tile_sanctum_door',
+      A: 'tile_sanctum_door', n: 'tile_snow', h: 'tile_snow_drift',
     };
 
     this.shrineTile = null;
@@ -138,6 +138,9 @@ class WorldScene extends Phaser.Scene {
       keldrath_cliffs: { tint: [0xdce8f0, 0x9fd0c8], frequency: 600, drift: 30 },
       mirewood_marsh: { tint: [0x8fd8c8, 0xefe2a0], frequency: 700, drift: 9 },
       mirewood_deep: { tint: [0x9fd8ff, 0x43657a], frequency: 750, drift: 6 },
+      mirewood_town: { tint: [0xefe2a0, 0x8fd8c8], frequency: 900, drift: 10 },
+      sanctum_inner: { tint: [0xf4e09a, 0x9fd8ff], frequency: 650, drift: 5 },
+      cinderpeaks_ascent: { tint: [0xf4f8ff, 0xdce8f0], frequency: 240, drift: 26 },
     };
     const p = presets[this.map.id];
     if (!p) return;
@@ -421,7 +424,7 @@ class WorldScene extends Phaser.Scene {
         }
         if (ENCOUNTER_TILES.has(this.tileAt(nx, ny))) {
           const t = this.tileAt(nx, ny);
-          this.rustle(nx, ny, t === 'e' ? 0x524a5c : t === 'm' ? 0x3e5648 : 0x4e7a42);
+          this.rustle(nx, ny, t === 'e' ? 0x524a5c : t === 'm' ? 0x3e5648 : t === 'h' ? 0xe8f2fa : 0x4e7a42);
           this.maybeEncounter();
         }
         // Key still held? Chain straight into the next step — no stutter.
@@ -433,7 +436,7 @@ class WorldScene extends Phaser.Scene {
   /** Tiny dust puff at the tile being stepped off, tinted by the ground. */
   footDust(x, y) {
     const tile = this.tileAt(x, y);
-    const tint = tile === 'P' ? 0x8a7a5c : tile === 'c' || tile === 'e' ? 0x524a5c : 0x35573d;
+    const tint = tile === 'P' ? 0x8a7a5c : tile === 'c' || tile === 'e' ? 0x524a5c : tile === 'n' || tile === 'h' ? 0xe8f2fa : 0x35573d;
     this.dustEmitter.setParticleTint(tint);
     this.dustEmitter.explode(2, x * TILE + TILE / 2, y * TILE + TILE - 4);
   }

@@ -543,7 +543,7 @@ await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 14, y: 0, to:
 check('reedlight village loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'mirewood_town' && window.game.scene.getScene('WorldScene').npcs)`));
 await sleep(500);
 check('village discovered', await eval_(`Save.state.discoveredLocations.includes('mirewood_town')`));
-check('5 village NPCs spawned (Lyra shows after the Sigil)', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 5);
+check('6 village NPCs spawned (Lyra shows after the Sigil)', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 6);
 check('village shrine present', await eval_(`Boolean(window.game.scene.getScene('WorldScene').shrineTile)`));
 
 // Tamsin's free heal mirrors Maeve's.
@@ -591,6 +591,65 @@ for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
 await sleep(400);
 check('Lyra saw the second Sigil', await eval_(`Save.state.storyFlags.lyra_sigil_seen === true`));
 check('uiLock released after Lyra', !(await eval_(`window.game.scene.getScene('WorldScene').uiLock`)));
+
+// 8c-11. Cinderpeaks: Bryn opens the snow gate, the ascent, the Chain digger.
+check('Bryn blocks the north pass', await eval_(`window.game.scene.getScene('WorldScene').isSolid(14, 1)`));
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'snow_guide_bryn')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(300); }
+await sleep(700);
+check('peak pass granted', await eval_(`Save.state.storyFlags.peak_pass_granted === true`));
+check('Bryn stepped aside', !(await eval_(`window.game.scene.getScene('WorldScene').isSolid(14, 1)`)) && (await eval_(`window.game.scene.getScene('WorldScene').isSolid(13, 1)`)));
+
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 14, y: 0, to: 'cinderpeaks_ascent', toX: 14, toY: 15, facing: 'up' }), true)`);
+check('cinderpeaks ascent loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'cinderpeaks_ascent' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('ascent discovered', await eval_(`Save.state.discoveredLocations.includes('cinderpeaks_ascent')`));
+check('2 ascent NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 2);
+check('ascent shrine present', await eval_(`Boolean(window.game.scene.getScene('WorldScene').shrineTile)`));
+check('snow drift is an encounter tile', await eval_(`window.game.scene.getScene('WorldScene').tileAt(3, 1) === 'h' && !window.game.scene.getScene('WorldScene').isSolid(3, 1)`));
+
+// Lv 50, not 42: the digger's Cragmaw + Murkmaw both resist Flame 0.5x and
+// the drain loop only ever picks the first move — at 42 the embrik line
+// actually blacks out (observed), at 50 the win is deterministic.
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 50), true)`);
+const shardsPreDigger = await eval_(`Save.state.shards`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'down'; w.talkTo(w.npcs.find(n => n.def.id === 'chain_digger')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+check('digger battle started', await waitFor(`window.game.scene.isActive('BattleScene')`));
+await sleep(500);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(250); }
+for (let round = 0; round < 35; round++) {
+  const scene = await eval_(`window.game.scene.getScenes(true)[0].scene.key`);
+  if (scene !== 'BattleScene') break;
+  const menuOpen = await eval_(`Boolean(window.game.scene.getScene('BattleScene')?.menu)`);
+  await pressZ();
+  await sleep(menuOpen ? 400 : 350);
+  if (menuOpen) { await pressZ(); await sleep(400); }
+  for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+}
+await sleep(1500);
+check('digger driven off, back in world', await eval_(`window.game.scene.isActive('WorldScene')`));
+check('chain_digger_beaten flag set', await eval_(`Save.state.storyFlags.chain_digger_beaten === true`));
+check('digger reward paid', (await eval_(`Save.state.shards`)) >= shardsPreDigger + 700, `${shardsPreDigger} -> ${await eval_(`Save.state.shards`)}`);
+
+// A snow wild we can flee (exercises the Frost species + drift table).
+await eval_(`(window.game.scene.getScene('WorldScene').scene.start('BattleScene', { wild: makeLuminary('drifthare', 25) }), true)`);
+await sleep(1000);
+check('snow wild battle starts', await eval_(`window.game.scene.isActive('BattleScene')`));
+await pressZ(); await sleep(300); await pressZ(); await sleep(500); // intro
+for (let i = 0; i < 6; i++) {
+  const inBattle = await eval_(`window.game.scene.isActive('BattleScene')`);
+  if (!inBattle) break;
+  await eval_(`(() => { const b = window.game.scene.getScene('BattleScene'); if (b?.menu && b.menu.items.length < 5) b.menu.cancel(); return true; })()`);
+  await sleep(250);
+  await eval_(`(() => { const b = window.game.scene.getScene('BattleScene'); if (b?.menu && b.menu.items.length === 5) { b.menu.index = 4; b.menu.refresh(); b.menu.select(); } return true; })()`);
+  await sleep(500);
+  for (let j = 0; j < 6; j++) { await pressZ(); await sleep(250); }
+}
+await sleep(800);
+check('escaped snow battle', await eval_(`window.game.scene.isActive('WorldScene')`));
 
 // 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);

@@ -110,6 +110,19 @@ const TRAINERS = {
     },
   },
 
+  // --- Cinderpeaks ascent: the Chain digs for another way in ---
+  chain_digger: {
+    id: 'chain_digger',
+    name: 'Chain Digger Hesk',
+    introText: "The digger leaned on a frost-bitten pick. 'Doors, tunnels, keepers — everything opens. The Chain only argues about the order.'",
+    winText: 'You drove the Chain Digger off the ascent!',
+    loseText: "Hesk went back to measuring the rock face. 'Rest. Dig. Either way the mountain gets smaller.'",
+    reward: 700,
+    buildParty() {
+      return [makeLuminary('gloomshroud', 26), makeLuminary('cragmaw', 27), makeLuminary('murkmaw', 27)];
+    },
+  },
+
   // --- Chapter 1 closer: the Hollowed Chain reaches the coast ---
   chain_scout: {
     id: 'chain_scout',

@@ -179,6 +179,22 @@ function ensureWorldTextures(scene) {
 
   noiseTile(scene, 'tile_path', '#7a6a4e', ['#6a5c42', '#8a7a5c', '#5f5440'], 44);
 
+  // Cinderpeaks snow — packed white-blue ground and the deep powder drifts
+  // that hide wild Luminary.
+  noiseTile(scene, 'tile_snow', '#dde8f2', ['#d2dfec', '#e8f0f8', '#c8d6e6'], 155);
+  noiseTile(scene, 'tile_snow_drift', '#cfdcea', ['#c2d2e2', '#dce8f2', '#b6c8da'], 166, {
+    count: 40,
+    post: (ctx, rnd) => {
+      ctx.fillStyle = '#f2f7fc';
+      for (let i = 0; i < 6; i++) {
+        ctx.fillRect(2 + Math.floor(rnd() * 26), 2 + Math.floor(rnd() * 26), 3 + Math.floor(rnd() * 3), 2);
+      }
+      ctx.fillStyle = '#a8bcd0';
+      ctx.fillRect(6, 24, 6, 1);
+      ctx.fillRect(20, 10, 6, 1);
+    },
+  });
+
   // Mire — dark bog water with surface scum and slow bubbles.
   noiseTile(scene, 'tile_mire', '#2a3c34', ['#223228', '#32463c', '#1c2c24'], 144, {
     count: 50,
@@ -1310,6 +1326,78 @@ Object.assign(STARTER_PIXELMAPS, {
       '..vvvvvvvvvv....',
       '...nvvvvvvn.....',
       '....n.vv.n......',
+    ],
+  },
+});
+
+// Cinderpeaks wilds.
+Object.assign(STARTER_PIXELMAPS, {
+  drifthare: {
+    palette: { w: '#e8f0f8', d: '#c2d2e2', s: '#a8bcd0', k: '#1c2430', p: '#e8a8b8', b: '#8fa8c0' },
+    rows: [
+      '..ww........ww..',
+      '..wpw......wpw..',
+      '..www......www..',
+      '...ww......ww...',
+      '...wwwwwwwwww...',
+      '..wwkwwwwwwkww..',
+      '..wwwwwwwwwwww..',
+      '...wwwsppswww...',
+      '...wwwwwwwwww...',
+      '..swwww..wwwws..',
+      '...bb.b..b.bb...',
+      '..bbb.bb.bb.b...',
+    ],
+  },
+  emberhoof: {
+    palette: { b: '#8a5a3a', d: '#6e4628', y: '#e8c84a', o: '#e8743a', k: '#241410', w: '#d8b88a' },
+    rows: [
+      '..bb........bb..',
+      '..bbb......bbb..',
+      '...bbbbbbbbbb...',
+      '..bbkbbbbbbkbb..',
+      '..bbbbwwwwbbbb..',
+      '.bbbbwwwwwwbbbb.',
+      '.bbbbbbbbbbbbbb.',
+      '..bbbbbbbbbbbb..',
+      '..bbb.bbbb.bbb..',
+      '..dd...dd...dd..',
+      '..oo...oo...oo..',
+      '.oyo..oyo..oyo..',
+    ],
+  },
+  slatewing: {
+    palette: { s: '#7a8896', d: '#5e6a78', l: '#a8b4c0', k: '#141c24', y: '#e8c84a', g: '#48525e' },
+    rows: [
+      'ss............ss',
+      'ssss........ssss',
+      '.ssssss..ssssss.',
+      '..sssssssssssss.',
+      '...ssslssslss...',
+      '....sskssksss...',
+      '....lssyysssl...',
+      '...lssssssssl...',
+      '....gssssssg....',
+      '.....gssssg.....',
+      '......gssg......',
+      '.......gg.......',
+    ],
+  },
+  snowveil: {
+    palette: { w: '#eef4fa', d: '#cfdcea', b: '#9fc0e0', k: '#2a3a5e', l: '#aef0e8', s: '#b6c8da' },
+    rows: [
+      '......www.......',
+      '....wwwwwww.....',
+      '...wwwwwwwww....',
+      '..wwwkwwwkww....',
+      '..wwwwwwwwww....',
+      '..wbwwllwwbw....',
+      '...wwwwwwww.....',
+      '..s.wwwwww.s....',
+      '.ss..wwww..ss...',
+      '.s...wwww...s...',
+      '......ww........',
+      '.......w........',
     ],
   },
 });

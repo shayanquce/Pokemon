@@ -6,9 +6,9 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.17 "Grown Deep" (PAUSED)
+## Current checkpoint — v0.18 "The White Road" (PAUSED)
 
-**Build order steps 1–15 are DONE.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–16 are DONE.** Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -31,29 +31,32 @@
 | 13. Mirewood town (v0.15) | ✅ | `mirewood_town` Reedlight Village: Tamsin (healer), Hobb shop + Lantern Dew, Elder Wren postBadge counsel, per-merchant shop titles, playtest-mode setTimeout loop |
 | 14. Chapter 3 beats (v0.16) | ✅ | Awakened-door mechanic, Sanctum Doors (`A` tile) → `sanctum_inner` hall, Echo of Solen (eight doors, Cinderpeaks), Lyra in Reedlight, chapter → 3 |
 | 15. Coast/Mirewood evolutions (v0.17) | ✅ | 9 second stages (dex 37–45, 42 species), 4 new moves, rare evolved spawns in both Mirewood maps |
-| 16–18 | ⏭️ **NEXT** | Cinderpeaks opener, third-stage starters, audio, packaging… |
+| 16. Cinderpeaks opener (v0.18) | ✅ | Snow-Guide Bryn gate (echo_answered → peak_pass_granted), `cinderpeaks_ascent` w/ snow tiles `n`/`h`, Frost attack row, 4 species (dex 46–49), Chain Digger, Edda names Warden Korr |
+| 17–19 | ⏭️ **NEXT** | Forge-hall + Warden Korr (third badge), third-stage starters, audio, packaging… |
 
-## Exactly where we left off (2026-06-12, session 6, v0.17)
+## Exactly where we left off (2026-06-12, session 6, v0.18)
 
-Steps 1–15 are all complete. Most recent: **v0.17 "Grown Deep"** — nine
-coast/Mirewood second stages (dex 37–45, **42 species**): Brinehound,
-Galewraith, Saltbastion, Driftcrown, Surgefin (coast, evolve 22–24) and
-Mossbruin, Mirehornet, Murkmaw, Wickbloom (Mirewood, 24–26); new moves
-Riptide Maw / Gale Burst / Venom Bloom / Dawn Lance; rare evolved spawns in
-mirewood_marsh + mirewood_deep (cliffs pattern). `lum_` textures generate on
-demand (`ensureLuminaryTexture`). **v0.16**: awakened-door mechanic
-(`awakened` on door defs, `WorldScene.openDoor`), Sanctum Doors (tile `A`)
-→ `sanctum_inner` + Echo of Solen (chapter → 3), Lyra in Reedlight. **v0.15**:
-Reedlight Village (Tamsin healer, Hobb shop, Lantern Dew, Elder Wren),
-playtest-mode setTimeout loop fix.
+Steps 1–16 are all complete. Most recent: **v0.18 "The White Road"** —
+**Snow-Guide Bryn** gate in Reedlight (requires `echo_answered`, grants
+`peak_pass_granted`, north exit (14,0)); **`cinderpeaks_ascent`** with new
+walkable tiles `n` snow + `h` snow drift (drift is in ENCOUNTER_TILES;
+white rustle/footdust; heavy snowfall ambient preset); **Frost attack row**
+in TYPE_CHART (2x Verdant/Wind/Beast, 0.5x Flame/Tide/Frost); 4 species
+dex 46–49 (**46 total**): Drifthare, Emberhoof, Slatewing, Snowveil
+(Lv 24–28) + moves Frost Bite/Snow Flurry; **Chain Digger Hesk**
+(`chain_digger_beaten`, 700 shards) digging toward the failing eighth door;
+**Forge Acolyte Edda** points at **Warden Korr's forge-hall** (next map —
+the north wall is the buried forge road). Playtest gotcha: the digger test
+lead is **Lv 50** (a Lv 42 Flame lead loses — Cragmaw+Murkmaw resist Flame,
+drain loop picks first move only; observed blackout, not theory).
 
-Verified end-to-end: save-smoke 6/6, engine-test 323/323, playtest 133/133.
+Verified end-to-end: save-smoke 6/6, engine-test 345/345, playtest 151/151.
 
 Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS
-2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2) — 133 checks (uses/deletes slot_3)
-3. Start on the **Cinderpeaks opener** (third region: mountain route, snow gate via Lyra's "snowed in" hook, third Warden seat, new species)
+2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2) — 151 checks (uses/deletes slot_3)
+3. Start on **the forge-hall + Warden Korr** (third badge: map past the ascent north wall, Lyra3 race-rematch, Korr's Oath → `badge_cinderpeaks`)
 4. Then **third-stage starters** (Embralion/Runedeep/Grovemaw, Lv 32–34), audio
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn

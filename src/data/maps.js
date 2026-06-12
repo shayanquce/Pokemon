@@ -756,8 +756,8 @@ const MAPS = {
     name: 'Mirewood — Reedlight Village',
     //       012345678901234567890123456789
     rows: [
-      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
-      'TGGmmGGGRRRRGGGGGGGRRRRGGmmGGT', // 1  <- stilt-house roofs
+      'TTTTTTTTTTTTTTPTTTTTTTTTTTTTTT', // 0  <- north exit to the Cinderpeaks ascent at (14,0)
+      'TGGmmGGGRRRRGGGGGGGRRRRGGmmGGT', // 1  <- stilt-house roofs; snow-guide Bryn at (14,1)
       'TGGmmGGGRRRRGGGGGGGRRRRGGmmGGT', // 2
       'TGGGGGGGBBDBGGGGGGGBDBBGGGGGGT', // 3  <- doors at (10,3) and (20,3)
       'TGGGGGGGGGPGGGGGGGGGPGGGGGGGGT', // 4
@@ -774,12 +774,36 @@ const MAPS = {
       'TGGGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 15
       'TTTTTTTTTTTTTTPTTTTTTTTTTTTTTT', // 16 <- south exit to the marsh at (14,16)
     ],
-    exits: [{ x: 14, y: 16, to: 'mirewood_marsh', toX: 14, toY: 1, facing: 'down' }],
+    exits: [
+      { x: 14, y: 16, to: 'mirewood_marsh', toX: 14, toY: 1, facing: 'down' },
+      { x: 14, y: 0, to: 'cinderpeaks_ascent', toX: 14, toY: 15, facing: 'up' },
+    ],
     doors: [
       { x: 10, y: 3, text: "Hobb's storehouse. Stacked crates of reed-wax candles hum faintly in the dark." },
       { x: 20, y: 3, text: 'The Reedlight Lodge. A carved sign reads: "The mire keeps what the mire is given."' },
     ],
     npcs: [
+      {
+        // Gate to the third region: the pass opens once the Echo has answered.
+        id: 'snow_guide_bryn',
+        name: 'Snow-Guide Bryn',
+        x: 14, y: 1, facing: 'down',
+        palette: { h: '#d8d2c4', f: '#caa07a', e: '#20203a', c: '#5a708a', g: '#dce8f0', b: '#241d18' },
+        gate: {
+          requiresFlag: 'echo_answered',
+          grantsFlag: 'peak_pass_granted',
+          asideX: 13, asideY: 1,
+          deniedDialogue: [
+            'Turn back, walker. The Cinderpeaks pass is under nine feet of stubborn snow, and the mountain is still adding.',
+            'They say the drowned doors east of here answer to an old voice. If anything can change the weather, it is whatever wakes when THEY do.',
+          ],
+          grantedDialogue: [
+            'The night the sanctum sang, the snow on the pass cracked like a knuckle. First clear road in a generation, and here YOU stand. Hm.',
+            'The ascent runs north to the cinder fields, {player}. Walk the packed snow, mind the drifts — things hunt under the powder — and if a grey cloak is digging up there, do not lend them a shovel.',
+          ],
+        },
+        repeatDialogue: ['The pass holds clear. The Warden of the peaks keeps a forge-hall past the cinder field, if the road ever opens that far.'],
+      },
       {
         // Free full heal — the village answer to Dockside Maeve.
         id: 'reedkeeper_tamsin',
@@ -862,6 +886,71 @@ const MAPS = {
       },
     ],
     encounters: null,
+  },
+  cinderpeaks_ascent: {
+    id: 'cinderpeaks_ascent',
+    name: 'Cinderpeaks — Snowbound Ascent',
+    //       012345678901234567890123456789
+    rows: [
+      'CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', // 0  <- forge road north (future map; acolyte hints at it)
+      'CnnhhhnnnnCnnnnnnnnnnnnhhhnnnC', // 1
+      'CnnhhhnnnnnnnnhhhhnnnnnhhhnnnC', // 2
+      'CnnhhhnnnnnnnnhhhhnnnnnnnnnnnC', // 3
+      'CnnnnnnnCnnnnnhhhhnnnCnnnnnnnC', // 4
+      'CnnnnnnnnnnnnnnnnnnnnnnnnnnnnC', // 5  <- Chain Digger Hesk at (8,5)
+      'CnnnnnWWWnnnnnnnnnnnnnWWWnnnnC', // 6  <- frozen pools
+      'CnnnnWWWWWnnnnSnnnnnnWWWWWnnnC', // 7  <- Save Shrine at (14,7)
+      'CnnnnnWWWnnnnnnnnnnnnnWWWnnnnC', // 8
+      'CnnnnnnnnnnnnnnnnnnnnnnnnnnnnC', // 9  <- Forge Acolyte Edda at (22,9)
+      'CnnhhhhnnnnCnnnnnnnnnnnnnnnnnC', // 10
+      'CnnhhhhnnnnnnnnnhhhhnnnnCnnnnC', // 11
+      'CnnhhhhnnnnnnnnnhhhhnnnnnnnnnC', // 12
+      'CnnnnnnnnnnnnnnnhhhhnnnnnnnnnC', // 13
+      'CnnnnnnnCnnnnnnnnnnnnnnnCnnnnC', // 14
+      'CnnnnnnnnnnnnnnnnnnnnnnnnnnnnC', // 15
+      'CCCCCCCCCCCCCCPCCCCCCCCCCCCCCC', // 16 <- south exit back to Reedlight at (14,16)
+    ],
+    exits: [{ x: 14, y: 16, to: 'mirewood_town', toX: 14, toY: 1, facing: 'down' }],
+    doors: [],
+    npcs: [
+      {
+        // Solen said the Chain digs for another way in. Here is the shovel.
+        id: 'chain_digger',
+        name: 'Grey Cloak',
+        x: 8, y: 5, facing: 'down',
+        palette: { h: '#3a3a44', f: '#cfae96', e: '#4a1c28', c: '#43355e', g: '#8a93a0', b: '#1c1620' },
+        dialogue: [
+          'A keeper, this high already? The drowned doors must have liked you. No matter — stone keeps no favorites.',
+          'The eighth door is FAILING, child. We dig toward the sound it makes. Step aside, or be the next thing the mountain swallows.',
+        ],
+        battle: { trainerId: 'chain_digger', flag: 'chain_digger_beaten' },
+        postWinDialogue: [
+          'Enough. The rock face will still be here when your bones are not.',
+          'Climb, then. The Warden of the peaks will smell the Chain on you and bar her forge anyway.',
+        ],
+        repeatDialogue: ['The Grey Cloak studies the rock face and pointedly ignores you.'],
+      },
+      {
+        id: 'forge_acolyte_edda',
+        name: 'Forge Acolyte Edda',
+        x: 22, y: 9, facing: 'left',
+        palette: { h: '#a0522a', f: '#d8a878', e: '#20203a', c: '#7a3a2e', g: '#e8c84a', b: '#241d18' },
+        dialogue: [
+          'Up from the mire, are you? Then you have met the second Warden. The third keeps the forge-hall past the cinder field — Warden Korr, and her Oath burns hotter than her temper.',
+          'The forge road is buried past the north crags — the mountain has been arguing with itself all season. When it settles, the way to Korr opens. I will be here, melting snow for tea.',
+        ],
+        repeatDialogue: ['The forge road is still buried. The mountain argues; we wait. Tea?'],
+      },
+    ],
+    encounters: {
+      rate: 0.15,
+      table: [
+        { speciesId: 'drifthare', weight: 30, min: 24, max: 27 },
+        { speciesId: 'emberhoof', weight: 26, min: 24, max: 27 },
+        { speciesId: 'slatewing', weight: 24, min: 24, max: 28 },
+        { speciesId: 'snowveil', weight: 20, min: 25, max: 28 },
+      ],
+    },
   },
 };
 

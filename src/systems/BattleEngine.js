@@ -19,6 +19,7 @@ const TYPE_CHART = {
   Psyche: { Venom: 2, Beast: 2, Psyche: 0.5, Shadow: 0 },
   Beast: { Psyche: 0.5, Iron: 0.5 },
   Spirit: { Psyche: 2, Spirit: 2, Beast: 0 },
+  Frost: { Verdant: 2, Wind: 2, Beast: 2, Flame: 0.5, Tide: 0.5, Frost: 0.5 },
 };
 
 function typeMultiplier(moveType, defenderTypes) {
