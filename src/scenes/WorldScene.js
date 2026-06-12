@@ -8,7 +8,7 @@
 
 const TILE = 32;
 
-const SOLID_TILES = new Set(['T', 'W', 'S', 'B', 'R', 'D', 'C', 'A']);
+const SOLID_TILES = new Set(['T', 'W', 'S', 'B', 'R', 'D', 'C', 'A', 'l']);
 const ENCOUNTER_TILES = new Set(['g', 'e', 'm', 'h']);
 const FACING_DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
@@ -102,7 +102,7 @@ class WorldScene extends Phaser.Scene {
       G: 'tile_grass', g: 'tile_grass_tall', F: 'tile_flowers', P: 'tile_path',
       W: 'tile_water', T: 'tile_tree', S: 'tile_grass', R: 'tile_roof', B: 'tile_wall', D: 'tile_door',
       C: 'tile_cave_wall', c: 'tile_cave_floor', e: 'tile_cave_gravel', s: 'tile_sand', m: 'tile_mire',
-      A: 'tile_sanctum_door', n: 'tile_snow', h: 'tile_snow_drift',
+      A: 'tile_sanctum_door', n: 'tile_snow', h: 'tile_snow_drift', l: 'tile_lava',
     };
 
     this.shrineTile = null;
@@ -141,6 +141,7 @@ class WorldScene extends Phaser.Scene {
       mirewood_town: { tint: [0xefe2a0, 0x8fd8c8], frequency: 900, drift: 10 },
       sanctum_inner: { tint: [0xf4e09a, 0x9fd8ff], frequency: 650, drift: 5 },
       cinderpeaks_ascent: { tint: [0xf4f8ff, 0xdce8f0], frequency: 240, drift: 26 },
+      cinderpeaks_forge: { tint: [0xe8743a, 0xe8c84a], frequency: 500, drift: 9 },
     };
     const p = presets[this.map.id];
     if (!p) return;

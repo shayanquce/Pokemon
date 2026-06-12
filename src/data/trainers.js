@@ -110,6 +110,46 @@ const TRAINERS = {
     },
   },
 
+  // --- The forge-hall: the race, the door-ward, and the third Warden ---
+  lyra3: {
+    id: 'lyra3',
+    name: 'Rival Lyra',
+    introText: "Lyra was already grinning in the forge-light. 'I said race you up the mountain, {player}. Welcome to second place.'",
+    winText: 'You defeated Rival Lyra — the race is yours!',
+    loseText: "Lyra pulled you off the hot stone. 'Second place AND scorched. Drink something and come back.'",
+    reward: 800,
+    buildParty(state) {
+      // Her whole roster has grown into the climb.
+      const counter = { embrik: 'tidarune', tidalink: 'thorngrove', thornpaw: 'embrath' };
+      const starterId = state.starterId ?? state.dex?.caught?.[0] ?? 'embrik';
+      return [makeLuminary('lumenmoth', 29), makeLuminary('brinehound', 29), makeLuminary(counter[starterId] ?? 'tidarune', 31)];
+    },
+  },
+  forge_acolyte: {
+    id: 'forge_acolyte',
+    name: 'Acolyte Brann',
+    introText: "Brann lowered his hammer. 'The Warden hears every strike on this floor. Make yours worth hearing.'",
+    winText: 'You defeated Acolyte Brann!',
+    loseText: "Brann hauled you off the channel grate. 'Soft metal bends. Go temper.'",
+    reward: 300,
+    buildParty() {
+      return [makeLuminary('emberhoof', 28), makeLuminary('slatewing', 29)];
+    },
+  },
+  warden_korr: {
+    id: 'warden_korr',
+    name: 'Warden Korr',
+    introText: "Korr set her hammer on the anvil and turned. 'The mountain argues, Echo-bearer. I settle arguments.'",
+    winText: 'You defeated Warden Korr and earned the CINDERPEAKS SIGIL!',
+    loseText: "Korr lifted you with one soot-black hand. 'The Oath holds. Come back when your fire keeps.'",
+    reward: 1200,
+    wardenOath: true,
+    setFlags: { badge_cinderpeaks: true },
+    buildParty() {
+      return [makeLuminary('emberhoof', 30), makeLuminary('cragmaw', 31), makeLuminary('cindralisk', 33)];
+    },
+  },
+
   // --- Cinderpeaks ascent: the Chain digs for another way in ---
   chain_digger: {
     id: 'chain_digger',

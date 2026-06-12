@@ -357,6 +357,22 @@ function ensureWorldTextures(scene) {
 
   noiseTile(scene, 'tile_cave_floor', '#3e3a44', ['#363240', '#48424f', '#302c38'], 111);
 
+  // Forge lava — banked magma with bright seams (solid; decorative hazard).
+  noiseTile(scene, 'tile_lava', '#a83a1c', ['#8a2e16', '#c44a20', '#7a2812'], 133, {
+    count: 45,
+    post: (ctx, rnd) => {
+      ctx.fillStyle = '#e8743a';
+      for (let i = 0; i < 5; i++) {
+        ctx.fillRect(2 + Math.floor(rnd() * 24), 2 + Math.floor(rnd() * 26), 4 + Math.floor(rnd() * 4), 2);
+      }
+      ctx.fillStyle = '#f4c84a';
+      ctx.fillRect(7, 9, 5, 1);
+      ctx.fillRect(19, 21, 6, 1);
+      ctx.fillStyle = '#2c1410';
+      ctx.fillRect(0, 0, 32, 2);
+    },
+  });
+
   noiseTile(scene, 'tile_cave_gravel', '#36323e', ['#2c2836', '#403a48'], 122, {
     count: 50,
     post: (ctx, rnd) => {
@@ -1398,6 +1414,27 @@ Object.assign(STARTER_PIXELMAPS, {
       '.s...wwww...s...',
       '......ww........',
       '.......w........',
+    ],
+  },
+});
+
+// The forge Warden's ace (and rare forge spawn).
+Object.assign(STARTER_PIXELMAPS, {
+  cindralisk: {
+    palette: { s: '#8a4a2e', d: '#6e3a22', o: '#e8743a', y: '#f4c84a', k: '#241008', g: '#5e5648' },
+    rows: [
+      '.ss.........sss.',
+      '.sss......sssss.',
+      '..ssssssssssoss.',
+      '..sskssssksssss.',
+      '..ssssssssss.ss.',
+      '.sssyooysss..ss.',
+      '.gsssssssssg.os.',
+      '.sssooosssss.ss.',
+      '.gssssssssssgss.',
+      '..sss.ssss.sss..',
+      '..dd...dd...dd..',
+      '.ddd..ddd..ddd..',
     ],
   },
 });

@@ -497,7 +497,10 @@ await sleep(500);
 check('sanctum discovered', await eval_(`Save.state.discoveredLocations.includes('mirewood_deep')`));
 check('2 sanctum NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 2);
 
-await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 40), true)`); // fresh lead vs Mira's Lv 22-25 Oath trio
+// Lv 80 Storm Coil lead vs Mira's Oath trio: at 40 the Flame lead rarely but
+// observably stalls out (Lanternreed glowpulse sleep procs + Murkfin's
+// Hollowed debuff + the 0.5x Tide resist). Neutral one-shots are flake-proof.
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 80), Save.state.party[0].moves = [{ id: 'storm_coil', pp: 30, maxPp: 30 }], true)`);
 const shardsPreMira = await eval_(`Save.state.shards`);
 await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'warden_mira')); return true; })()`);
 await sleep(300);
@@ -609,10 +612,14 @@ check('2 ascent NPCs spawned', (await eval_(`window.game.scene.getScene('WorldSc
 check('ascent shrine present', await eval_(`Boolean(window.game.scene.getScene('WorldScene').shrineTile)`));
 check('snow drift is an encounter tile', await eval_(`window.game.scene.getScene('WorldScene').tileAt(3, 1) === 'h' && !window.game.scene.getScene('WorldScene').isSolid(3, 1)`));
 
-// Lv 50, not 42: the digger's Cragmaw + Murkmaw both resist Flame 0.5x and
-// the drain loop only ever picks the first move — at 42 the embrik line
-// actually blacks out (observed), at 50 the win is deterministic.
-await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 50), true)`);
+// Lv 80 lead with Storm Coil as its only move, used for the digger AND the
+// lyra3 fight after it. The drain loop only ever picks the first move and
+// never heals, so against the Lv 26-31 trios up here anything short of
+// one-shot territory is a coin flip — a Flame lead blacked out at 42 and
+// at 50, and a Lv 50 Storm Coil lead still lost to lyra3's 2x Brine Jet +
+// sleep procs (all observed). Volt is neutral on every defender; at 80 each
+// enemy dies in one hit and the win is deterministic.
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 80), Save.state.party[0].moves = [{ id: 'storm_coil', pp: 30, maxPp: 30 }], true)`);
 const shardsPreDigger = await eval_(`Save.state.shards`);
 await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'down'; w.talkTo(w.npcs.find(n => n.def.id === 'chain_digger')); return true; })()`);
 await sleep(300);
@@ -650,6 +657,70 @@ for (let i = 0; i < 6; i++) {
 }
 await sleep(800);
 check('escaped snow battle', await eval_(`window.game.scene.isActive('WorldScene')`));
+
+// 8c-12. The forge-hall: Edda's gate, the Lyra race-rematch, Warden Korr.
+check('Edda blocks the forge road', await eval_(`window.game.scene.getScene('WorldScene').isSolid(14, 1)`));
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'forge_acolyte_edda')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(300); }
+await sleep(700);
+check('forge road cleared', await eval_(`Save.state.storyFlags.forge_road_cleared === true`));
+check('Edda stepped aside', !(await eval_(`window.game.scene.getScene('WorldScene').isSolid(14, 1)`)) && (await eval_(`window.game.scene.getScene('WorldScene').isSolid(13, 1)`)));
+
+await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 14, y: 0, to: 'cinderpeaks_forge', toX: 14, toY: 15, facing: 'up' }), true)`);
+check('forge-hall loaded', await waitFor(`Boolean(window.game.scene.isActive('WorldScene') && window.game.scene.getScene('WorldScene').map.id === 'cinderpeaks_forge' && window.game.scene.getScene('WorldScene').npcs)`));
+await sleep(500);
+check('forge-hall discovered', await eval_(`Save.state.discoveredLocations.includes('cinderpeaks_forge')`));
+check('3 forge NPCs spawned', (await eval_(`window.game.scene.getScene('WorldScene').npcs.length`)) === 3);
+check('lava is solid', await eval_(`window.game.scene.getScene('WorldScene').tileAt(10, 6) === 'l' && window.game.scene.getScene('WorldScene').isSolid(10, 6)`));
+
+// Lyra3 — the race ends. Lead is still the Lv 50 from the digger fix.
+const shardsPreLyra3 = await eval_(`Save.state.shards`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'left'; w.talkTo(w.npcs.find(n => n.def.id === 'lyra_forge')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+check('lyra3 battle started', await waitFor(`window.game.scene.isActive('BattleScene')`));
+await sleep(500);
+for (let i = 0; i < 5; i++) { await pressZ(); await sleep(250); }
+for (let round = 0; round < 35; round++) {
+  const scene = await eval_(`window.game.scene.getScenes(true)[0].scene.key`);
+  if (scene !== 'BattleScene') break;
+  const menuOpen = await eval_(`Boolean(window.game.scene.getScene('BattleScene')?.menu)`);
+  await pressZ();
+  await sleep(menuOpen ? 400 : 350);
+  if (menuOpen) { await pressZ(); await sleep(400); }
+  for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+}
+await sleep(1500);
+check('lyra3 won, back in world', await eval_(`window.game.scene.isActive('WorldScene')`));
+check('rival3_won flag set', await eval_(`Save.state.storyFlags.rival3_won === true`));
+check('lyra3 reward paid', (await eval_(`Save.state.shards`)) >= shardsPreLyra3 + 800, `${shardsPreLyra3} -> ${await eval_(`Save.state.shards`)}`);
+
+// Warden Korr. Fresh Lv 80 Storm Coil lead (see the digger note): her ace
+// Cindralisk (Flame/Stone) takes Flame at 0.25x and the Oath refills it
+// once — the neutral one-shot is the only deterministic line through.
+await eval_(`(Save.state.party[0] = makeLuminary(Save.state.starterId ?? 'embrik', 80), Save.state.party[0].moves = [{ id: 'storm_coil', pp: 30, maxPp: 30 }], true)`);
+const shardsPreKorr = await eval_(`Save.state.shards`);
+await eval_(`(() => { const w = window.game.scene.getScene('WorldScene'); w.facing = 'up'; w.talkTo(w.npcs.find(n => n.def.id === 'warden_korr')); return true; })()`);
+await sleep(300);
+for (let i = 0; i < 8; i++) { await pressZ(); await sleep(250); }
+check('Korr battle started via dialogue', await waitFor(`window.game.scene.isActive('BattleScene')`));
+await sleep(500);
+for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+for (let round = 0; round < 45; round++) {
+  const scene = await eval_(`window.game.scene.getScenes(true)[0].scene.key`);
+  if (scene !== 'BattleScene') break;
+  const menuOpen = await eval_(`Boolean(window.game.scene.getScene('BattleScene')?.menu)`);
+  await pressZ();
+  await sleep(menuOpen ? 400 : 350);
+  if (menuOpen) { await pressZ(); await sleep(400); }
+  for (let i = 0; i < 6; i++) { await pressZ(); await sleep(250); }
+}
+await sleep(1500);
+check('Korr defeated, back in world', await eval_(`window.game.scene.isActive('WorldScene')`));
+check('warden3_won flag set', await eval_(`Save.state.storyFlags.warden3_won === true`));
+check('badge_cinderpeaks flag set', await eval_(`Save.state.storyFlags.badge_cinderpeaks === true`));
+check('Korr reward paid', (await eval_(`Save.state.shards`)) >= shardsPreKorr + 1200, `${shardsPreKorr} -> ${await eval_(`Save.state.shards`)}`);
 
 // 8d. Beaten Lyra hides in town; Bram's shop sells with shards.
 await eval_(`(window.game.scene.getScene('WorldScene').warpTo({ x: 0, y: 9, to: 'ashfen_town', toX: 28, toY: 9, facing: 'left' }), true)`);

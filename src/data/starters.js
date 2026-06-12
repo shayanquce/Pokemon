@@ -165,6 +165,11 @@ const MOVES = {
     power: 46, accuracy: 100, pp: 25,
     desc: 'A whirl of razor-fine ice crystals.',
   },
+  magma_lash: {
+    id: 'magma_lash', name: 'Magma Lash', type: 'Flame', category: 'physical',
+    power: 62, accuracy: 95, pp: 15, inflicts: { id: 'burn', chance: 15 },
+    desc: 'A whip of molten stone straight off the forge. May burn.',
+  },
   // Signature moves — unlocked at high Bond, powered up at Bond 10 (Echo Surge).
   cindershroud: {
     id: 'cindershroud', name: 'Cindershroud', type: 'Flame', category: 'special',
@@ -589,6 +594,15 @@ const LUMINARY_SPECIES = {
     lore: 'Snowveil drift at the heart of whiteouts, keeping a circle of still air for whatever shelters inside it. Mountain guides call that circle "the guest room" and never, ever whistle in it.',
     captureRate: 120, baseExp: 118,
     learnset: [{ id: 'snow_flurry', level: 1 }, { id: 'wisp_flare', level: 1 }, { id: 'glowpulse', level: 23 }],
+  },
+
+  cindralisk: {
+    id: 'cindralisk', dexNo: 50, name: 'Cindralisk', types: ['Flame', 'Stone'],
+    baseStats: { hp: 72, atk: 80, def: 78, spa: 60, spd: 58, spe: 48 },
+    tagline: 'The forge keeps a dog. The dog is the forge.',
+    lore: 'Cindralisk sleep coiled in the forge-channels, scales banked like coals. Warden Korr hammers to their breathing — and when one wakes mid-strike, the whole hall holds its own.',
+    captureRate: 70, baseExp: 158,
+    learnset: [{ id: 'cinder_snap', level: 1 }, { id: 'stone_guard', level: 1 }, { id: 'flame_burst', level: 24 }, { id: 'magma_lash', level: 29 }],
   },
 
   // --- Hollow Cave wild ---

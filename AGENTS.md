@@ -6,9 +6,9 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.18 "The White Road" (PAUSED)
+## Current checkpoint — v0.19 "The Third Sigil" (PAUSED)
 
-**Build order steps 1–16 are DONE.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–17 are DONE.** Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -32,32 +32,36 @@
 | 14. Chapter 3 beats (v0.16) | ✅ | Awakened-door mechanic, Sanctum Doors (`A` tile) → `sanctum_inner` hall, Echo of Solen (eight doors, Cinderpeaks), Lyra in Reedlight, chapter → 3 |
 | 15. Coast/Mirewood evolutions (v0.17) | ✅ | 9 second stages (dex 37–45, 42 species), 4 new moves, rare evolved spawns in both Mirewood maps |
 | 16. Cinderpeaks opener (v0.18) | ✅ | Snow-Guide Bryn gate (echo_answered → peak_pass_granted), `cinderpeaks_ascent` w/ snow tiles `n`/`h`, Frost attack row, 4 species (dex 46–49), Chain Digger, Edda names Warden Korr |
-| 17–19 | ⏭️ **NEXT** | Forge-hall + Warden Korr (third badge), third-stage starters, audio, packaging… |
+| 17. Forge-hall + Warden Korr (v0.19) | ✅ | Edda gate (chain_digger_beaten → forge_road_cleared), `cinderpeaks_forge` w/ lava tile `l`, Cindralisk + Magma Lash, Lyra3 race-rematch, Korr's Oath → badge_cinderpeaks |
+| 18–20 | ⏭️ **NEXT** | Third-stage starters, Chapter 3 closer (the Chain's offer), fourth region, audio… |
 
-## Exactly where we left off (2026-06-12, session 6, v0.18)
+## Exactly where we left off (2026-06-12, session 6, v0.19)
 
-Steps 1–16 are all complete. Most recent: **v0.18 "The White Road"** —
-**Snow-Guide Bryn** gate in Reedlight (requires `echo_answered`, grants
-`peak_pass_granted`, north exit (14,0)); **`cinderpeaks_ascent`** with new
-walkable tiles `n` snow + `h` snow drift (drift is in ENCOUNTER_TILES;
-white rustle/footdust; heavy snowfall ambient preset); **Frost attack row**
-in TYPE_CHART (2x Verdant/Wind/Beast, 0.5x Flame/Tide/Frost); 4 species
-dex 46–49 (**46 total**): Drifthare, Emberhoof, Slatewing, Snowveil
-(Lv 24–28) + moves Frost Bite/Snow Flurry; **Chain Digger Hesk**
-(`chain_digger_beaten`, 700 shards) digging toward the failing eighth door;
-**Forge Acolyte Edda** points at **Warden Korr's forge-hall** (next map —
-the north wall is the buried forge road). Playtest gotcha: the digger test
-lead is **Lv 50** (a Lv 42 Flame lead loses — Cragmaw+Murkmaw resist Flame,
-drain loop picks first move only; observed blackout, not theory).
+Steps 1–17 are all complete. Most recent: **v0.19 "The Third Sigil"** —
+**Edda is a gate NPC** (requires `chain_digger_beaten`, grants
+`forge_road_cleared`, ascent north exit (14,0)); **`cinderpeaks_forge`**
+dungeon with solid **`l` lava tile** + ember-mote ambient; **Cindralisk**
+(Flame/Stone, dex 50, **47 species**, new move Magma Lash) as 10% forge
+spawn and Korr's ace; **Lyra3** race-rematch (Lumenmoth 29 / Brinehound 29
+/ counter-pick 31, `rival3_won`, 800 shards — postWin foreshadows the
+Chain's "real offer"); optional **Acolyte Brann**; **Warden Korr**
+(Emberhoof 30 / Cragmaw 31 / Cindralisk 33, Oath, 1200 shards,
+`warden3_won` + `badge_cinderpeaks`, fourth-Warden hook). **CRITICAL
+playtest pattern**: scripted trainer wins must be one-shot decisive — the
+digger/lyra3/Mira/Korr test leads are **Lv 80 with Storm Coil (neutral) as
+their only move**; Flame leads at 42/50 and a Lv 50 Storm Coil lead vs
+lyra3 all observably lost or coin-flipped (sleep/Hollowed procs, 2x Brine
+Jet, type resists). Playtest count is 167, or 163 when capture RNG misses.
 
-Verified end-to-end: save-smoke 6/6, engine-test 345/345, playtest 151/151.
+Verified end-to-end: save-smoke 6/6, engine-test 361/361, playtest 167/167
+(twice consecutively).
 
 Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS
-2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2) — 151 checks (uses/deletes slot_3)
-3. Start on **the forge-hall + Warden Korr** (third badge: map past the ascent north wall, Lyra3 race-rematch, Korr's Oath → `badge_cinderpeaks`)
-4. Then **third-stage starters** (Embralion/Runedeep/Grovemaw, Lv 32–34), audio
+2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2) — 167 checks (uses/deletes slot_3)
+3. Start on **third-stage starters** (Embralion Flame/Light 34, Runedeep Tide/Psyche 32, Grovemaw Verdant/Stone 33 — the curve is 30+ now)
+4. Then the **Chapter 3 closer** (the Chain's "real offer" after badge_cinderpeaks), fourth region, audio
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn
 message flow compatible with the playtest drain loops (they tolerate the

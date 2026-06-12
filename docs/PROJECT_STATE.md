@@ -1,10 +1,37 @@
-# Project State — v0.18 "The White Road" checkpoint (2026-06-12)
+# Project State — v0.19 "The Third Sigil" checkpoint (2026-06-12)
 
-> Paused after the Cinderpeaks opener (build-order step 16).
-> All automated tests pass: 6 save-smoke, 345 engine checks, 151 live CDP
-> playtest checks.
+> Paused after the forge-hall + Warden Korr (build-order step 17).
+> All automated tests pass: 6 save-smoke, 361 engine checks, 167 live CDP
+> playtest checks (163 when the capture-orb RNG misses — the in-battle
+> switch section only runs with a caught second mon).
 
 ## What runs today
+
+### v0.19 The Forge-Hall (step 17)
+
+- **Edda is now a gate NPC** (ascent (14,1)): requires
+  `chain_digger_beaten` ("settle HIM and the mountain settles"), grants
+  `forge_road_cleared`, steps aside to (13,1); ascent north exit (14,0)
+- **Cinderpeaks — The Forge-Hall** (`cinderpeaks_forge`): third dungeon,
+  Hollow-Cave-style halls with **`l` lava tile** (solid, banked-magma
+  glow; ember-mote ambient). Gravel beds hold Lv 26–29 wilds plus
+  **Cindralisk** (Flame/Stone, dex 50, new move **Magma Lash** phys 62
+  15% burn) at 10% — also Korr's ace
+- **Lyra3 race-rematch** (`lyra_forge` (13,9), beside the path):
+  Lumenmoth 29 / Brinehound 29 / evolved counter-pick 31. 800 shards,
+  `rival3_won`; her postWin seeds the Chain's "real offer" foreshadow
+- **Acolyte Brann** (optional, Emberhoof 28 + Slatewing 29, 300 shards,
+  `forge_acolyte_won`)
+- **Warden Korr** (14,2): Emberhoof 30 / Cragmaw 31 / Cindralisk 33 with
+  the Warden's Oath, 1200 shards, `warden3_won` + **`badge_cinderpeaks`**.
+  Aftermath: the Chain wants the Echo CARRIED by hollowed hands, not
+  destroyed; the fourth Warden keeps the far slopes (next-region hook)
+- **Playtest hardening**: the digger/lyra3/Mira/Korr test leads are
+  **Lv 80 with Storm Coil as their only move** — the drain loop picks the
+  first move and never heals, so anything short of neutral one-shots is a
+  coin flip vs Lv 25–33 trios (Flame leads observably blacked out at 42
+  and 50; a Lv 50 Storm Coil lead still lost to lyra3's 2x Brine Jet;
+  Mira stalled a Lv 40 lead once via sleep + Hollowed procs)
 
 ### v0.18 Cinderpeaks opener (step 16)
 
@@ -258,16 +285,17 @@ badge, shop, dex), plus:
 
 ```
 npm run save-smoke     # 6 checks
-npm run engine-test    # 345 checks — maps/species/exits are auto-derived;
+npm run engine-test    # 361 checks — maps/species/exits are auto-derived;
                        # status/surge multipliers are checked statistically
 npm run playtest-game  # terminal 1: game with CDP port 9223 (playtest mode:
                        # Phaser loop on setTimeout, immune to rAF throttling)
-npm run playtest       # terminal 2: 151 live checks — vault, all three
-                       # gates, coast town, healer + salve, scout/stalker/
-                       # digger fights, Maren counsel, cliffs rematch,
-                       # Warden Mira (badge_mirewood), sanctum doors ->
-                       # inner hall -> Solen (chapter 3), Reedlight Village,
-                       # Cinderpeaks ascent (uses + deletes slot_3)
+npm run playtest       # terminal 2: 167 live checks (163 if capture RNG
+                       # misses) — vault, all four gates, coast town,
+                       # healer + salve, scout/stalker/digger fights, Maren
+                       # counsel, cliffs + forge Lyra rematches, Wardens
+                       # Mira + Korr, sanctum doors -> inner hall -> Solen
+                       # (chapter 3), Reedlight Village, Cinderpeaks ascent
+                       # + forge-hall (uses + deletes slot_3)
 node scripts/screenshot-cdp.mjs   # PNG of the running game
 node scripts/cdp-eval.mjs "expr"  # eval JS in the running game, print JSON
 node scripts/cdp-press.mjs ArrowDown 700  # hold a REAL key (drives isDown —
@@ -293,8 +321,8 @@ Playtest scripting gotchas (don't regress):
 
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
-  ├─ data/starters.js   LUMINARY_SPECIES (46), MOVES, makeLuminary
-  ├─ data/maps.js       12 maps {rows, exits, doors, npcs, encounters}
+  ├─ data/starters.js   LUMINARY_SPECIES (47), MOVES, makeLuminary
+  ├─ data/maps.js       13 maps {rows, exits, doors, npcs, encounters}
   │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…};
   │                     door defs may carry awakened:{flag,pages,warp,…})
   ├─ data/items.js      ITEMS
@@ -326,36 +354,39 @@ v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
 `rival2_won`, `chain_scout_beaten`, `pass_cleared`, `heard_sanctum_rumor`,
 `chain_stalker_beaten`, `sanctum_keeper_won`, `warden2_won`, `badge_mirewood`,
 `sanctum_doors_opened`, `echo_answered`, `lyra_sigil_seen`,
-`peak_pass_granted`, `chain_digger_beaten` (chapter now reaches 3).
+`peak_pass_granted`, `chain_digger_beaten`, `forge_road_cleared`,
+`rival3_won`, `forge_acolyte_won`, `warden3_won`, `badge_cinderpeaks`
+(chapter now reaches 3).
 
-## Implemented Luminary (46 of 180+)
+## Implemented Luminary (47 of 180+)
 
 Starter lines ×3 (2 stages), grove lines ×3 (2 stages), road/cave wild
 lines ×6 (2 stages), coast wild lines ×5 (2 stages), Mirewood wild lines ×4
-(2 stages), Cinderpeaks wilds ×4 (single-stage so far). Dex numbers 1–49
-with gaps reserved for third stages.
+(2 stages), Cinderpeaks wilds ×4 (single-stage so far) + Cindralisk.
+Dex numbers 1–50 with gaps reserved for third stages.
 
 ## Not built yet (do not assume exists)
 
 - Bond gain from shrine rests; status infliction from wild AI tuning
 - Third-stage starter evolutions (Embralion/Runedeep/Grovemaw — Lv 32–34,
   named in evolution notes but not defined)
-- **Warden Korr / the forge-hall** (Edda names her; the forge road past the
-  ascent's north wall is "buried" — the next map + third badge)
-- Lyra's Cinderpeaks rematch (she promised a race up the mountain)
+- The fourth Warden / far slopes (Korr's aftermath hook; nothing exists)
+- The Chain's "real offer" (Lyra3 + Korr both foreshadow it — the Chapter
+  3 closer / Chapter 4 turn, not yet implemented)
 - The other seven doors / the failing eighth (Solen exposition only)
 - Building interiors, audio, packaging, full 18×18 type chart
 - Coast shop/noticeboard (Orla mentions a noticeboard; doesn't exist)
 
 ## Next session — plan (in priority order)
 
-1. **The forge-hall + Warden Korr** (third badge): map past the ascent
-   north wall, forge acolyte fights, Lyra3 race-rematch on the way up,
-   Korr's Oath battle (`badge_cinderpeaks`), Chapter 3 closer beats
-2. **Third-stage starter evolutions** (Embralion Flame/Light 34, Runedeep
+1. **Third-stage starter evolutions** (Embralion Flame/Light 34, Runedeep
    Tide/Psyche 32, Grovemaw Verdant/Stone 33) — the curve reaches 30+ in
-   the Cinderpeaks
-3. Audio pass (region BGM + battle SFX) or packaging when content settles
+   the Cinderpeaks, so these are due now
+2. **Chapter 3 closer**: the Chain's "real offer" beat (a Chain envoy after
+   `badge_cinderpeaks`, chapter → 4, Maren/Wren conditionalDialogue)
+3. **Fourth region opener** (the far slopes past the peaks) when the story
+   calls for it
+4. Audio pass (region BGM + battle SFX) or packaging when content settles
 
 ## Dependencies
 

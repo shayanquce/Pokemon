@@ -892,7 +892,7 @@ const MAPS = {
     name: 'Cinderpeaks — Snowbound Ascent',
     //       012345678901234567890123456789
     rows: [
-      'CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', // 0  <- forge road north (future map; acolyte hints at it)
+      'CCCCCCCCCCCCCCPCCCCCCCCCCCCCCC', // 0  <- forge road north at (14,0); Edda guards (14,1)
       'CnnhhhnnnnCnnnnnnnnnnnnhhhnnnC', // 1
       'CnnhhhnnnnnnnnhhhhnnnnnhhhnnnC', // 2
       'CnnhhhnnnnnnnnhhhhnnnnnnnnnnnC', // 3
@@ -910,7 +910,10 @@ const MAPS = {
       'CnnnnnnnnnnnnnnnnnnnnnnnnnnnnC', // 15
       'CCCCCCCCCCCCCCPCCCCCCCCCCCCCCC', // 16 <- south exit back to Reedlight at (14,16)
     ],
-    exits: [{ x: 14, y: 16, to: 'mirewood_town', toX: 14, toY: 1, facing: 'down' }],
+    exits: [
+      { x: 14, y: 16, to: 'mirewood_town', toX: 14, toY: 1, facing: 'down' },
+      { x: 14, y: 0, to: 'cinderpeaks_forge', toX: 14, toY: 15, facing: 'up' },
+    ],
     doors: [],
     npcs: [
       {
@@ -931,15 +934,25 @@ const MAPS = {
         repeatDialogue: ['The Grey Cloak studies the rock face and pointedly ignores you.'],
       },
       {
+        // Gate to the forge-hall: the mountain settles once the digger stops.
         id: 'forge_acolyte_edda',
         name: 'Forge Acolyte Edda',
-        x: 22, y: 9, facing: 'left',
+        x: 14, y: 1, facing: 'down',
         palette: { h: '#a0522a', f: '#d8a878', e: '#20203a', c: '#7a3a2e', g: '#e8c84a', b: '#241d18' },
-        dialogue: [
-          'Up from the mire, are you? Then you have met the second Warden. The third keeps the forge-hall past the cinder field — Warden Korr, and her Oath burns hotter than her temper.',
-          'The forge road is buried past the north crags — the mountain has been arguing with itself all season. When it settles, the way to Korr opens. I will be here, melting snow for tea.',
-        ],
-        repeatDialogue: ['The forge road is still buried. The mountain argues; we wait. Tea?'],
+        gate: {
+          requiresFlag: 'chain_digger_beaten',
+          grantsFlag: 'forge_road_cleared',
+          asideX: 13, asideY: 1,
+          deniedDialogue: [
+            'Up from the mire, are you? Then you have met the second Warden. The third keeps the forge-hall past these crags — Warden Korr, and her Oath burns hotter than her temper.',
+            'But the road is shut. The mountain has rumbled all season — ever since that grey cloak started swinging a pick at it. Settle HIM, and I would wager the mountain settles too.',
+          ],
+          grantedDialogue: [
+            'The pick stopped, and the mountain slept its first honest night in months. You settle arguments like a Warden already.',
+            'The forge road is open, {player}. Korr will have heard the whole thing through the stone — walk in like you mean it, and mind the channels. The forge keeps a dog.',
+          ],
+        },
+        repeatDialogue: ['The forge road stands open. Korr is past the channels — and the tea offer stands.'],
       },
     ],
     encounters: {
@@ -949,6 +962,91 @@ const MAPS = {
         { speciesId: 'emberhoof', weight: 26, min: 24, max: 27 },
         { speciesId: 'slatewing', weight: 24, min: 24, max: 28 },
         { speciesId: 'snowveil', weight: 20, min: 25, max: 28 },
+      ],
+    },
+  },
+  cinderpeaks_forge: {
+    id: 'cinderpeaks_forge',
+    name: 'Cinderpeaks — The Forge-Hall',
+    //       012345678901234567890123456789
+    rows: [
+      'CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', // 0
+      'CCCCCCCCCCCcccccccCCCCCCCCCCCC', // 1  <- Korr's anvil chamber
+      'CCCCCCCCCCCcccccccCCCCCCCCCCCC', // 2  <- Warden Korr at (14,2)
+      'CCCCCCCCCCCcccccccCCCCCCCCCCCC', // 3
+      'CCCCCCCCCCCCCCcCCCCCCCCCCCCCCC', // 4  <- neck (14,4)
+      'CCCCeeeeccccccccccccceeeeCCCCC', // 5
+      'CCCCeeeeclllccccccclllceeeeCCC', // 6  <- lava channels; Brann at (8,7)
+      'CCCCccccccccccccccccccccccCCCC', // 7
+      'CCCCcCCCCCCCCCCCCCCCCCCCCcCCCC', // 8  <- twin side passages (4,8) and (25,8)
+      'CCCCccccccccccccccccccccccCCCC', // 9  <- Lyra waits at (13,9)
+      'CCCCCCCCCCCCCCcCCCCCCCCCCCCCCC', // 10 <- neck (14,10)
+      'CCCCCCCeecccccccccceeCCCCCCCCC', // 11
+      'CCCCCCCcccclllccccccCCCCCCCCCC', // 12
+      'CCCCCCcccccccccccccccccCCCCCCC', // 13
+      'CCCCCCCCCCCCCCcCCCCCCCCCCCCCCC', // 14 <- entry corridor
+      'CCCCCCCCCCCCCCcCCCCCCCCCCCCCCC', // 15
+      'CCCCCCCCCCCCCCcCCCCCCCCCCCCCCC', // 16 <- mouth back to the ascent at (14,16)
+    ],
+    exits: [{ x: 14, y: 16, to: 'cinderpeaks_ascent', toX: 14, toY: 1, facing: 'down' }],
+    doors: [],
+    npcs: [
+      {
+        // The race she promised in Reedlight ends here.
+        id: 'lyra_forge',
+        name: 'Lyra',
+        x: 13, y: 9, facing: 'right',
+        palette: { h: '#a03a4a', f: '#e8c39a', e: '#20203a', c: '#2a4a3a', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          'Bryn let me through an HOUR after you. One hour, {player}. The mountain barely had time to miss me.',
+          "So: forge-hall, third Sigil, and the finish line is Korr's anvil. The race ends where one of us beats the other to it — and I am DONE finishing second.",
+        ],
+        battle: { trainerId: 'lyra3', flag: 'rival3_won' },
+        postWinDialogue: [
+          'THREE for three. Fine. FINE. You are officially the rival in this story, not me.',
+          "Father always said the Wardens test what the Chain tempts. Go let Korr test you — and {player}? When the Chain finally makes its real offer... be exactly this stubborn.",
+        ],
+        repeatDialogue: ['Go on — the anvil is waiting. I will be timing your Oath like a hawk.'],
+      },
+      {
+        id: 'forge_acolyte_brann',
+        name: 'Acolyte Brann',
+        x: 8, y: 7, facing: 'right',
+        palette: { h: '#3a2a22', f: '#b8835a', e: '#20203a', c: '#6e3a2e', g: '#e8c84a', b: '#241d18' },
+        dialogue: [
+          'Hold. The channel floor is the Warden\'s threshing room — nobody reaches her anvil unweighed.',
+          'The hammer hears soft metal. Show me yours rings true.',
+        ],
+        battle: { trainerId: 'forge_acolyte', flag: 'forge_acolyte_won' },
+        postWinDialogue: ['Rings true. Up the neck of stone — and do not touch the channels. The dog sleeps lightly.'],
+        repeatDialogue: ['The Warden is up the neck. Mind the lava channels — the forge keeps a dog.'],
+      },
+      {
+        id: 'warden_korr',
+        name: 'Warden Korr',
+        x: 14, y: 2, facing: 'down',
+        palette: { h: '#2c2420', f: '#b8835a', e: '#20203a', c: '#8a3a22', g: '#f4c84a', b: '#241d18' },
+        dialogue: [
+          'So. The keeper the drowned doors sang for, with mire on your boots and the Chain\'s diggers behind you. The stone told me everything, {player}.',
+          'I am Korr, Warden of the Cinderpeaks. My Sigil holds the third seal-thread, and my Oath has not broken since I took the hammer.',
+          'The forge judges metal by what it keeps under the blow. Let us see what you keep.',
+        ],
+        battle: { trainerId: 'warden_korr', flag: 'warden3_won' },
+        postWinDialogue: [
+          'The Oath broke clean off your fire. Three Sigils, Echo-bearer. The mountain will talk about this for a century.',
+          'Hear a smith\'s truth: the Chain does not want your Echo destroyed. It wants it CARRIED — by hands that no longer argue. Solen knew. Now you do.',
+          'Rest at the ascent shrine. Past the peaks the land falls toward dawn — the fourth Warden keeps the far slopes, when the road is cut.',
+        ],
+        repeatDialogue: ['The Sigil is yours, Echo-bearer. The forge remembers every strike — make the next ones count.'],
+      },
+    ],
+    encounters: {
+      rate: 0.16,
+      table: [
+        { speciesId: 'emberhoof', weight: 34, min: 26, max: 29 },
+        { speciesId: 'slatewing', weight: 30, min: 26, max: 29 },
+        { speciesId: 'gloombat', weight: 26, min: 26, max: 29 },
+        { speciesId: 'cindralisk', weight: 10, min: 28, max: 31 },
       ],
     },
   },
