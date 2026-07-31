@@ -6,9 +6,9 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.21 "The Dawnward Slopes" (PAUSED)
+## Current checkpoint — v0.22 "Alder's Vale" (PAUSED)
 
-**Build order steps 1–19 are DONE.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–20 are DONE.** Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -35,12 +35,38 @@
 | 17. Forge-hall + Warden Korr (v0.19) | ✅ | Edda gate (chain_digger_beaten → forge_road_cleared), `cinderpeaks_forge` w/ lava tile `l`, Cindralisk + Magma Lash, Lyra3 race-rematch, Korr's Oath → badge_cinderpeaks |
 | 18. Third stages + Ch3 closer (v0.20) | ✅ | Embralion/Runedeep/Grovemaw (dex 3/6/9, starter lines complete), Chain Envoy Vael on the ascent (refusal → chain_envoy_beaten + chapter 4) |
 | 19. Fourth region opener + Ch4 reactions (v0.21) | ✅ | Verdant Sprawl "Dawnward Slopes": Dawn-Guide Sella gate (chain_envoy_beaten → slopes_pass_granted), `verdant_descent` map, 4 species (dex 51–54), **Hollow Vessel** (faceless chain_hollow), Lyra cameo, Ranger names Warden Alder; Maren/Wren react to chain_envoy_beaten |
-| 20–22 | ⏭️ **NEXT** | Alder's vale + fourth Warden, more Sprawl species/second stages, audio, packaging… |
+| 20. Alder's Vale — Sprawl town (v0.22) | ✅ | Grafter Wick gate (chain_hollow_beaten → vale_road_cleared), `sprawl_vale` town, new `o` orchard tile, healer/shop/Orchard Cordial, Steward Yarrow + Lyra Ch4 beats, engine-test map invariants |
+| 21. **Warden Alder + orchard road** | ⏭️ **NEXT** | Open `sprawl_vale` south (13,16) → dungeon map, acolyte, Warden Alder + Oath + `badge_sprawl`, chapter-5 seed |
+| 22–23 | ⏭️ | Sprawl second stages, playtest coverage for region 5, audio, packaging… |
 
-## Exactly where we left off (2026-07-31, session 7, v0.21)
+## Exactly where we left off (2026-07-31, session 7, v0.22)
 
-Steps 1–19 are all complete. Most recent: **v0.21 "The Dawnward Slopes"** —
-the **fourth region opener** (Verdant Sprawl, region 5, Chapter 4). Descend
+**READ THIS FIRST if you are picking the project up cold.** Steps 1–20 are
+complete. The current frontier is **region 5, the Verdant Sprawl**, built
+across two versions this session:
+
+**v0.22 "Alder's Vale"** (most recent) — the Sprawl **town**. Past the
+slopes, **Grafter Wick** (`verdant_descent` (28,11)) gates the grafted
+treewall on `chain_hollow_beaten` → grants `vale_road_cleared`, opening
+exit (29,11) → **`sprawl_vale`** ("Alder's Vale", (1,11)). The town has a
+**new walkable tile `o`** (`tile_orchard` — tilled terrace rows; wired into
+WorldScene `groundFor`, not solid, not an encounter tile), **Grafter Nell**
+(healer), **Cellarman Dov** (shop + new **Orchard Cordial**, heal 200, 900
+shards), **Steward Yarrow** (names Warden Alder; `conditionalDialogue` on
+`chain_hollow_beaten`), **Lyra** (`showIfFlag: chain_hollow_beaten` — she
+voices the Chapter-4 fear that the Chain collects the KEEPER, not the
+Echo), and **Pip**. Ambient presets were added for both new maps.
+engine-test also gained **map invariants that apply to every map**: NPCs
+must stand on walkable tiles, gate aside tiles must be walkable, gate
+requires/grants flags must differ, door defs must sit on `D` (or `A`).
+
+**⚠️ THE NEXT STEP IS WARDEN ALDER.** Every NPC in the vale points "up the
+orchard road, south" — but `sprawl_vale` row 16 is still solid treewall.
+Nothing beyond the town exists: no fourth-Warden map, no trainer, no
+`badge_sprawl`. Build that next (template: the v0.19 forge-hall).
+
+**v0.21 "The Dawnward Slopes"** — the region **opener** (Verdant Sprawl,
+region 5, Chapter 4). Descend
 the Cinderpeaks ascent's new **east gate** — **Dawn-Guide Sella** (28,9),
 `gate.requiresFlag: chain_envoy_beaten`, `grantsFlag: slopes_pass_granted`,
 opens exit (29,9) → new map **`verdant_descent`** ("Dawnward Slopes",
@@ -65,16 +91,16 @@ the digger/lyra3/Mira/Korr/envoy test leads are **Lv 80 with Storm Coil
 follow the same rule (Lv 80 Storm Coil). Playtest count was 176; the new
 Hollow Vessel fight is not yet scripted into playtest-cdp.mjs.
 
-Verified this session: **engine-test 416/416 PASS**. save-smoke + playtest
+Verified this session: **engine-test 496/496 PASS**. save-smoke + playtest
 were NOT run here (no `node_modules`/Electron binary in this environment —
 run `npm install` then `npm run fix-electron` to restore them).
 
 Resume by:
 
 1. `npm run save-smoke` and `npm run engine-test` — all must PASS (needs `npm install` first)
-2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2); add a `chain_hollow` step to the playtest and re-baseline the count
-3. Start on **Warden Alder's vale** (the far-slopes town + fourth Warden/badge) — the `verdant_descent` east tree-wall is the gate hook (`heard_vale_rumor` is already set by Tibb)
-4. Then more Sprawl species / second stages, audio, packaging
+2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2); region 5 is not covered yet — add steps and re-baseline the count
+3. **Build Warden Alder + the orchard road** (see the ⚠️ above and PROJECT_STATE "Next session"): open `sprawl_vale` south at (13,16) → new dungeon map → optional acolyte → Warden Alder (`wardenOath: true`, `setFlags: { badge_sprawl: true }`) → chapter-5 seed. Template: the v0.19 forge-hall
+4. Then Sprawl second stages, region-5 playtest coverage, audio, packaging
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn
 message flow compatible with the playtest drain loops (they tolerate the
@@ -140,7 +166,7 @@ node scripts/dump-texture.mjs lum_embrik 6  # generated texture → upscaled PNG
 | `src/systems/DialogueBox.js` | Typewriter dialogue widget |
 | `src/scenes/WorldScene.js` | Overworld — maps, NPC battle/shop hooks, pause menu |
 | `src/scenes/BattleScene.js` | Wild + trainer battles, learn/evolve/bond flow |
-| `src/data/maps.js` | 14 maps: exits, doors, NPCs (battle/shop/hiddenIfFlag/showIfFlag/gate/healer/conditionalDialogue), encounters |
+| `src/data/maps.js` | 15 maps: exits, doors, NPCs (battle/shop/hiddenIfFlag/showIfFlag/gate/healer/conditionalDialogue), encounters |
 | `src/data/starters.js` | 54 species + move defs (schema for all 180+), leveled learnsets |
 | `src/data/items.js` | Item definitions |
 | `src/data/trainers.js` | TRAINERS (lyra1/2, acolyte_vren/sila, warden_thane, chain_scout/stalker, sanctum_keeper, warden_mira) + buildTrainer |

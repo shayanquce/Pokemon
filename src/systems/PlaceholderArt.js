@@ -383,6 +383,33 @@ function ensureWorldTextures(scene) {
     },
   });
 
+  // Verdant Sprawl orchard terrace — tilled rows, low green, fallen fruit.
+  // Walkable and decorative: the vale's signature ground.
+  noiseTile(scene, 'tile_orchard', '#4a3a26', ['#41321f', '#54432c', '#3a2c1c'], 177, {
+    count: 46,
+    post: (ctx, rnd) => {
+      // Tilled furrows running across the terrace.
+      ctx.fillStyle = '#5e4a30';
+      ctx.fillRect(0, 7, 32, 2);
+      ctx.fillRect(0, 21, 32, 2);
+      // Low orchard growth along the rows.
+      ctx.fillStyle = '#4e7a3e';
+      for (let i = 0; i < 7; i++) {
+        const x = 1 + Math.floor(rnd() * 29);
+        const y = rnd() < 0.5 ? 3 : 17;
+        ctx.fillRect(x, y, 2, 3);
+      }
+      ctx.fillStyle = '#6aa052';
+      ctx.fillRect(5, 12, 3, 2);
+      ctx.fillRect(23, 26, 3, 2);
+      // A little windfall fruit.
+      ctx.fillStyle = '#c4622e';
+      ctx.fillRect(11, 27, 2, 2);
+      ctx.fillStyle = '#d8a33a';
+      ctx.fillRect(27, 13, 2, 2);
+    },
+  });
+
   // Save Shrine: stone plinth + rune-marked pillar + floating crystal (32x48).
   if (!scene.textures.exists('shrine_obj')) {
     const c = scene.textures.createCanvas('shrine_obj', 32, 48);

@@ -215,6 +215,14 @@ for (const [mapId, npcId] of [['ashfen_town', 'elder_maren'], ['mirewood_town', 
   check(`${npcId} reacts to chain_envoy_beaten first`, npc.conditionalDialogue[0].flag === 'chain_envoy_beaten');
 }
 
+// --- Alder's Vale (the Verdant Sprawl town) -------------------------------------------
+check("sprawl_vale exists and has no wild encounters", !!G.MAPS.sprawl_vale && G.MAPS.sprawl_vale.encounters === null);
+check('the vale road is gated on chain_hollow_beaten', G.MAPS.verdant_descent.npcs
+  .some((n) => n.gate?.requiresFlag === 'chain_hollow_beaten' && n.gate?.grantsFlag === 'vale_road_cleared'));
+check('the vale has a healer', G.MAPS.sprawl_vale.npcs.some((n) => n.healer === true));
+check('the vale has a Save Shrine', G.MAPS.sprawl_vale.rows.some((r) => r.includes('S')));
+check('orchard_cordial heals 200', G.ITEMS.orchard_cordial.heal === 200);
+
 // --- shop stock + NPC battle refs resolve --------------------------------------------
 for (const m of Object.values(G.MAPS)) {
   for (const npc of m.npcs ?? []) {
@@ -224,14 +232,32 @@ for (const m of Object.values(G.MAPS)) {
 }
 
 // --- map integrity --------------------------------------------------------------------
+// Keep in sync with WorldScene SOLID_TILES.
+const SOLID = 'TWSBRDCAl';
 for (const m of Object.values(G.MAPS)) {
   check(`map ${m.id} rows are 30 wide x 17 tall`, m.rows.length === 17 && m.rows.every((r) => r.length === 30));
+  const tile = (x, y) => m.rows[y]?.[x];
   for (const e of m.exits ?? []) {
     check(`exit target exists: ${m.id} -> ${e.to}`, !!G.MAPS[e.to]);
     if (G.MAPS[e.to]) {
       const landing = G.MAPS[e.to].rows[e.toY]?.[e.toX];
       check(`exit landing walkable: ${m.id} -> ${e.to} (${e.toX},${e.toY})`, !'TWSBRDC'.includes(landing));
     }
+  }
+  // NPCs must stand on walkable ground, or they are unreachable/invisible-blocked.
+  for (const npc of m.npcs ?? []) {
+    check(`npc on walkable tile: ${m.id}/${npc.id} (${npc.x},${npc.y})`, !SOLID.includes(tile(npc.x, npc.y)));
+    // A gate NPC that steps aside onto a solid tile would vanish into a wall.
+    if (npc.gate) {
+      check(`gate aside walkable: ${m.id}/${npc.id} (${npc.gate.asideX},${npc.gate.asideY})`,
+        !SOLID.includes(tile(npc.gate.asideX, npc.gate.asideY)));
+      check(`gate flags differ: ${m.id}/${npc.id}`, npc.gate.requiresFlag !== npc.gate.grantsFlag);
+    }
+  }
+  // Door defs must sit on a door tile: 'D' normally, 'A' for the awakened
+  // sanctum doors (which carry an `awakened` block instead of plain text).
+  for (const d of m.doors ?? []) {
+    check(`door on a door tile: ${m.id} (${d.x},${d.y})`, 'DA'.includes(tile(d.x, d.y)));
   }
 }
 

@@ -1132,7 +1132,7 @@ const MAPS = {
       'CnnGGGGGGGGGGGGGGWWWWGGGGGGGGT', // 8  <- the Hollow Vessel waits at (14,8)
       'PnnGGGGGGGGGGGGGGGWWGGGGGGGGGT', // 9  <- west road back up to the ascent (0,9)
       'CnnGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 10
-      'CGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 11 <- Lyra caught the updraft down (6,11)
+      'CGGGGGGGGGGGGGGGGGGGGGGGGGGGGP', // 11 <- Lyra (6,11); Grafter Wick gates the vale road (28,11), exit (29,11)
       'CGGGgggggGGGGGGGGGGGGggggGGGGT', // 12
       'CGGGgggggggGGGGGGGGgggggGGGGGT', // 13 <- Sprawl Ranger Tibb at (26,13)
       'CGGGgggggGGGGGGSGGGGGgggGGGGGT', // 14 <- Save Shrine at (15,14)
@@ -1141,6 +1141,7 @@ const MAPS = {
     ],
     exits: [
       { x: 0, y: 9, to: 'cinderpeaks_ascent', toX: 28, toY: 9, facing: 'left' },
+      { x: 29, y: 11, to: 'sprawl_vale', toX: 1, toY: 11, facing: 'right' },
     ],
     doors: [],
     npcs: [
@@ -1202,6 +1203,28 @@ const MAPS = {
         repeatDialogue: ['Alder\'s vale is east, past the treewall. It opens when it means to. Rest at the shrine till then, keeper.'],
         setFlags: { heard_vale_rumor: true },
       },
+      {
+        // Gate to Alder's vale: the treewall is grafted shut, and Wick only
+        // cuts it for someone the faceless thing failed to collect.
+        id: 'grafter_wick',
+        name: 'Grafter Wick',
+        x: 28, y: 11, facing: 'left',
+        palette: { h: '#6e5a3a', f: '#caa07a', e: '#20203a', c: '#4a6a3a', g: '#c8e0a0', b: '#241d18' },
+        gate: {
+          requiresFlag: 'chain_hollow_beaten',
+          grantsFlag: 'vale_road_cleared',
+          asideX: 28, asideY: 12,
+          deniedDialogue: [
+            'Far enough, walker. This treewall was grafted shut by hands older than the vale, and I keep the graft. Alder\'s orders, and Alder does not repeat herself.',
+            'There is a thing walking these slopes with no face on it. Until somebody settles THAT, every road into the vale stays a hedge. I am not losing an orchard to politeness.',
+          ],
+          grantedDialogue: [
+            'It came apart on the west slope. I felt the graft loosen the same moment — the whole hedge exhaled, {player}. Trees know when something stops watching them.',
+            'Then the vale is yours to enter. Down the terraces: cellars, cordial, and Warden Alder at the top of the orchard road. Tell her Wick cut the hedge himself. She will know what it cost me.',
+          ],
+        },
+        repeatDialogue: ['The hedge stands open. Mind the terraces — and if Alder offers you the cordial, drink it. Refusing is its own kind of insult.'],
+      },
     ],
     encounters: {
       rate: 0.16,
@@ -1212,6 +1235,121 @@ const MAPS = {
         { speciesId: 'hollowmoth', weight: 20, min: 32, max: 35 },
       ],
     },
+  },
+  sprawl_vale: {
+    id: 'sprawl_vale',
+    name: "Verdant Sprawl — Alder's Vale",
+    //       012345678901234567890123456789
+    rows: [
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 0
+      'TooooGGRRRRGGGGGGGGRRRRGGooooT', // 1  <- terrace houses over the orchard rows
+      'TooooGGRRRRGGGGGGGGRRRRGGooooT', // 2
+      'TooooGGBBDBGGGGGGGGBDBBGGooooT', // 3  <- doors at (9,3) and (20,3)
+      'TooooGGGGPGGGGGGGGGGPGGGGooooT', // 4
+      'TGGGGGGGGPPPPPPPPPPPPGGGGGGGGT', // 5  <- the terrace street
+      'TGGGGGGGGGGGGPGGGGGGGGGGGGGGGT', // 6  <- Steward Yarrow at (17,6)
+      'TooooGGGGGGGGPGGGGGGGGWWWGGGGT', // 7  <- Grafter Nell (healer) at (6,7); cistern pools east
+      'TooooGGGGGGGGPGGGGGGGGWWWGGGGT', // 8
+      'TooooGGGGGGGGPGGGGGGGGWWWGGGGT', // 9
+      'TGGGGGGGGGGGGPGGGGGGGGGGGGGGGT', // 10 <- Cellarman Dov at (9,10)
+      'PGGGGGGGGGGGGPGGGGGGGGGGGGGGGT', // 11 <- west hedge road back to the slopes (0,11)
+      'TGGGGGGGSGGGGPGGGGGGGGGGGGGGGT', // 12 <- Save Shrine at (8,12); Lyra at (16,12)
+      'TooooGGGGGGGGPGGGGGGGooooooGGT', // 13
+      'TooooGGGGGGGGPGGGGGGGooooooGGT', // 14 <- Pip the scrumper at (24,14)
+      'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 15
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 16 <- the orchard road up to Alder opens here later
+    ],
+    exits: [
+      { x: 0, y: 11, to: 'verdant_descent', toX: 28, toY: 11, facing: 'left' },
+    ],
+    doors: [
+      { x: 9, y: 3, text: 'A pressing-house. The whole room smells of bruised fruit and patient wood.' },
+      { x: 20, y: 3, text: 'The vale cellars. Rows of dark bottles, each chalked with a year older than you are.' },
+    ],
+    npcs: [
+      {
+        // The vale's free full heal — third in the Maeve/Tamsin line.
+        id: 'grafter_nell',
+        name: 'Grafter Nell',
+        x: 6, y: 7, facing: 'right',
+        healer: true,
+        palette: { h: '#8a6a3a', f: '#e0bc94', e: '#20203a', c: '#4a6a3a', g: '#d8a33a', b: '#241d18' },
+        dialogue: [
+          'Come off the terrace and sit, keeper. You have the look of someone the mountain used badly and the slopes finished the job.',
+          'There. Grafting is grafting — trees, bones, tired Luminary. You join the hurt thing to the strong thing and you WAIT. Off you go.',
+        ],
+        repeatDialogue: ['Sit whenever the vale road chews on you. Grafts take better on the rested.'],
+      },
+      {
+        id: 'cellarman_dov',
+        name: 'Cellarman Dov',
+        x: 9, y: 10, facing: 'down',
+        palette: { h: '#4a3a2a', f: '#caa07a', e: '#20203a', c: '#6a4a3a', g: '#c4622e', b: '#241d18' },
+        dialogue: [
+          'Cordial, orbs, salves — the vale presses more than fruit, friend. Anything that goes up the orchard road ought to go up stocked.',
+          'The cordial is not cheap and I will not pretend otherwise. Neither is being carried back down. Choose.',
+        ],
+        repeatDialogue: ['Back again? The cellar keeps. Your Luminary might not.'],
+        shop: [
+          { itemId: 'capture_orb', price: 200 },
+          { itemId: 'brine_salve', price: 160 },
+          { itemId: 'lantern_dew', price: 500 },
+          { itemId: 'orchard_cordial', price: 900 },
+        ],
+      },
+      {
+        // The vale's elder voice: names Alder's nature + the fourth seal-thread.
+        id: 'steward_yarrow',
+        name: 'Steward Yarrow',
+        x: 17, y: 6, facing: 'down',
+        palette: { h: '#c8c2b4', f: '#d8b08a', e: '#20203a', c: '#5a7a4a', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          'So the hedge opened for you. Wick does not cut that graft for charm, which means the slopes are quieter than they were. The vale thanks you in fruit, mostly.',
+          'Warden Alder keeps the orchard road above us — fourth Sigil, fourth seal-thread. She has held it through two hollow winters and one very bad spring, and she has never once raised her voice.',
+        ],
+        repeatDialogue: ['The orchard road runs south and up. Alder will be at the top of it, exactly where she always is.'],
+        // Once the Chain's faceless thing has been met, Yarrow says the quiet part.
+        conditionalDialogue: [
+          {
+            flag: 'chain_hollow_beaten',
+            stateKey: 'postHollow',
+            pages: [
+              'You met the faceless one. No — do not describe it. Three of our pickers have tried, and all three used the same words, and none of them had ever spoken to each other.',
+              'That is what frightens Alder. Not that the Chain sends monsters — that it has stopped sending PEOPLE. A thing with no face cannot be bargained with, bribed, or shamed. It can only be outlasted.',
+              'Go up the orchard road, Echo-bearer. Tell her what you saw. She has been waiting years for someone who could.',
+            ],
+            repeat: ['Up the orchard road, keeper. Alder is waiting, and she has been waiting a long while.'],
+          },
+        ],
+      },
+      {
+        // Rival beat: Lyra arrives once the faceless thing is down.
+        id: 'lyra_vale',
+        name: 'Lyra',
+        x: 16, y: 12, facing: 'left',
+        showIfFlag: 'chain_hollow_beaten',
+        palette: { h: '#a03a4a', f: '#e8c39a', e: '#20203a', c: '#3a6a4a', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          'One ridge behind you, exactly like I said. I even got here first for once — the hedge-keeper likes me. Everyone likes me. It is my main advantage over you.',
+          'I have been thinking about that face in the grass, {player}. The one that looked like yours. What if that is what the Chain actually collects? Not the Echo. The KEEPER. Hollow you out and walk the fragment through the door wearing your hands.',
+          'Anyway. Cheerful thought, terrible sleep. Alder is up the orchard road. I am going to sit here and pretend to be relaxed until you get back.',
+        ],
+        repeatDialogue: ['Go on. Fourth Sigil. I will be right here being relaxed. Extremely relaxed. Look at me.'],
+        setFlags: { lyra_vale_seen: true },
+      },
+      {
+        id: 'vale_pip',
+        name: 'Pip',
+        x: 24, y: 14, facing: 'left',
+        palette: { h: '#d8a33a', f: '#e8c39a', e: '#20203a', c: '#6aa052', g: '#c4622e', b: '#241d18' },
+        dialogue: [
+          'You cannot have the low fruit, it is MINE, I called it in spring. The high fruit is the Warden\'s and nobody argues with that.',
+          'Fernkit steal the windfalls. I let them. They dig fake trails to the wrong tree and think they fooled me, and I let them think that TOO.',
+        ],
+        repeatDialogue: ['Low fruit mine. High fruit hers. Middle fruit is negotiable, for a keeper.'],
+      },
+    ],
+    encounters: null,
   },
 };
 

@@ -103,6 +103,7 @@ class WorldScene extends Phaser.Scene {
       W: 'tile_water', T: 'tile_tree', S: 'tile_grass', R: 'tile_roof', B: 'tile_wall', D: 'tile_door',
       C: 'tile_cave_wall', c: 'tile_cave_floor', e: 'tile_cave_gravel', s: 'tile_sand', m: 'tile_mire',
       A: 'tile_sanctum_door', n: 'tile_snow', h: 'tile_snow_drift', l: 'tile_lava',
+      o: 'tile_orchard',
     };
 
     this.shrineTile = null;
@@ -142,6 +143,9 @@ class WorldScene extends Phaser.Scene {
       sanctum_inner: { tint: [0xf4e09a, 0x9fd8ff], frequency: 650, drift: 5 },
       cinderpeaks_ascent: { tint: [0xf4f8ff, 0xdce8f0], frequency: 240, drift: 26 },
       cinderpeaks_forge: { tint: [0xe8743a, 0xe8c84a], frequency: 500, drift: 9 },
+      // Verdant Sprawl — thaw-spray on the slopes, orchard pollen in the vale.
+      verdant_descent: { tint: [0xdce8f0, 0x8fd05a], frequency: 520, drift: 20 },
+      sprawl_vale: { tint: [0xefe2a0, 0xd8a33a], frequency: 700, drift: 13 },
     };
     const p = presets[this.map.id];
     if (!p) return;

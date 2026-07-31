@@ -24,4 +24,8 @@ const ITEMS = {
     id: 'lantern_dew', name: 'Lantern Dew', heal: 120,
     desc: 'Glowing nectar tapped from a lanternreed. Restores 120 HP.',
   },
+  orchard_cordial: {
+    id: 'orchard_cordial', name: 'Orchard Cordial', heal: 200,
+    desc: 'Pressed from vale fruit and aged in the terrace cellars. Restores 200 HP.',
+  },
 };

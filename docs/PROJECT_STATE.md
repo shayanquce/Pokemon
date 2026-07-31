@@ -1,13 +1,46 @@
-# Project State — v0.21 "The Dawnward Slopes" checkpoint (2026-07-31)
+# Project State — v0.22 "Alder's Vale" checkpoint (2026-07-31)
 
-> Paused after the fourth-region opener + Chapter-4 reaction pass (step 19).
-> engine-test: **416 checks PASS** (was 383). save-smoke + the 176-check CDP
-> playtest were NOT re-run this session — the environment had no
-> `node_modules`/Electron binary (run `npm install` && `npm run fix-electron`
-> to restore, then both should still pass; the new Hollow Vessel fight is not
-> yet scripted into the playtest).
+> Paused after the Verdant Sprawl town (step 20). Warden Alder herself is
+> the NEXT step and does not exist yet.
+> engine-test: **496 checks PASS** (was 383 at v0.20). save-smoke + the
+> 176-check CDP playtest were NOT re-run this session — the environment had
+> no `node_modules`/Electron binary (run `npm install` && `npm run
+> fix-electron` to restore; the Hollow Vessel fight and the whole Verdant
+> Sprawl are not yet scripted into the playtest).
 
 ## What runs today
+
+### v0.22 Alder's Vale — the Sprawl town (step 20)
+
+- **Alder's Vale** (`sprawl_vale`): the Verdant Sprawl town, east of the
+  slopes through the grafted treewall. Terrace houses, pressing-house and
+  cellar doors, cistern pools, Save Shrine (8,12). No encounters (town)
+- **New walkable tile `o` orchard terrace** (`tile_orchard`): tilled
+  furrows, low green rows, windfall fruit — the vale's signature ground.
+  Added to `groundFor` in WorldScene (NOT solid, NOT an encounter tile)
+- **Grafter Wick** (`verdant_descent` (28,11), gate NPC): requires
+  `chain_hollow_beaten` ("until somebody settles THAT, every road into the
+  vale stays a hedge"), grants `vale_road_cleared`, steps aside to (28,12);
+  opens the descent's east exit (29,11) → the vale (1,11)
+- **Grafter Nell** (6,7, `healer: true`) — third free full-heal, after
+  Maeve and Tamsin
+- **Cellarman Dov** (9,10): shop — capture orb 200, brine salve 160,
+  lantern dew 500, **Orchard Cordial 900** (new item, heal **200** — the
+  first heal item tuned for the Lv 30+ curve)
+- **Steward Yarrow** (17,6): names Warden Alder + the fourth seal-thread;
+  `conditionalDialogue` on `chain_hollow_beaten` (stateKey `postHollow`)
+  delivers the chapter's thesis — the Chain has stopped sending PEOPLE
+- **Lyra** (16,12, `showIfFlag: chain_hollow_beaten`): voices the real
+  Chapter-4 fear — that what the Chain collects is the KEEPER, not the
+  Echo ("walk the fragment through the door wearing your hands");
+  sets `lyra_vale_seen`
+- **Pip** (24,14): orchard-scrumping flavor, Fernkit decoy-trail callback
+- **Ambient presets added** for `verdant_descent` (thaw spray) and
+  `sprawl_vale` (orchard pollen) — v0.21 shipped the descent without one
+- **engine-test hardening** (applies to ALL maps, catches whole classes of
+  bug): every NPC must stand on a walkable tile; every gate `asideX/Y` must
+  be walkable; a gate's `requiresFlag` must differ from its `grantsFlag`;
+  every door def must sit on a `D` tile (or `A`, the awakened sanctum doors)
 
 ### v0.21 Fourth region opener + Chapter-4 reactions (step 19)
 
@@ -375,7 +408,7 @@ Playtest scripting gotchas (don't regress):
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
   ├─ data/starters.js   LUMINARY_SPECIES (50), MOVES, makeLuminary
-  ├─ data/maps.js       14 maps {rows, exits, doors, npcs, encounters}
+  ├─ data/maps.js       15 maps {rows, exits, doors, npcs, encounters}
   │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…};
   │                     door defs may carry awakened:{flag,pages,warp,…})
   ├─ data/items.js      ITEMS
@@ -410,7 +443,8 @@ v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
 `peak_pass_granted`, `chain_digger_beaten`, `forge_road_cleared`,
 `rival3_won`, `forge_acolyte_won`, `warden3_won`, `badge_cinderpeaks`,
 `chain_envoy_beaten` (chapter reaches 4), `slopes_pass_granted`,
-`chain_hollow_beaten`, `lyra_slopes_seen`, `heard_vale_rumor`.
+`chain_hollow_beaten`, `lyra_slopes_seen`, `heard_vale_rumor`,
+`vale_road_cleared`, `lyra_vale_seen`.
 
 ## Implemented Luminary (54 of 180+)
 
@@ -424,23 +458,27 @@ second/third stages.
 ## Not built yet (do not assume exists)
 
 - Bond gain from shrine rests; status infliction from wild AI tuning
-- **Warden Alder's vale** / the fourth Warden + badge (region-5 town lives
-  east of `verdant_descent` past the treewall; only the `heard_vale_rumor`
-  hook exists so far — nothing beyond the slopes is built)
+- **Warden Alder herself / the orchard-road dungeon / `badge_sprawl`** —
+  the vale town is built and every NPC POINTS at her ("up the orchard
+  road, south"), but `sprawl_vale` row 16 is still solid treewall and no
+  fourth-Warden map, trainer, or badge flag exists. **This is the next step**
 - Verdant Sprawl second stages (the four dex 51–54 wilds are single-stage)
-- The Hollow Vessel is not yet scripted into the CDP playtest (add a
-  `chain_hollow` step + a Lv 80 Storm Coil test lead, then re-baseline)
+- The Verdant Sprawl is not yet in the CDP playtest at all (Hollow Vessel,
+  both gates, the vale) — add steps + Lv 80 Storm Coil leads, then re-baseline
 - The other seven doors / the failing eighth (Solen exposition only)
 - Building interiors, audio, packaging, full 18×18 type chart
 - Coast shop/noticeboard (Orla mentions a noticeboard; doesn't exist)
 
 ## Next session — plan (in priority order)
 
-1. **Warden Alder's vale** (region-5 town + fourth Warden/badge): open a
-   gate on the `verdant_descent` treewall (requires `heard_vale_rumor` or a
-   fresh flag), build the vale town/dungeon, add Warden Alder + the Oath +
-   `badge_sprawl`. This is the natural continuation of the far slopes
-2. **Script the Hollow Vessel into the playtest** and re-baseline the count
+1. **Warden Alder + the orchard road** (finishes region 5): open
+   `sprawl_vale` south at (13,16) into a new orchard-road/dungeon map, add
+   an optional acolyte fight, then **Warden Alder** with `wardenOath: true`
+   and `setFlags: { badge_sprawl: true }`. Her aftermath should seed
+   chapter 5 (regions 6–8 are Frostwall Tundra → Shattered Expanse →
+   Aethori Sanctum per DESIGN_SPEC). Follow the v0.19 forge-hall as the
+   template — it is the closest structural match
+2. **Script the Verdant Sprawl into the playtest** and re-baseline the count
 3. **Verdant Sprawl second stages** as the curve rises past Lv 35
 4. **Audio pass** (region BGM + battle SFX via WebAudio synth — no
    external assets) or **packaging** (electron-builder) when content settles
