@@ -1593,6 +1593,27 @@ Object.assign(STARTER_PIXELMAPS, {
   },
 });
 
+// Warden Alder's ace — the guardian at the top of the orchard road.
+Object.assign(STARTER_PIXELMAPS, {
+  orchardwarden: {
+    palette: { v: '#3f6e34', L: '#6aa052', n: '#6b4f30', d: '#2a4a24', y: '#f4d24a', k: '#16240f' },
+    rows: [
+      '...LvLyLvLL.....',
+      '..LvvvvvvvvL....',
+      '.LvvvyvvyvvvL...',
+      '.vvvvvvvvvvvv...',
+      'nvvkvvvvvvkvvn..',
+      'nnvvvvyyvvvvnn..',
+      '.nnvvvvvvvvnn...',
+      '..nnnvvvvnnn....',
+      '..nnnnnnnnnn....',
+      '..nnn.nn.nnn....',
+      '..dd..nn..dd....',
+      '.ddd..nn..ddd...',
+    ],
+  },
+});
+
 // Hollow Cave wild.
 Object.assign(STARTER_PIXELMAPS, {
   gloombat: {

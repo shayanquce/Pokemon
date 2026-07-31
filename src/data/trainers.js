@@ -177,6 +177,32 @@ const TRAINERS = {
     },
   },
 
+  // --- The orchard road: the pruner and the fourth Warden ---
+  vale_acolyte: {
+    id: 'vale_acolyte',
+    name: 'Pruner Hallow',
+    introText: "Hallow set down her shears. 'Everything that climbs this road gets pruned. Hold still.'",
+    winText: 'You defeated Pruner Hallow!',
+    loseText: "Hallow helped you up and brushed you off. 'Cut back hard, grow back harder. Go on.'",
+    reward: 400,
+    buildParty() {
+      return [makeLuminary('thistlebuck', 33), makeLuminary('fernkit', 34)];
+    },
+  },
+  warden_alder: {
+    id: 'warden_alder',
+    name: 'Warden Alder',
+    introText: "Alder did not raise her voice. 'You came up the whole road to ask me something. Ask it properly, {player} — with everything you have.'",
+    winText: 'You defeated Warden Alder and earned the SPRAWL SIGIL!',
+    loseText: "Alder steadied you under one arm, unhurried. 'The Oath holds. Roots take their time. So will you.'",
+    reward: 1500,
+    wardenOath: true,
+    setFlags: { badge_sprawl: true, chapter: 5 },
+    buildParty() {
+      return [makeLuminary('dawnfinch', 34), makeLuminary('thistlebuck', 35), makeLuminary('orchardwarden', 37)];
+    },
+  },
+
   // --- Chapter 4: the Chain stops sending faces ---
   chain_hollow: {
     id: 'chain_hollow',

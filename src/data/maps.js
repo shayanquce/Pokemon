@@ -1256,11 +1256,12 @@ const MAPS = {
       'TGGGGGGGSGGGGPGGGGGGGGGGGGGGGT', // 12 <- Save Shrine at (8,12); Lyra at (16,12)
       'TooooGGGGGGGGPGGGGGGGooooooGGT', // 13
       'TooooGGGGGGGGPGGGGGGGooooooGGT', // 14 <- Pip the scrumper at (24,14)
-      'TGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 15
-      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 16 <- the orchard road up to Alder opens here later
+      'TGGGGGGGGGGGGPGGGGGGGGGGGGGGGT', // 15
+      'TTTTTTTTTTTTTPTTTTTTTTTTTTTTTT', // 16 <- the orchard road up to Alder (13,16)
     ],
     exits: [
       { x: 0, y: 11, to: 'verdant_descent', toX: 28, toY: 11, facing: 'left' },
+      { x: 13, y: 16, to: 'sprawl_orchard', toX: 14, toY: 1, facing: 'down' },
     ],
     doors: [
       { x: 9, y: 3, text: 'A pressing-house. The whole room smells of bruised fruit and patient wood.' },
@@ -1336,6 +1337,19 @@ const MAPS = {
         ],
         repeatDialogue: ['Go on. Fourth Sigil. I will be right here being relaxed. Extremely relaxed. Look at me.'],
         setFlags: { lyra_vale_seen: true },
+        // Chapter 5: the Sprawl Sigil is won and the Frostwall is next.
+        conditionalDialogue: [
+          {
+            flag: 'badge_sprawl',
+            stateKey: 'postSprawl',
+            pages: [
+              'Four. FOUR, {player}. I have stopped keeping score, which is the single most generous thing I have ever done for anybody.',
+              'Alder talked to me on the way down. She does that thing where she says something ordinary and it follows you around for a week. She said: the Chain has stopped needing you, and that is worse.',
+              'So — the Frostwall. White, north, and nobody has walked that road in a generation. I am coming this time. Not one ridge behind. WITH you. Do not make it weird.',
+            ],
+            repeat: ['North to the Frostwall, rival. Together, this time. I already packed. I packed WEEKS ago.'],
+          },
+        ],
       },
       {
         id: 'vale_pip',
@@ -1350,6 +1364,88 @@ const MAPS = {
       },
     ],
     encounters: null,
+  },
+  sprawl_orchard: {
+    id: 'sprawl_orchard',
+    name: 'Verdant Sprawl — The Orchard Road',
+    //       012345678901234567890123456789
+    rows: [
+      'TTTTTTTTTTTTTTPTTTTTTTTTTTTTTT', // 0  <- back down to the vale at (14,0)
+      'TooooGGGGGGGGGPGGGGGGGGGGooooT', // 1  <- road head (14,1)
+      'TooooGGGGgggGGPGGgggGGGGGooooT', // 2
+      'TooooGGGGgggGGPGGgggGGGGGooooT', // 3
+      'TGGGGGGGGgggGGPGGgggGGGGGGGGGT', // 4
+      'TGGGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 5  <- Pruner Hallow at (13,5)
+      'TooooooGGGGGGGPGGGGGGGooooooGT', // 6
+      'TooooooGGSGGGGPGGGGGWWWGGGGGGT', // 7  <- Save Shrine (9,7); irrigation cistern east
+      'TGGGGGGGGGGGGGPGGGGGWWWGGGGGGT', // 8
+      'TGGGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 9  <- Grafter's boy Tam at (18,9)
+      'TooooGGGggggGGPGGggggGGGGooooT', // 10
+      'TooooGGGggggGGPGGggggGGGGooooT', // 11
+      'TGGGGGGGGGGGGGPGGGGGGGGGGGGGGT', // 12
+      'TTTTTTGGGGGGGGPGGGGGGGGTTTTTTT', // 13 <- the road narrows into her terrace
+      'TTTTTTGGGGGGGGGGGGGGGGGTTTTTTT', // 14 <- Warden Alder at (14,14)
+      'TTTTTToooooooooooooooooTTTTTTT', // 15 <- the high rows, hers to keep
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 16
+    ],
+    exits: [{ x: 14, y: 0, to: 'sprawl_vale', toX: 13, toY: 15, facing: 'up' }],
+    doors: [],
+    npcs: [
+      {
+        id: 'pruner_hallow',
+        name: 'Pruner Hallow',
+        x: 13, y: 5, facing: 'right',
+        palette: { h: '#5a4a32', f: '#d8a878', e: '#20203a', c: '#5a7a4a', g: '#c8e0a0', b: '#241d18' },
+        dialogue: [
+          'Far enough up, keeper. Alder does not see climbers who have not been pruned — her word, not mine, and she means it kindly. Mostly.',
+          'Nothing personal in it. A branch that has never been cut grows long, and hollow, and snaps in the first real wind. Let us find out which you are.',
+        ],
+        battle: { trainerId: 'vale_acolyte', flag: 'vale_acolyte_won' },
+        postWinDialogue: ['Solid wood. Go up — she has been standing at the top of that road since sunrise, which means she already knows you are coming.'],
+        repeatDialogue: ['Up the terraces. Do not dawdle in the high rows; the Warden likes her fruit unbruised.'],
+      },
+      {
+        id: 'orchard_tam',
+        name: 'Tam',
+        x: 18, y: 9, facing: 'left',
+        palette: { h: '#8a6a3a', f: '#e8c39a', e: '#20203a', c: '#7a9a5a', g: '#d8a33a', b: '#241d18' },
+        dialogue: [
+          'You are the one from the slopes. The one it did not get.',
+          'My gran says the Warden has been sleeping out here in the rows since midwinter. Not watching the road, mind — watching the TREES. Says she is waiting to see which of them stops answering her first.',
+        ],
+        repeatDialogue: ['She sleeps out in the rows. Watching the trees, not the road. I would not be able to sleep at all.'],
+      },
+      {
+        // The fourth Warden. Beating her closes Chapter 4 and opens Chapter 5.
+        id: 'warden_alder',
+        name: 'Warden Alder',
+        x: 14, y: 14, facing: 'up',
+        palette: { h: '#8a8478', f: '#d8b08a', e: '#20203a', c: '#3f6e34', g: '#f4d24a', b: '#241d18' },
+        dialogue: [
+          'Wick cut his own graft for you, and Yarrow sent you up, and the boy in the rows told you I have been sleeping out here. All true. Sit or do not — but hear it properly.',
+          'I have kept this vale eleven years and I have never once fought the Chain. I did not have to. It always wanted something a person could be talked out of. Then it stopped sending people.',
+          'It has been coming through my orchard, {player}. Not taking fruit. Taking the QUIET — row by row, and the trees it passes never green again. That is what a hollowed hand does to a living thing. That is what your Echo would do to a door.',
+          'So. The Sigil is not a prize here, and the Oath is not a courtesy. Show me the keeper who told it no, and show me properly.',
+        ],
+        battle: { trainerId: 'warden_alder', flag: 'warden4_won' },
+        postWinDialogue: [
+          'The Oath went and you did not falter. Four Sigils, Echo-bearer. Four seal-threads, and the ones who wrote them have been dust for a thousand years.',
+          'Now the part I have been dreading. The Chain does not need the eighth door any more — not the way it needed it. It has learned to make hollowed things WITHOUT a keeper to hollow. That is what walks my rows. That is what came off the slopes at you.',
+          'North of here the land goes white and does not stop: the Frostwall. The fifth Warden keeps a road nobody has walked in a generation, and the last Sigil-thread before the Expanse is hers. Rest at my shrine. Take the cordial. Then go, while the trees still answer.',
+        ],
+        repeatDialogue: ['The Sprawl Sigil is yours, keeper. North to the Frostwall when you are rested — and do not go quiet on the way. Quiet is how it finds you.'],
+      },
+    ],
+    encounters: {
+      rate: 0.16,
+      table: [
+        { speciesId: 'thistlebuck', weight: 30, min: 33, max: 36 },
+        { speciesId: 'fernkit', weight: 28, min: 33, max: 36 },
+        { speciesId: 'dawnfinch', weight: 24, min: 34, max: 37 },
+        { speciesId: 'hollowmoth', weight: 12, min: 34, max: 37 },
+        { speciesId: 'orchardwarden', weight: 6, min: 36, max: 38 },
+      ],
+    },
   },
 };
 

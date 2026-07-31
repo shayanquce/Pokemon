@@ -678,6 +678,16 @@ const LUMINARY_SPECIES = {
     learnset: [{ id: 'wisp_flare', level: 1 }, { id: 'gloom_fang', level: 1 }, { id: 'hollow_gaze', level: 27 }],
   },
 
+  // Warden Alder's ace (and the rarest thing on the orchard road).
+  orchardwarden: {
+    id: 'orchardwarden', dexNo: 55, name: 'Orchardwarden', types: ['Verdant', 'Light'],
+    baseStats: { hp: 86, atk: 84, def: 82, spa: 74, spd: 76, spe: 52 },
+    tagline: 'It has stood at the top of the road for longer than the road.',
+    lore: 'An Orchardwarden roots itself where a grove most needs guarding and simply refuses to be moved. Alder says she did not tame hers — she asked, once, and then spent eleven years being worth the yes.',
+    captureRate: 60, baseExp: 172,
+    learnset: [{ id: 'briar_swipe', level: 1 }, { id: 'rootbrace', level: 1 }, { id: 'bramble_rush', level: 28 }, { id: 'dawn_lance', level: 34 }],
+  },
+
   // --- Hollow Cave wild ---
   gloombat: {
     id: 'gloombat', dexNo: 21, name: 'Gloombat', types: ['Shadow', 'Wind'],

@@ -223,6 +223,23 @@ check('the vale has a healer', G.MAPS.sprawl_vale.npcs.some((n) => n.healer === 
 check('the vale has a Save Shrine', G.MAPS.sprawl_vale.rows.some((r) => r.includes('S')));
 check('orchard_cordial heals 200', G.ITEMS.orchard_cordial.heal === 200);
 
+// --- The orchard road + Warden Alder (fourth Warden, closes Chapter 4) ----------------
+check('warden_alder fields 3 mons with the Oath',
+  G.TRAINERS.warden_alder.buildParty({}).length === 3 && G.TRAINERS.warden_alder.wardenOath === true);
+check('warden_alder grants the sprawl badge', G.TRAINERS.warden_alder.setFlags.badge_sprawl === true);
+check('warden_alder opens chapter 5', G.TRAINERS.warden_alder.setFlags.chapter === 5);
+check('Alder aces Orchardwarden (dex 55)',
+  G.TRAINERS.warden_alder.buildParty({}).at(-1).speciesId === 'orchardwarden' &&
+  G.LUMINARY_SPECIES.orchardwarden.dexNo === 55);
+check('vale_acolyte fields 2 mons', G.TRAINERS.vale_acolyte.buildParty({}).length === 2);
+check('the orchard road holds Alder', !!G.MAPS.sprawl_orchard &&
+  G.MAPS.sprawl_orchard.npcs.some((n) => n.battle?.trainerId === 'warden_alder'));
+// Every Warden must be beatable-and-recorded the same way.
+for (const w of ['warden_thane', 'warden_mira', 'warden_korr', 'warden_alder']) {
+  check(`${w} has the Oath + a badge flag`, G.TRAINERS[w].wardenOath === true &&
+    Object.keys(G.TRAINERS[w].setFlags).some((k) => k.startsWith('badge_')));
+}
+
 // --- shop stock + NPC battle refs resolve --------------------------------------------
 for (const m of Object.values(G.MAPS)) {
   for (const npc of m.npcs ?? []) {
@@ -258,6 +275,47 @@ for (const m of Object.values(G.MAPS)) {
   // sanctum doors (which carry an `awakened` block instead of plain text).
   for (const d of m.doors ?? []) {
     check(`door on a door tile: ${m.id} (${d.x},${d.y})`, 'DA'.includes(tile(d.x, d.y)));
+  }
+}
+
+// --- reachability ---------------------------------------------------------------------
+// Flood-fill each map from where the player can actually arrive and confirm no
+// NPC or exit is walled off. Gate NPCs are treated as passable: they step aside
+// once their flag is earned, so the ground behind them is legitimately reachable.
+// Catches the game-breaking case of a Warden sealed behind solid tiles.
+const incomingLandings = {};
+for (const m of Object.values(G.MAPS)) {
+  for (const e of m.exits ?? []) (incomingLandings[e.to] ??= []).push([e.toX, e.toY]);
+}
+for (const m of Object.values(G.MAPS)) {
+  // Seeds: every tile the player can warp in on, plus the new-game spawn.
+  const seeds = [...(incomingLandings[m.id] ?? [])];
+  if (m.id === 'ashfen_grove') seeds.push([14, 11]);
+  if (!seeds.length) continue;
+  const seen = new Set();
+  const queue = [];
+  const push = (x, y) => {
+    const k = `${x},${y}`;
+    if (seen.has(k) || x < 0 || y < 0 || x > 29 || y > 16) return;
+    if (SOLID.includes(m.rows[y][x])) return;
+    seen.add(k);
+    queue.push([x, y]);
+  };
+  seeds.forEach(([x, y]) => push(x, y));
+  while (queue.length) {
+    const [x, y] = queue.pop();
+    push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1);
+  }
+  for (const npc of m.npcs ?? []) {
+    check(`npc reachable: ${m.id}/${npc.id}`, seen.has(`${npc.x},${npc.y}`));
+  }
+  for (const e of m.exits ?? []) {
+    // WorldScene.tryStep checks exitAt() BEFORE isSolid(), so an exit tile may
+    // itself be solid (e.g. the mirewood_deep cave mouth). What must hold is
+    // that the player can stand next to it and step in.
+    const adjacent = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]
+      .some(([dx, dy]) => seen.has(`${e.x + dx},${e.y + dy}`));
+    check(`exit reachable: ${m.id} -> ${e.to} (${e.x},${e.y})`, adjacent);
   }
 }
 

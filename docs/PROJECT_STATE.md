@@ -1,14 +1,42 @@
-# Project State — v0.22 "Alder's Vale" checkpoint (2026-07-31)
+# Project State — v0.23 "What the Orchard Keeps" checkpoint (2026-07-31)
 
-> Paused after the Verdant Sprawl town (step 20). Warden Alder herself is
-> the NEXT step and does not exist yet.
-> engine-test: **496 checks PASS** (was 383 at v0.20). save-smoke + the
+> **Region 5 (Verdant Sprawl) is COMPLETE**: opener → town → dungeon →
+> fourth Warden → badge → Chapter 5 opens. Steps 1–21 done.
+> engine-test: **599 checks PASS** (was 383 at v0.20). save-smoke + the
 > 176-check CDP playtest were NOT re-run this session — the environment had
 > no `node_modules`/Electron binary (run `npm install` && `npm run
-> fix-electron` to restore; the Hollow Vessel fight and the whole Verdant
-> Sprawl are not yet scripted into the playtest).
+> fix-electron` to restore; the whole Verdant Sprawl is not yet scripted
+> into the playtest).
 
 ## What runs today
+
+### v0.23 The Orchard Road + Warden Alder (step 21)
+
+- **The Orchard Road** (`sprawl_orchard`): region-5 dungeon, south out of
+  the vale at (13,16) → (14,1). A terraced climb — orchard bands, tall-grass
+  beds (Lv 33–37), an irrigation cistern, Save Shrine (9,7) — that narrows
+  into Alder's high terrace behind a treewall funnel
+- **Orchardwarden** (dex 55, **55 species**, Verdant/Light, 6% rare spawn at
+  Lv 36–38): Alder's ace, the Cindralisk-equivalent for this region
+- **Pruner Hallow** (13,5, optional gauntlet): Thistlebuck 33 + Fernkit 34,
+  400 shards, `vale_acolyte_won`
+- **Warden Alder** (14,14): Dawnfinch 34 / Thistlebuck 35 / **Orchardwarden
+  37** with the Warden's Oath, 1500 shards, `warden4_won` + **`badge_sprawl`**
+  + **`chapter: 5`**. Her speech is the chapter's thesis paid off: the Chain
+  has been walking her rows taking *the quiet*, and it no longer needs a
+  keeper to hollow — it has learned to make hollowed things without one.
+  Aftermath points **north to the Frostwall** and the fifth Warden
+- **Tam** (18,9): flavor + dread — Alder has slept in the rows since
+  midwinter, watching which tree stops answering her first
+- **Lyra** gains a `badge_sprawl` branch in the vale: she stops trailing one
+  ridge behind and joins the road north ("WITH you. Do not make it weird.")
+- **engine-test reachability pass** (new, applies to every map): flood-fills
+  each map from its real arrival tiles and asserts no NPC or exit is walled
+  off. Gate NPCs count as passable (they step aside once earned); exit tiles
+  may themselves be solid, since `tryStep` checks `exitAt()` before
+  `isSolid()` — so exits only need a reachable neighbor (the mirewood_deep
+  cave mouth at (0,9) is exactly this case). A Warden sealed behind solid
+  tiles is now a test failure, not a playtest surprise
 
 ### v0.22 Alder's Vale — the Sprawl town (step 20)
 
@@ -407,8 +435,8 @@ Playtest scripting gotchas (don't regress):
 
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
-  ├─ data/starters.js   LUMINARY_SPECIES (50), MOVES, makeLuminary
-  ├─ data/maps.js       15 maps {rows, exits, doors, npcs, encounters}
+  ├─ data/starters.js   LUMINARY_SPECIES (55), MOVES, makeLuminary
+  ├─ data/maps.js       16 maps {rows, exits, doors, npcs, encounters}
   │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…};
   │                     door defs may carry awakened:{flag,pages,warp,…})
   ├─ data/items.js      ITEMS
@@ -444,40 +472,41 @@ v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
 `rival3_won`, `forge_acolyte_won`, `warden3_won`, `badge_cinderpeaks`,
 `chain_envoy_beaten` (chapter reaches 4), `slopes_pass_granted`,
 `chain_hollow_beaten`, `lyra_slopes_seen`, `heard_vale_rumor`,
-`vale_road_cleared`, `lyra_vale_seen`.
+`vale_road_cleared`, `lyra_vale_seen`, `vale_acolyte_won`, `warden4_won`,
+`badge_sprawl` (chapter now reaches 5).
 
-## Implemented Luminary (54 of 180+)
+## Implemented Luminary (55 of 180+)
 
 Starter lines ×3 (**3 stages, complete**), grove lines ×3 (2 stages),
 road/cave wild lines ×6 (2 stages), coast wild lines ×5 (2 stages),
 Mirewood wild lines ×4 (2 stages), Cinderpeaks wilds ×4 (single-stage) +
 Cindralisk, Verdant Sprawl wilds ×4 (single-stage: Fernkit, Dawnfinch,
-Thistlebuck, Hollowmoth). Dex numbers 1–54; remaining gaps are wild
-second/third stages.
+Thistlebuck, Hollowmoth) + Orchardwarden. Dex numbers 1–55; remaining gaps
+are wild second/third stages.
 
 ## Not built yet (do not assume exists)
 
 - Bond gain from shrine rests; status infliction from wild AI tuning
-- **Warden Alder herself / the orchard-road dungeon / `badge_sprawl`** —
-  the vale town is built and every NPC POINTS at her ("up the orchard
-  road, south"), but `sprawl_vale` row 16 is still solid treewall and no
-  fourth-Warden map, trainer, or badge flag exists. **This is the next step**
-- Verdant Sprawl second stages (the four dex 51–54 wilds are single-stage)
-- The Verdant Sprawl is not yet in the CDP playtest at all (Hollow Vessel,
-  both gates, the vale) — add steps + Lv 80 Storm Coil leads, then re-baseline
+- **Region 6 — the Frostwall Tundra** (Chapter 5). Alder's aftermath and
+  Lyra both point north; **nothing north of the Sprawl exists**. No gate,
+  no map, no fifth Warden. **This is the next step**
+- Verdant Sprawl second stages (dex 51–54 are all single-stage)
+- The Verdant Sprawl is not in the CDP playtest at all (Hollow Vessel, the
+  three gates, the vale, Alder) — add steps + Lv 80 Storm Coil leads, then
+  re-baseline the count
 - The other seven doors / the failing eighth (Solen exposition only)
 - Building interiors, audio, packaging, full 18×18 type chart
 - Coast shop/noticeboard (Orla mentions a noticeboard; doesn't exist)
 
 ## Next session — plan (in priority order)
 
-1. **Warden Alder + the orchard road** (finishes region 5): open
-   `sprawl_vale` south at (13,16) into a new orchard-road/dungeon map, add
-   an optional acolyte fight, then **Warden Alder** with `wardenOath: true`
-   and `setFlags: { badge_sprawl: true }`. Her aftermath should seed
-   chapter 5 (regions 6–8 are Frostwall Tundra → Shattered Expanse →
-   Aethori Sanctum per DESIGN_SPEC). Follow the v0.19 forge-hall as the
-   template — it is the closest structural match
+1. **Frostwall Tundra opener** (region 6, Chapter 5): gate out of
+   `sprawl_vale` or `sprawl_orchard` heading north (requires `badge_sprawl`),
+   a tundra route map, ~4 new species (dex 56+), and the Chapter-5 antagonist
+   beat. The Chain's new shape is established: it no longer needs a keeper
+   to hollow things, so the threat should be environmental/impersonal now.
+   Template: v0.21 (opener) then v0.22/v0.23 (town → Warden), which is the
+   rhythm every region has followed
 2. **Script the Verdant Sprawl into the playtest** and re-baseline the count
 3. **Verdant Sprawl second stages** as the curve rises past Lv 35
 4. **Audio pass** (region BGM + battle SFX via WebAudio synth — no

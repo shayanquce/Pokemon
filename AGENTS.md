@@ -6,9 +6,11 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.22 "Alder's Vale" (PAUSED)
+## Current checkpoint — v0.23 "What the Orchard Keeps" (PAUSED)
 
-**Build order steps 1–20 are DONE.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–21 are DONE.** Do not rebuild them unless fixing bugs.
+**Regions 1–5 are complete** (Ashfen Lowlands, Keldrath Coast, Mirewood,
+Cinderpeaks, Verdant Sprawl); four Sigils won; story is at Chapter 5.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -36,16 +38,40 @@
 | 18. Third stages + Ch3 closer (v0.20) | ✅ | Embralion/Runedeep/Grovemaw (dex 3/6/9, starter lines complete), Chain Envoy Vael on the ascent (refusal → chain_envoy_beaten + chapter 4) |
 | 19. Fourth region opener + Ch4 reactions (v0.21) | ✅ | Verdant Sprawl "Dawnward Slopes": Dawn-Guide Sella gate (chain_envoy_beaten → slopes_pass_granted), `verdant_descent` map, 4 species (dex 51–54), **Hollow Vessel** (faceless chain_hollow), Lyra cameo, Ranger names Warden Alder; Maren/Wren react to chain_envoy_beaten |
 | 20. Alder's Vale — Sprawl town (v0.22) | ✅ | Grafter Wick gate (chain_hollow_beaten → vale_road_cleared), `sprawl_vale` town, new `o` orchard tile, healer/shop/Orchard Cordial, Steward Yarrow + Lyra Ch4 beats, engine-test map invariants |
-| 21. **Warden Alder + orchard road** | ⏭️ **NEXT** | Open `sprawl_vale` south (13,16) → dungeon map, acolyte, Warden Alder + Oath + `badge_sprawl`, chapter-5 seed |
-| 22–23 | ⏭️ | Sprawl second stages, playtest coverage for region 5, audio, packaging… |
+| 21. Orchard Road + Warden Alder (v0.23) | ✅ | `sprawl_orchard` dungeon, Pruner Hallow, **Warden Alder** + Oath + `badge_sprawl` + **chapter 5**, Orchardwarden (dex 55), Lyra joins the road north, engine-test reachability pass |
+| 22. **Frostwall Tundra opener** | ⏭️ **NEXT** | Region 6 / Chapter 5 — gate north on `badge_sprawl`, tundra route, ~4 species (dex 56+), the Chain's new impersonal shape |
+| 23–24 | ⏭️ | Sprawl second stages, playtest coverage for region 5, audio, packaging… |
 
-## Exactly where we left off (2026-07-31, session 7, v0.22)
+## Exactly where we left off (2026-07-31, session 7, v0.23)
 
-**READ THIS FIRST if you are picking the project up cold.** Steps 1–20 are
-complete. The current frontier is **region 5, the Verdant Sprawl**, built
-across two versions this session:
+**READ THIS FIRST if you are picking the project up cold.** Steps 1–21 are
+complete. This session built **all of region 5, the Verdant Sprawl**, across
+three versions (v0.21 opener → v0.22 town → v0.23 dungeon+Warden). The
+region is FINISHED; the story now sits at the start of **Chapter 5**.
 
-**v0.22 "Alder's Vale"** (most recent) — the Sprawl **town**. Past the
+**⚠️ THE NEXT STEP IS THE FROSTWALL TUNDRA (region 6, Chapter 5).** Warden
+Alder's aftermath and Lyra both explicitly point north to it, and **nothing
+north of the Sprawl exists** — no gate, no map, no fifth Warden. Build the
+opener first (template: v0.21), then town + Warden (v0.22/v0.23). Per
+DESIGN_SPEC the remaining regions are Frostwall Tundra → Shattered Expanse
+→ Aethori Sanctum. Story beat to honor: the Chain no longer needs a keeper
+to hollow things, so its Chapter-5 presence should feel impersonal and
+environmental rather than a cloaked negotiator.
+
+**v0.23 "What the Orchard Keeps"** (most recent) — the Sprawl **dungeon +
+fourth Warden**. `sprawl_vale` south (13,16) → **`sprawl_orchard`** ("The
+Orchard Road", terraced climb, tall-grass beds Lv 33–37, Save Shrine (9,7),
+narrowing treewall funnel to Alder's terrace). **Pruner Hallow** (13,5,
+optional, `vale_acolyte_won`), **Tam** (18,9, flavor), and **Warden Alder**
+(14,14): Dawnfinch 34 / Thistlebuck 35 / **Orchardwarden 37** (new dex 55
+ace, Verdant/Light, also a 6% rare spawn), `wardenOath: true`, 1500 shards,
+sets `warden4_won` + **`badge_sprawl`** + **`chapter: 5`**. Lyra gains a
+`badge_sprawl` branch in the vale and joins the road north. engine-test
+gained a **reachability pass** over every map (flood-fill from real arrival
+tiles; no NPC or exit may be walled off — gates count as passable, and exit
+tiles may be solid since `tryStep` checks `exitAt()` before `isSolid()`).
+
+**v0.22 "Alder's Vale"** — the Sprawl **town**. Past the
 slopes, **Grafter Wick** (`verdant_descent` (28,11)) gates the grafted
 treewall on `chain_hollow_beaten` → grants `vale_road_cleared`, opening
 exit (29,11) → **`sprawl_vale`** ("Alder's Vale", (1,11)). The town has a
@@ -59,11 +85,6 @@ Echo), and **Pip**. Ambient presets were added for both new maps.
 engine-test also gained **map invariants that apply to every map**: NPCs
 must stand on walkable tiles, gate aside tiles must be walkable, gate
 requires/grants flags must differ, door defs must sit on `D` (or `A`).
-
-**⚠️ THE NEXT STEP IS WARDEN ALDER.** Every NPC in the vale points "up the
-orchard road, south" — but `sprawl_vale` row 16 is still solid treewall.
-Nothing beyond the town exists: no fourth-Warden map, no trainer, no
-`badge_sprawl`. Build that next (template: the v0.19 forge-hall).
 
 **v0.21 "The Dawnward Slopes"** — the region **opener** (Verdant Sprawl,
 region 5, Chapter 4). Descend
@@ -91,15 +112,17 @@ the digger/lyra3/Mira/Korr/envoy test leads are **Lv 80 with Storm Coil
 follow the same rule (Lv 80 Storm Coil). Playtest count was 176; the new
 Hollow Vessel fight is not yet scripted into playtest-cdp.mjs.
 
-Verified this session: **engine-test 496/496 PASS**. save-smoke + playtest
+Verified this session: **engine-test 599/599 PASS**. save-smoke + playtest
 were NOT run here (no `node_modules`/Electron binary in this environment —
-run `npm install` then `npm run fix-electron` to restore them).
+run `npm install` then `npm run fix-electron` to restore them). Nothing in
+this session touched battle/save code — it is all data, art and tests — so
+those two suites are expected to still pass unchanged.
 
 Resume by:
 
-1. `npm run save-smoke` and `npm run engine-test` — all must PASS (needs `npm install` first)
+1. `npm install` (this checkout has no `node_modules`), then `npm run save-smoke` and `npm run engine-test` — all must PASS
 2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2); region 5 is not covered yet — add steps and re-baseline the count
-3. **Build Warden Alder + the orchard road** (see the ⚠️ above and PROJECT_STATE "Next session"): open `sprawl_vale` south at (13,16) → new dungeon map → optional acolyte → Warden Alder (`wardenOath: true`, `setFlags: { badge_sprawl: true }`) → chapter-5 seed. Template: the v0.19 forge-hall
+3. **Build the Frostwall Tundra opener** (see the ⚠️ above and PROJECT_STATE "Next session"): gate north on `badge_sprawl`, a tundra route map, ~4 species from dex 56, and the Chapter-5 threat beat. Template: v0.21
 4. Then Sprawl second stages, region-5 playtest coverage, audio, packaging
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn
@@ -166,8 +189,8 @@ node scripts/dump-texture.mjs lum_embrik 6  # generated texture → upscaled PNG
 | `src/systems/DialogueBox.js` | Typewriter dialogue widget |
 | `src/scenes/WorldScene.js` | Overworld — maps, NPC battle/shop hooks, pause menu |
 | `src/scenes/BattleScene.js` | Wild + trainer battles, learn/evolve/bond flow |
-| `src/data/maps.js` | 15 maps: exits, doors, NPCs (battle/shop/hiddenIfFlag/showIfFlag/gate/healer/conditionalDialogue), encounters |
-| `src/data/starters.js` | 54 species + move defs (schema for all 180+), leveled learnsets |
+| `src/data/maps.js` | 16 maps: exits, doors, NPCs (battle/shop/hiddenIfFlag/showIfFlag/gate/healer/conditionalDialogue), encounters |
+| `src/data/starters.js` | 55 species + move defs (schema for all 180+), leveled learnsets |
 | `src/data/items.js` | Item definitions |
 | `src/data/trainers.js` | TRAINERS (lyra1/2, acolyte_vren/sila, warden_thane, chain_scout/stalker, sanctum_keeper, warden_mira) + buildTrainer |
 | `scripts/engine-test.mjs` | Headless engine tests (vm-based, no Electron) |
