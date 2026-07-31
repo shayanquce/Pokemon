@@ -1,11 +1,47 @@
-# Project State — v0.20 "What the Fire Keeps" checkpoint (2026-06-12)
+# Project State — v0.21 "The Dawnward Slopes" checkpoint (2026-07-31)
 
-> Paused after the third-stage starters + Chapter 3 closer (step 18).
-> All automated tests pass: 6 save-smoke, 383 engine checks, 176 live CDP
-> playtest checks (172 when the capture-orb RNG misses — the in-battle
-> switch section only runs with a caught second mon).
+> Paused after the fourth-region opener + Chapter-4 reaction pass (step 19).
+> engine-test: **416 checks PASS** (was 383). save-smoke + the 176-check CDP
+> playtest were NOT re-run this session — the environment had no
+> `node_modules`/Electron binary (run `npm install` && `npm run fix-electron`
+> to restore, then both should still pass; the new Hollow Vessel fight is not
+> yet scripted into the playtest).
 
 ## What runs today
+
+### v0.21 Fourth region opener + Chapter-4 reactions (step 19)
+
+- **Verdant Sprawl — Dawnward Slopes** (region 5, Chapter 4). The Cinderpeaks
+  ascent gains an **east gate**: **Dawn-Guide Sella** (28,9), `gate:
+  { requiresFlag: 'chain_envoy_beaten', grantsFlag: 'slopes_pass_granted',
+  asideX/Y: 28,10 }`, opens exit (29,9) → **`verdant_descent`**. She climbed
+  UP from the sprawl; her granted speech names Warden Alder and the faceless
+  thing on the slopes
+- **`verdant_descent`** ("Dawnward Slopes"): snow (`n`) thinning into grass
+  (`G`) and tall-grass encounter beds (`g`), a meltwater tarn (`W`), Save
+  Shrine (15,14), and a **south/east tree-wall** — the vale beyond is the
+  v0.22 hook. West road (0,9) returns to the ascent (28,9)
+- **4 new species (54 total, dex 51–54)**: Fernkit (Verdant/Beast, 51),
+  Dawnfinch (Wind/Light, 52), Thistlebuck (Verdant/Stone, 53), Hollowmoth
+  (Spirit/Shadow, 54) — full stats/lore/pixel maps, Lv 30–35 in the beds
+- **2 new moves**: Bramble Rush (Verdant phys 58, 10% Shattered), Hollow Gaze
+  (Shadow spec 56, 15% Hollowed)
+- **Hollow Vessel** (`chain_hollow`, (14,8), `hiddenIfFlag:
+  chain_hollow_beaten`): the **faceless** Chapter-4 enemy the envoy promised
+  ("what comes next will not have a face"). It does not speak — dialogue is
+  narration. Gloomshroud 33 / Murkmaw 34 / Hollowmoth 35, 1100 shards, sets
+  `chain_hollow_beaten` (chapter stays 4). Vanishes after (hiddenIfFlag)
+- **Lyra cameo** (`lyra_slopes`, (6,11)): reacts to the settled race +
+  the envoy refusal, names Alder's vale, sets `lyra_slopes_seen`; a
+  `chain_hollow_beaten` conditionalDialogue branch reacts after the faceless
+  fight (she saw a face in the grass — "it looked like YOURS")
+- **Sprawl Ranger Tibb** (26,13): names **Warden Alder** and the vale east
+  past the treewall; sets `heard_vale_rumor` (the v0.22 gate hook)
+- **Chapter-4 reaction pass**: **Elder Maren** (ashfen_town) and **Elder
+  Wren** (mirewood_town) each gain a `chain_envoy_beaten` conditionalDialogue
+  entry ordered **first** (before their badge entries — `.find` returns the
+  first matching flag, so newer beats older). Lyra's reaction lives on the
+  descent cameo instead of a home-town NPC
 
 ### v0.20 Third stages + the Chain's offer (step 18)
 
@@ -339,7 +375,7 @@ Playtest scripting gotchas (don't regress):
 ```
 Renderer (Phaser 3, sandboxed, classic scripts — load order in src/index.html)
   ├─ data/starters.js   LUMINARY_SPECIES (50), MOVES, makeLuminary
-  ├─ data/maps.js       13 maps {rows, exits, doors, npcs, encounters}
+  ├─ data/maps.js       14 maps {rows, exits, doors, npcs, encounters}
   │                     (npc defs may carry gate:{requiresFlag,grantsFlag,…};
   │                     door defs may carry awakened:{flag,pages,warp,…})
   ├─ data/items.js      ITEMS
@@ -373,37 +409,41 @@ v0.4 fields. Story flags in play: `chapter`, `echo_awakened`, `met_lyra`,
 `sanctum_doors_opened`, `echo_answered`, `lyra_sigil_seen`,
 `peak_pass_granted`, `chain_digger_beaten`, `forge_road_cleared`,
 `rival3_won`, `forge_acolyte_won`, `warden3_won`, `badge_cinderpeaks`,
-`chain_envoy_beaten` (chapter now reaches 4).
+`chain_envoy_beaten` (chapter reaches 4), `slopes_pass_granted`,
+`chain_hollow_beaten`, `lyra_slopes_seen`, `heard_vale_rumor`.
 
-## Implemented Luminary (50 of 180+)
+## Implemented Luminary (54 of 180+)
 
 Starter lines ×3 (**3 stages, complete**), grove lines ×3 (2 stages),
 road/cave wild lines ×6 (2 stages), coast wild lines ×5 (2 stages),
-Mirewood wild lines ×4 (2 stages), Cinderpeaks wilds ×4 (single-stage so
-far) + Cindralisk. Dex numbers 1–50; remaining gaps are wild third stages.
+Mirewood wild lines ×4 (2 stages), Cinderpeaks wilds ×4 (single-stage) +
+Cindralisk, Verdant Sprawl wilds ×4 (single-stage: Fernkit, Dawnfinch,
+Thistlebuck, Hollowmoth). Dex numbers 1–54; remaining gaps are wild
+second/third stages.
 
 ## Not built yet (do not assume exists)
 
 - Bond gain from shrine rests; status infliction from wild AI tuning
-- The fourth Warden / far slopes ("what comes next will not have a face" —
-  Chapter 4 opens there; nothing exists)
+- **Warden Alder's vale** / the fourth Warden + badge (region-5 town lives
+  east of `verdant_descent` past the treewall; only the `heard_vale_rumor`
+  hook exists so far — nothing beyond the slopes is built)
+- Verdant Sprawl second stages (the four dex 51–54 wilds are single-stage)
+- The Hollow Vessel is not yet scripted into the CDP playtest (add a
+  `chain_hollow` step + a Lv 80 Storm Coil test lead, then re-baseline)
 - The other seven doors / the failing eighth (Solen exposition only)
 - Building interiors, audio, packaging, full 18×18 type chart
 - Coast shop/noticeboard (Orla mentions a noticeboard; doesn't exist)
-- Chapter-4 reactions from Maren/Wren/Lyra (conditionalDialogue on
-  `chain_envoy_beaten` would be cheap and is not done)
 
 ## Next session — plan (in priority order)
 
-1. **Fourth region opener — the far slopes** (Chapter 4): descent route
-   east/north of the peaks, new species, the faceless thing the envoy
-   promised as the story spine
-2. **Chapter-4 reaction pass**: Maren/Wren/Lyra conditionalDialogue on
-   `chain_envoy_beaten`; Lyra should react to the race result too
-3. **Audio pass** (region BGM + battle SFX via WebAudio synth — no
-   external assets) or **packaging** (electron-builder) when content
-   settles
-4. Wild third stages / Cinderpeaks second stages as the curve rises
+1. **Warden Alder's vale** (region-5 town + fourth Warden/badge): open a
+   gate on the `verdant_descent` treewall (requires `heard_vale_rumor` or a
+   fresh flag), build the vale town/dungeon, add Warden Alder + the Oath +
+   `badge_sprawl`. This is the natural continuation of the far slopes
+2. **Script the Hollow Vessel into the playtest** and re-baseline the count
+3. **Verdant Sprawl second stages** as the curve rises past Lv 35
+4. **Audio pass** (region BGM + battle SFX via WebAudio synth — no
+   external assets) or **packaging** (electron-builder) when content settles
 
 ## Dependencies
 

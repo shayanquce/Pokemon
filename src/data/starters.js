@@ -170,6 +170,17 @@ const MOVES = {
     power: 62, accuracy: 95, pp: 15, inflicts: { id: 'burn', chance: 15 },
     desc: 'A whip of molten stone straight off the forge. May burn.',
   },
+  // Verdant Sprawl wild moves (the dawnward slopes, Lv 30-35).
+  bramble_rush: {
+    id: 'bramble_rush', name: 'Bramble Rush', type: 'Verdant', category: 'physical',
+    power: 58, accuracy: 95, pp: 15, inflicts: { id: 'shattered', chance: 10 },
+    desc: 'A headlong charge through living thorn-hedge. May Shatter armor.',
+  },
+  hollow_gaze: {
+    id: 'hollow_gaze', name: 'Hollow Gaze', type: 'Shadow', category: 'special',
+    power: 56, accuracy: 100, pp: 15, inflicts: { id: 'hollowed', chance: 15 },
+    desc: 'A stare from a face that is not there. May leave foes Hollowed.',
+  },
   // Signature moves — unlocked at high Bond, powered up at Bond 10 (Echo Surge).
   cindershroud: {
     id: 'cindershroud', name: 'Cindershroud', type: 'Flame', category: 'special',
@@ -631,6 +642,40 @@ const LUMINARY_SPECIES = {
     lore: 'Cindralisk sleep coiled in the forge-channels, scales banked like coals. Warden Korr hammers to their breathing — and when one wakes mid-strike, the whole hall holds its own.',
     captureRate: 70, baseExp: 158,
     learnset: [{ id: 'cinder_snap', level: 1 }, { id: 'stone_guard', level: 1 }, { id: 'flame_burst', level: 24 }, { id: 'magma_lash', level: 29 }],
+  },
+
+  // --- Verdant Sprawl wilds (the dawnward slopes below the peaks) ---
+  fernkit: {
+    id: 'fernkit', dexNo: 51, name: 'Fernkit', types: ['Verdant', 'Beast'],
+    baseStats: { hp: 64, atk: 74, def: 58, spa: 46, spd: 54, spe: 70 },
+    tagline: 'The first green thing the melt-water finds.',
+    lore: 'Fernkit uncurl from the snowline the hour the ice starts weeping, racing the thaw down the slopes. Where a pack passes, the brown mountain goes green behind them in a single afternoon.',
+    captureRate: 140, baseExp: 116,
+    learnset: [{ id: 'leaf_dart', level: 1 }, { id: 'gnaw', level: 1 }, { id: 'bramble_rush', level: 26 }],
+  },
+  dawnfinch: {
+    id: 'dawnfinch', dexNo: 52, name: 'Dawnfinch', types: ['Wind', 'Light'],
+    baseStats: { hp: 56, atk: 50, def: 48, spa: 72, spd: 60, spe: 82 },
+    tagline: 'It sings the sun over the ridge whether it rises or not.',
+    lore: 'Dawnfinch nest on the east-facing crags and greet first light with a note that carries for miles. The sprawl-folk set their whole day by it — and grow uneasy the mornings it sings early.',
+    captureRate: 130, baseExp: 118,
+    learnset: [{ id: 'gust_flick', level: 1 }, { id: 'glimmer_dust', level: 1 }, { id: 'zephyr_slice', level: 24 }],
+  },
+  thistlebuck: {
+    id: 'thistlebuck', dexNo: 53, name: 'Thistlebuck', types: ['Verdant', 'Stone'],
+    baseStats: { hp: 78, atk: 80, def: 76, spa: 44, spd: 56, spe: 50 },
+    tagline: 'Antlers of bramble, temperament of the cliff they grew on.',
+    lore: 'Thistlebuck graze the terraced slopes with stone-heavy hooves and antlers knotted from living thorn. They lock horns over territory so hard the clap starts small rockslides — and never seem to mind.',
+    captureRate: 110, baseExp: 122,
+    learnset: [{ id: 'briar_swipe', level: 1 }, { id: 'pebble_toss', level: 1 }, { id: 'thorn_volley', level: 25 }],
+  },
+  hollowmoth: {
+    id: 'hollowmoth', dexNo: 54, name: 'Hollowmoth', types: ['Spirit', 'Shadow'],
+    baseStats: { hp: 62, atk: 48, def: 54, spa: 80, spd: 68, spe: 66 },
+    tagline: 'The pattern on its wings is a face. Do not look for whose.',
+    lore: 'Hollowmoth drift the twilight sprawl where the Chain has walked, feeding on whatever the hollowed leave behind. The eye-marks on their wings are said to belong to no living thing — only to the shape of a face forgetting itself.',
+    captureRate: 90, baseExp: 128,
+    learnset: [{ id: 'wisp_flare', level: 1 }, { id: 'gloom_fang', level: 1 }, { id: 'hollow_gaze', level: 27 }],
   },
 
   // --- Hollow Cave wild ---

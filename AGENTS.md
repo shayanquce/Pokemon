@@ -6,9 +6,9 @@
 
 **Luminary: Echoes of the Forgotten Age** — offline Electron desktop monster-taming RPG (Pokémon-like, deeper story/combat). Local folder may be named `Pokemon`; the npm package is `luminary-game`.
 
-## Current checkpoint — v0.20 "What the Fire Keeps" (PAUSED)
+## Current checkpoint — v0.21 "The Dawnward Slopes" (PAUSED)
 
-**Build order steps 1–18 are DONE.** Do not rebuild them unless fixing bugs.
+**Build order steps 1–19 are DONE.** Do not rebuild them unless fixing bugs.
 
 | Step | Status | Notes |
 |------|--------|-------|
@@ -34,33 +34,47 @@
 | 16. Cinderpeaks opener (v0.18) | ✅ | Snow-Guide Bryn gate (echo_answered → peak_pass_granted), `cinderpeaks_ascent` w/ snow tiles `n`/`h`, Frost attack row, 4 species (dex 46–49), Chain Digger, Edda names Warden Korr |
 | 17. Forge-hall + Warden Korr (v0.19) | ✅ | Edda gate (chain_digger_beaten → forge_road_cleared), `cinderpeaks_forge` w/ lava tile `l`, Cindralisk + Magma Lash, Lyra3 race-rematch, Korr's Oath → badge_cinderpeaks |
 | 18. Third stages + Ch3 closer (v0.20) | ✅ | Embralion/Runedeep/Grovemaw (dex 3/6/9, starter lines complete), Chain Envoy Vael on the ascent (refusal → chain_envoy_beaten + chapter 4) |
-| 19–21 | ⏭️ **NEXT** | Fourth region (far slopes), Chapter-4 reaction pass, audio, packaging… |
+| 19. Fourth region opener + Ch4 reactions (v0.21) | ✅ | Verdant Sprawl "Dawnward Slopes": Dawn-Guide Sella gate (chain_envoy_beaten → slopes_pass_granted), `verdant_descent` map, 4 species (dex 51–54), **Hollow Vessel** (faceless chain_hollow), Lyra cameo, Ranger names Warden Alder; Maren/Wren react to chain_envoy_beaten |
+| 20–22 | ⏭️ **NEXT** | Alder's vale + fourth Warden, more Sprawl species/second stages, audio, packaging… |
 
-## Exactly where we left off (2026-06-12, session 6, v0.20)
+## Exactly where we left off (2026-07-31, session 7, v0.21)
 
-Steps 1–18 are all complete. Most recent: **v0.20 "What the Fire Keeps"** —
-**starter third stages** (dex 3/6/9, **50 species**, starter lines done):
-Embralion (Flame/Light, 34), Runedeep (Tide/Psyche, 32), Grovemaw
-(Verdant/Stone, 33), each with high moves at 32–37 and pixel maps; **Chain
-Envoy Vael** on the ascent (16,8) (`showIfFlag: badge_cinderpeaks`) makes
-the Chain's real offer — beating him sets `chain_envoy_beaten` +
-**chapter 4** (1000 shards; "what comes next will not have a face" = the
-fourth-region story spine). **v0.19**: forge-hall, Warden Korr
-(badge_cinderpeaks), Lyra3, Cindralisk, lava tile. **CRITICAL playtest
-pattern**: scripted trainer wins must be one-shot decisive — the
-digger/lyra3/Mira/Korr/envoy test leads are **Lv 80 with Storm Coil
-(neutral) as their only move**; weaker or typed leads observably lost or
-coin-flipped (blackouts at 42/50, sleep/Hollowed procs, 2x Brine Jet).
-Playtest count is 176, or 172 when capture RNG misses.
+Steps 1–19 are all complete. Most recent: **v0.21 "The Dawnward Slopes"** —
+the **fourth region opener** (Verdant Sprawl, region 5, Chapter 4). Descend
+the Cinderpeaks ascent's new **east gate** — **Dawn-Guide Sella** (28,9),
+`gate.requiresFlag: chain_envoy_beaten`, `grantsFlag: slopes_pass_granted`,
+opens exit (29,9) → new map **`verdant_descent`** ("Dawnward Slopes",
+snow→grass gradient, Save Shrine (15,14), tree-wall east = v0.22 hook).
+**4 new species (54 total, dex 51–54)**: Fernkit (Verdant/Beast), Dawnfinch
+(Wind/Light), Thistlebuck (Verdant/Stone), Hollowmoth (Spirit/Shadow), Lv
+30–35, + moves **Bramble Rush** (Verdant phys 58) and **Hollow Gaze**
+(Shadow spec 56, 15% Hollowed). **Hollow Vessel** (`chain_hollow` at
+(14,8), `hiddenIfFlag: chain_hollow_beaten`) is the **faceless** Chapter-4
+enemy the envoy promised — gloomshroud 33 / murkmaw 34 / hollowmoth 35,
+1100 shards, sets `chain_hollow_beaten` (no chapter change; already 4).
+**Lyra cameo** (`lyra_slopes`) reacts to the race + the refusal, with a
+`chain_hollow_beaten` follow-up branch; **Sprawl Ranger Tibb** names
+**Warden Alder** and the vale further east. **Chapter-4 reaction pass**:
+Elder Maren + Elder Wren now have a `chain_envoy_beaten` conditionalDialogue
+entry ordered FIRST (before their badge entries — `.find` picks first match).
 
-Verified end-to-end: save-smoke 6/6, engine-test 383/383, playtest 176/176.
+**v0.20**: starter third stages, Chain Envoy Vael. **CRITICAL playtest
+pattern** (still holds): scripted trainer wins must be one-shot decisive —
+the digger/lyra3/Mira/Korr/envoy test leads are **Lv 80 with Storm Coil
+(neutral) as their only move**; a new `chain_hollow` playtest lead should
+follow the same rule (Lv 80 Storm Coil). Playtest count was 176; the new
+Hollow Vessel fight is not yet scripted into playtest-cdp.mjs.
+
+Verified this session: **engine-test 416/416 PASS**. save-smoke + playtest
+were NOT run here (no `node_modules`/Electron binary in this environment —
+run `npm install` then `npm run fix-electron` to restore them).
 
 Resume by:
 
-1. `npm run save-smoke` and `npm run engine-test` — all must PASS
-2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2) — 176 checks (uses/deletes slot_3)
-3. Start on the **fourth region opener** (the far slopes, Chapter 4 — the faceless thing the envoy promised) per PROJECT_STATE "Next session"
-4. Then the **Chapter-4 reaction pass** (Maren/Wren/Lyra conditionalDialogue on `chain_envoy_beaten`), audio, packaging
+1. `npm run save-smoke` and `npm run engine-test` — all must PASS (needs `npm install` first)
+2. Optional live verification: `npm run playtest-game` (terminal 1), `npm run playtest` (terminal 2); add a `chain_hollow` step to the playtest and re-baseline the count
+3. Start on **Warden Alder's vale** (the far-slopes town + fourth Warden/badge) — the `verdant_descent` east tree-wall is the gate hook (`heard_vale_rumor` is already set by Tibb)
+4. Then more Sprawl species / second stages, audio, packaging
 
 **Gotchas:** battle flavor text can vary via `pick()` but keep per-turn
 message flow compatible with the playtest drain loops (they tolerate the
@@ -126,8 +140,8 @@ node scripts/dump-texture.mjs lum_embrik 6  # generated texture → upscaled PNG
 | `src/systems/DialogueBox.js` | Typewriter dialogue widget |
 | `src/scenes/WorldScene.js` | Overworld — maps, NPC battle/shop hooks, pause menu |
 | `src/scenes/BattleScene.js` | Wild + trainer battles, learn/evolve/bond flow |
-| `src/data/maps.js` | 9 maps: exits, doors, NPCs (battle/shop/hiddenIfFlag/showIfFlag/gate/healer/conditionalDialogue), encounters |
-| `src/data/starters.js` | 18 species + move defs (schema for all 180+), leveled learnsets |
+| `src/data/maps.js` | 14 maps: exits, doors, NPCs (battle/shop/hiddenIfFlag/showIfFlag/gate/healer/conditionalDialogue), encounters |
+| `src/data/starters.js` | 54 species + move defs (schema for all 180+), leveled learnsets |
 | `src/data/items.js` | Item definitions |
 | `src/data/trainers.js` | TRAINERS (lyra1/2, acolyte_vren/sila, warden_thane, chain_scout/stalker, sanctum_keeper, warden_mira) + buildTrainer |
 | `scripts/engine-test.mjs` | Headless engine tests (vm-based, no Electron) |

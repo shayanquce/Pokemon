@@ -105,8 +105,19 @@ const MAPS = {
         ],
         repeatDialogue: ['Rest at the shrine in Whispergrove before you take the north road, {player}. Veranthis is patient. Be patient back.'],
         setFlags: { ceremony_complete: true },
-        // Once the Lowlands Sigil is won, Maren's counsel changes.
+        // Counsel deepens with each Sigil; the chapter-4 refusal comes first.
         conditionalDialogue: [
+          {
+            // The Chain's real offer, refused. Word reached even Ashfen.
+            flag: 'chain_envoy_beaten',
+            stateKey: 'postEnvoy',
+            pages: [
+              'Three Sigils, and then the Chain came to you with open hands and a soft voice. And you sent it away empty. The southern roads have not stopped talking about it, {player}.',
+              'Understand what you did. The Chain does not ASK twice. What it sends now will not bargain, will not boast, will not even have a face to read. Solen faced the same silence at the last door.',
+              "You are past the place where I can counsel you, child. Only this: the Echo is not a burden to carry to the end. It is a voice to LET SPEAK. When the faceless thing comes, do not out-argue it. Out-remember it.",
+            ],
+            repeat: ['The old fear has a name again, and it is coming uphill toward you. Let the Echo answer it, {player}. That is all any of us ever could.'],
+          },
           {
             flag: 'badge_lowlands',
             stateKey: 'postBadge',
@@ -844,8 +855,19 @@ const MAPS = {
           'Warden Mira keeps the drowned sanctum east of here. A hundred years that water has held its breath. Lately it has started listening again.',
         ],
         repeatDialogue: ['The sanctum water is listening again. Old folk notice such things; young folk survive them.'],
-        // Once the Mirewood Sigil is won, Wren speaks to the Echo directly.
+        // Wren's counsel deepens by chapter; the refusal reaction comes first.
         conditionalDialogue: [
+          {
+            // After the envoy is refused — the reeds go quiet, and Wren knows why.
+            flag: 'chain_envoy_beaten',
+            stateKey: 'postEnvoy',
+            pages: [
+              'The whole marsh went still the night you refused the pale cloak. Not frightened-still. Listening-still. The reeds do that when something old turns its head toward us.',
+              'You told the Chain no with your own mouth, where Solen could only tell it no with a locked door and a hundred years of silence. That is either the bravest thing this mire has witnessed, or the last.',
+              'Go to the far slopes, Echo-bearer. Warden Alder has kept the dawnward vale longer than any of us have been alive. If anyone knows how to stand in front of a thing with no face, it is her — and the voice you carry.',
+            ],
+            repeat: ['The reeds are still listening, child. Whatever answered you at the doors — keep letting it speak. It is not done yet.'],
+          },
           {
             flag: 'badge_mirewood',
             stateKey: 'postBadge',
@@ -901,7 +923,7 @@ const MAPS = {
       'CnnnnnWWWnnnnnnnnnnnnnWWWnnnnC', // 6  <- frozen pools
       'CnnnnWWWWWnnnnSnnnnnnWWWWWnnnC', // 7  <- Save Shrine at (14,7)
       'CnnnnnWWWnnnnnnnnnnnnnWWWnnnnC', // 8
-      'CnnnnnnnnnnnnnnnnnnnnnnnnnnnnC', // 9  <- Forge Acolyte Edda at (22,9)
+      'CnnnnnnnnnnnnnnnnnnnnnnnnnnnnP', // 9  <- Dawn-Guide Sella gates the east road (28,9); slopes exit (29,9)
       'CnnhhhhnnnnCnnnnnnnnnnnnnnnnnC', // 10
       'CnnhhhhnnnnnnnnnhhhhnnnnCnnnnC', // 11
       'CnnhhhhnnnnnnnnnhhhhnnnnnnnnnC', // 12
@@ -913,6 +935,7 @@ const MAPS = {
     exits: [
       { x: 14, y: 16, to: 'mirewood_town', toX: 14, toY: 1, facing: 'down' },
       { x: 14, y: 0, to: 'cinderpeaks_forge', toX: 14, toY: 15, facing: 'up' },
+      { x: 29, y: 9, to: 'verdant_descent', toX: 1, toY: 9, facing: 'right' },
     ],
     doors: [],
     npcs: [
@@ -974,6 +997,28 @@ const MAPS = {
           ],
         },
         repeatDialogue: ['The forge road stands open. Korr is past the channels — and the tea offer stands.'],
+      },
+      {
+        // Gate to the fourth region: the east road opens once the Chain's
+        // envoy is refused and the chapter turns. Sella came UP from the sprawl.
+        id: 'dawn_guide_sella',
+        name: 'Dawn-Guide Sella',
+        x: 28, y: 9, facing: 'left',
+        palette: { h: '#6a8a4a', f: '#d8a878', e: '#20203a', c: '#8a6a3a', g: '#e8c84a', b: '#241d18' },
+        gate: {
+          requiresFlag: 'chain_envoy_beaten',
+          grantsFlag: 'slopes_pass_granted',
+          asideX: 28, asideY: 10,
+          deniedDialogue: [
+            'Hold there, keeper. I climbed UP from the Verdant Sprawl to warn this pass, not to wave folk down into it.',
+            'A pale cloak came through here making a soft, terrible offer. Until the mountain is done answering THAT, the dawnward road stays my business, not yours.',
+          ],
+          grantedDialogue: [
+            'You sent the pale one back to whatever sends them. Word runs downhill faster than snow-melt — the whole sprawl already knows the keeper said no.',
+            'Then go down and see it, {player}. The slopes fall east toward dawn, green as a held breath. Warden Alder keeps the vale below — but something walks the slopes now that wears no face at all. Mind it does not learn yours.',
+          ],
+        },
+        repeatDialogue: ['The dawnward road is open. Alder keeps the vale — and the faceless thing keeps the slopes. Watch your shadow, keeper.'],
       },
     ],
     encounters: {
@@ -1068,6 +1113,103 @@ const MAPS = {
         { speciesId: 'slatewing', weight: 30, min: 26, max: 29 },
         { speciesId: 'gloombat', weight: 26, min: 26, max: 29 },
         { speciesId: 'cindralisk', weight: 10, min: 28, max: 31 },
+      ],
+    },
+  },
+  verdant_descent: {
+    id: 'verdant_descent',
+    name: 'Verdant Sprawl — Dawnward Slopes',
+    //       012345678901234567890123456789
+    rows: [
+      'CCCCCCCCCCCCCCTTTTTTTTTTTTTTTT', // 0  <- crag rim gives way to canopy
+      'CnnnnnnnnGGGGGGGGGGGGGGGGGGGGT', // 1  <- snow thins into the first green
+      'CnnnnnnnGGGGGGgggggGGGGGGGGGGT', // 2
+      'CnnnnnnGGGGGgggggggGGGGGGGFGGT', // 3
+      'CnnnnnGGGGGgggggggGGGGGGGGGGGT', // 4
+      'CnnnnGGGGGGGGGGGGGGGGGGGGGGGGT', // 5
+      'CnnnGGGGFGGGGGGGGWWWWGGGGGGGGT', // 6  <- meltwater tarn
+      'CnnGGGGGGGGGGGGGGWWWWGGGGGGGGT', // 7
+      'CnnGGGGGGGGGGGGGGWWWWGGGGGGGGT', // 8  <- the Hollow Vessel waits at (14,8)
+      'PnnGGGGGGGGGGGGGGGWWGGGGGGGGGT', // 9  <- west road back up to the ascent (0,9)
+      'CnnGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 10
+      'CGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 11 <- Lyra caught the updraft down (6,11)
+      'CGGGgggggGGGGGGGGGGGGggggGGGGT', // 12
+      'CGGGgggggggGGGGGGGGgggggGGGGGT', // 13 <- Sprawl Ranger Tibb at (26,13)
+      'CGGGgggggGGGGGGSGGGGGgggGGGGGT', // 14 <- Save Shrine at (15,14)
+      'CGGGGGGGGGGGGGGGGGGGGGGGGGGGGT', // 15
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT', // 16 <- the vale forest closes the south
+    ],
+    exits: [
+      { x: 0, y: 9, to: 'cinderpeaks_ascent', toX: 28, toY: 9, facing: 'left' },
+    ],
+    doors: [],
+    npcs: [
+      {
+        // Chapter 4 opens here: the Chain sends the thing with no face.
+        id: 'chain_hollow',
+        name: 'Hollow Vessel',
+        x: 14, y: 8, facing: 'down',
+        hiddenIfFlag: 'chain_hollow_beaten',
+        palette: { h: '#2a2438', f: '#b8b0c8', e: '#2a2438', c: '#3a3450', g: '#8a84a0', b: '#161020' },
+        dialogue: [
+          'It stands too still in the melt-water, and the snow does not settle on it. Where its face should be, the slope behind it simply continues.',
+          'The pale cloak said the next thing would have no face. This one has less than that. It lifts one hand — not to greet, not to threaten. To COLLECT.',
+        ],
+        battle: { trainerId: 'chain_hollow', flag: 'chain_hollow_beaten' },
+        postWinDialogue: [
+          'The Vessel folds down like a coat with no one in it. For a heartbeat the grass shows the shape of a face — yours, almost — and then the wind takes it.',
+          'Nothing is left on the slope but wet stone and the smell of a snuffed candle. The Chain will send another. It has stopped needing them to be people.',
+        ],
+        repeatDialogue: ['Only the melt-water remains, and the faint dark where the snow refused to fall.'],
+      },
+      {
+        // The rival caught up again — and the race is settled, so she reacts
+        // to the envoy instead. She names Warden Alder and the vale below.
+        id: 'lyra_slopes',
+        name: 'Lyra',
+        x: 6, y: 11, facing: 'right',
+        palette: { h: '#a03a4a', f: '#e8c39a', e: '#20203a', c: '#3a6a4a', g: '#d4af37', b: '#241d18' },
+        dialogue: [
+          'THERE you are. I lost the race to Korr\'s anvil by an hour, so I did the only honorable thing and glided down here first. We are even. Do not argue.',
+          'Sella told me what the pale cloak offered you up on the pass. Hand the Echo over, quiet and gentle, and no more drowned towns. And you said NO. Out loud. To its face.',
+          "Father would have liked you, {player}. He knocked on stone doors his whole life and never once offered to open them the easy way. Down there is Warden Alder's vale — fourth Sigil. I'll be one ridge behind you, as usual.",
+        ],
+        repeatDialogue: ['Alder\'s vale is east and down. Whatever wears no face out here — do not let it catch you alone, rival.'],
+        setFlags: { lyra_slopes_seen: true },
+        // After the faceless fight she drops the banter for a moment.
+        conditionalDialogue: [
+          {
+            flag: 'chain_hollow_beaten',
+            stateKey: 'postHollow',
+            pages: [
+              'I saw it come apart from up the ridge. There was a face in the grass for a second, {player}. It looked like YOURS. I have decided not to think about that until we are somewhere with tea.',
+              'Go find Alder. I mean it about staying a ridge behind — but not TOO far. The Chain stopped sending people. That means it stopped being afraid of losing them.',
+            ],
+            repeat: ['One ridge behind you, keeper. Always. Now go win a Sigil so I have something to chase.'],
+          },
+        ],
+      },
+      {
+        // Names the fourth Warden + seeds the next map (the vale, v0.22 hook).
+        id: 'sprawl_ranger_tibb',
+        name: 'Sprawl Ranger Tibb',
+        x: 26, y: 13, facing: 'left',
+        palette: { h: '#4a6a3a', f: '#d8a878', e: '#20203a', c: '#6a8a4a', g: '#c8e0a0', b: '#241d18' },
+        dialogue: [
+          'Down from the peaks in one piece — the sprawl does not see many of those. Mind the tall grass; the thaw wakes things up hungry and proud.',
+          'The vale runs on east past this forest wall, where the whole slope turns to orchard and terrace. Warden Alder keeps it, and her Sigil holds the fourth seal-thread. The road through the trees is grown shut for now — but it opens for keepers, in time.',
+        ],
+        repeatDialogue: ['Alder\'s vale is east, past the treewall. It opens when it means to. Rest at the shrine till then, keeper.'],
+        setFlags: { heard_vale_rumor: true },
+      },
+    ],
+    encounters: {
+      rate: 0.16,
+      table: [
+        { speciesId: 'fernkit', weight: 30, min: 30, max: 33 },
+        { speciesId: 'thistlebuck', weight: 26, min: 30, max: 33 },
+        { speciesId: 'dawnfinch', weight: 24, min: 31, max: 34 },
+        { speciesId: 'hollowmoth', weight: 20, min: 32, max: 35 },
       ],
     },
   },

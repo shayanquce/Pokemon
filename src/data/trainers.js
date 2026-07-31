@@ -177,6 +177,21 @@ const TRAINERS = {
     },
   },
 
+  // --- Chapter 4: the Chain stops sending faces ---
+  chain_hollow: {
+    id: 'chain_hollow',
+    name: 'Hollow Vessel',
+    // The envoy promised the next thing would have no face. It does not.
+    introText: 'The Vessel does not speak. Its Luminary step forward as if remembering how.',
+    winText: 'The Hollow Vessel came apart like snow off a branch — and did not fall.',
+    loseText: 'The Vessel did not celebrate. It simply turned, patient, toward the next dawn.',
+    reward: 1100,
+    setFlags: { chain_hollow_beaten: true },
+    buildParty() {
+      return [makeLuminary('gloomshroud', 33), makeLuminary('murkmaw', 34), makeLuminary('hollowmoth', 35)];
+    },
+  },
+
   // --- Chapter 1 closer: the Hollowed Chain reaches the coast ---
   chain_scout: {
     id: 'chain_scout',

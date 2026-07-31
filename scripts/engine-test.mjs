@@ -198,6 +198,23 @@ check('chain_stalker fields 3 mons', G.TRAINERS.chain_stalker.buildParty({}).len
 check('warden_mira fields 3 mons with the Oath', G.TRAINERS.warden_mira.buildParty({}).length === 3 && G.TRAINERS.warden_mira.wardenOath === true);
 check('warden_mira grants the mirewood badge', G.TRAINERS.warden_mira.setFlags.badge_mirewood === true);
 
+// --- Chapter 4: the Verdant Sprawl opener (the dawnward slopes) -----------------------
+check('chain_hollow (faceless) fields 3 mons', G.TRAINERS.chain_hollow.buildParty({}).length === 3);
+check('chain_hollow sets its beaten flag', G.TRAINERS.chain_hollow.setFlags.chain_hollow_beaten === true);
+for (const [id, dex] of [['fernkit', 51], ['dawnfinch', 52], ['thistlebuck', 53], ['hollowmoth', 54]]) {
+  check(`verdant species ${id} is dex ${dex}`, G.LUMINARY_SPECIES[id]?.dexNo === dex);
+}
+check('bramble_rush + hollow_gaze exist', !!G.MOVES.bramble_rush && !!G.MOVES.hollow_gaze);
+check('verdant_descent map exists and holds the faceless fight', !!G.MAPS.verdant_descent &&
+  G.MAPS.verdant_descent.npcs.some((n) => n.battle?.trainerId === 'chain_hollow'));
+check('Dawn-Guide gates the slopes on chain_envoy_beaten', G.MAPS.cinderpeaks_ascent.npcs
+  .some((n) => n.gate?.requiresFlag === 'chain_envoy_beaten' && n.gate?.grantsFlag === 'slopes_pass_granted'));
+// Chapter-4 reactions must take priority over the older badge lines.
+for (const [mapId, npcId] of [['ashfen_town', 'elder_maren'], ['mirewood_town', 'elder_wren']]) {
+  const npc = G.MAPS[mapId].npcs.find((n) => n.id === npcId);
+  check(`${npcId} reacts to chain_envoy_beaten first`, npc.conditionalDialogue[0].flag === 'chain_envoy_beaten');
+}
+
 // --- shop stock + NPC battle refs resolve --------------------------------------------
 for (const m of Object.values(G.MAPS)) {
   for (const npc of m.npcs ?? []) {

@@ -1494,6 +1494,78 @@ Object.assign(STARTER_PIXELMAPS, {
   },
 });
 
+// Verdant Sprawl wilds (the dawnward slopes below the peaks).
+Object.assign(STARTER_PIXELMAPS, {
+  fernkit: {
+    palette: { v: '#4e8a3e', L: '#7cc25a', d: '#33602a', k: '#182a12', n: '#6e5236', p: '#e88aa0' },
+    rows: [
+      '..vv......LvL...',
+      '..vvv....LvvL...',
+      '.vvkvv..LvvL....',
+      '.vvvvv.Lvvv.....',
+      'vvvvvvvvvvv.....',
+      'vvvLLvvvvvvL....',
+      'vvvvvvvvvvv.....',
+      '.vvvpvvvvvv.....',
+      '.vvvvvvvvv......',
+      '.vv.vv.vvv......',
+      '.nn.nn.nn.......',
+      'nnn.nn.nnn......',
+    ],
+  },
+  dawnfinch: {
+    palette: { b: '#4f8fd0', w: '#eaf2fb', y: '#f4d24a', o: '#e8823a', k: '#16283e', l: '#bfe0ff' },
+    rows: [
+      '......bbb.......',
+      '....bbbbbbb.....',
+      '...wbbkbbbw.....',
+      '..wwbbbbbbww....',
+      '.wwwbbbbbbbww...',
+      'wwwwbbyybbwwww..',
+      '.wwwbboobbww....',
+      '..wwbbbbbbw.....',
+      '...bbbbbbb......',
+      '....bb.bb.......',
+      '....y...y.......',
+      '...yy...yy......',
+    ],
+  },
+  thistlebuck: {
+    palette: { b: '#8a6236', d: '#5e3f22', v: '#5a8a3e', s: '#8f9aa2', k: '#1c1208', w: '#c2a074' },
+    rows: [
+      '..v.v.....v.v...',
+      '.v.v.v...v.v.v..',
+      '..vvv.....vvv...',
+      '...bbbb.bbbb....',
+      '..bbkbbbbbkbb...',
+      '..bbbbwwbbbbb...',
+      '..sbbbbbbbbbs...',
+      '...bbbbbbbbb....',
+      '...bb.bbb.bb....',
+      '...ss.sss.ss....',
+      '...dd.ddd.dd....',
+      '..ddd.ddd.ddd...',
+    ],
+  },
+  hollowmoth: {
+    palette: { p: '#5e4a7e', d: '#3a2e52', l: '#b6a8d8', w: '#8f7eb8', k: '#140e22', e: '#e6def4' },
+    rows: [
+      '...d.......d....',
+      '..dpd.....dpd...',
+      '.dppdd...ddppd..',
+      '.dpeepd.dpeepd..',
+      'dppeepp.ppeeppd.',
+      'dppllpwkwpllppd.',
+      '.dpppp.k.ppppd..',
+      '..dppp.k.pppd...',
+      '...dpp...ppd....',
+      '....dp...pd.....',
+      '.....p...p......',
+      '....dp...pd.....',
+    ],
+  },
+});
+
 // Hollow Cave wild.
 Object.assign(STARTER_PIXELMAPS, {
   gloombat: {
